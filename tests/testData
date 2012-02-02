@@ -1,0 +1,1 @@
+{"code":" \n  main() {\n var i=0;print(i);     print('hello world');\n  i=10;print(i);  }\n  "}

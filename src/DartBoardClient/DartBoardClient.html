@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <title>DartBoardClient</title>
+  </head>
+  <body>
+    <h1>DartBoardClient</h1>
+    <div>
+    <div>
+    <button id="submitButton" value="Submit">Submit</button>
+    </div>
+    <div>
+    <textarea id="editorBuffer" rows="10" cols="30">
+main() {
+	print('hello from dart client');
+}
+</textarea>
+</div>
+<div><p id="results">Results:</p></div>
+</div>
+    
+    <script type="application/dart" src="DartBoardClient.dart"></script>
+    <script src="http://dart.googlecode.com/svn/branches/bleeding_edge/dart/client/dart.js"></script>
+  </body>
+</html>
