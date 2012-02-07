@@ -1,24 +1,80 @@
 <html>
   <head>
     <title>DartBoardClient</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link href="dartboard.css" rel="stylesheet" type="text/css">
+
   </head>
   <body>
     <h1>DartBoardClient</h1>
+    <div class="db-view" style="width:701px; min-height:333px;">
     <div>
-    <div>
-    <button id="submitButton" value="Submit">Submit</button>
+    <button id="submitButton"  value="Submit">Submit</button>
     </div>
-    <div>
-    <textarea id="editorBuffer" rows="10" cols="30">
-main() {
-	print('hello from dart client');
-}
-</textarea>
-</div>
-<div><p id="results">Results:</p></div>
+    <section>
+    <div class="db-container" style="position: relative;">
+    <div class="db-body" style="top: 34px; position: absolute; overflow: hidden;height:400;width:400;">
+    <div class="db-textarea-container" style="left: 0px; position: absolute;">
+	  <textarea id="editorBuffer" class="db-textarea" spellcheck="false" wrap="off" goog_input_chext="chext"
+	  style="color: blue; background-color: transparent; height:400; width:400;
+	  font-family: monospace;
+font-size: 15px;
+line-height: 1.2;
+overflow: auto;
+overflow-x: auto;
+overflow-y: auto;
+resize: none;
+white-space: pre;
+word-wrap: normal;
+cursor: auto;
+letter-spacing: normal;
+word-spacing: normal;
+line-height: normal;
+text-transform: none;
+text-indent: 0px;
+text-shadow: none;
+display: inline-block;
+text-align: -webkit-auto;
+	  "
+	  ></textarea> <!-- style="color: transparent; background-color: transparent;" -->
+	</div>
+	<div id="scroll-container" class="db-scroll-y-container" style="position: absolute; top:0px; left: 0px; z-index:-1; 
+
+	"> 
+	<div class="db-gutter"></div>
+	<div id="editorBufferContainer" class="db-scroll-x-container" 
+	style="position: absolute; top:0px; left: 0px; z-index:-1; height:10000; width:400;
+	font-family: monospace; font-size: 15px;line-height: 1.2;
+		overflow: scroll;
+overflow-x: scroll;
+overflow-y: scroll;
+
+resize: none;
+white-space: pre;
+word-wrap: normal;
+cursor: auto;
+letter-spacing: normal;
+word-spacing: normal;
+line-height: normal;
+text-transform: none;
+text-indent: 0px;
+text-shadow: none;
+display: inline-block;
+text-align: -webkit-auto;
+
+
+	">
+
+	</div>
+	</div>
+	</div>
+	<section>
+	
+<div><p id="results"></p></div>
 </div>
     
     <script type="application/dart" src="DartBoardClient.dart"></script>
     <script src="http://dart.googlecode.com/svn/branches/bleeding_edge/dart/client/dart.js"></script>
+   
   </body>
 </html>
