@@ -108,6 +108,11 @@ function MUL$operator(val1, val2) {
       ? val1 * val2
       : val1.MUL$operator(val2);
 }
+function DIV$operator(val1, val2) {
+  return (typeof(val1) == 'number' && typeof(val2) == 'number')
+      ? val1 / val2
+      : val1.DIV$operator(val2);
+}
 function TRUNC$operator(val1, val2) {
   if (typeof(val1) == 'number' && typeof(val2) == 'number') {
     var tmp = val1 / val2;
@@ -657,6 +662,9 @@ function native_NumberImplementation_SUB(other) {
   native__NumberJsUtil__throwIllegalArgumentException(other);
 }
 function native_NumberImplementation_MUL(other) {
+  native__NumberJsUtil__throwIllegalArgumentException(other);
+}
+function native_NumberImplementation_DIV(other) {
   native__NumberJsUtil__throwIllegalArgumentException(other);
 }
 function native_NumberImplementation_TRUNC(other) {
@@ -2420,6 +2428,10 @@ Number.prototype.SUB$operator = function(other){
 ;
 Number.prototype.MUL$operator = function(other){
   return native_NumberImplementation_MUL.call(this, other);
+}
+;
+Number.prototype.DIV$operator = function(other){
+  return native_NumberImplementation_DIV.call(this, other);
 }
 ;
 Number.prototype.TRUNC$operator = function(other){
@@ -51883,6 +51895,14 @@ htmlimpl0a8e4b$CSSStyleDeclarationWrappingImplementation$Dart.prototype.left$set
   this.setProperty$member('left', value, '');
 }
 ;
+htmlimpl0a8e4b$CSSStyleDeclarationWrappingImplementation$Dart.prototype.marginLeft$setter = function(value){
+  this.setProperty$member('margin-left', value, '');
+}
+;
+htmlimpl0a8e4b$CSSStyleDeclarationWrappingImplementation$Dart.prototype.resize$getter = function(){
+  return this.getPropertyValue$member('resize');
+}
+;
 htmlimpl0a8e4b$CSSStyleDeclarationWrappingImplementation$Dart.prototype.top$getter = function(){
   return this.getPropertyValue$member('top');
 }
@@ -52858,6 +52878,10 @@ htmlimpl0a8e4b$BodyElementEventsImplementation$Dart.BodyElementEventsImplementat
 ;
 htmlimpl0a8e4b$BodyElementEventsImplementation$Dart.prototype.message$getter = function(){
   return this._get$htmlimpl0a8e4b$$member_('message');
+}
+;
+htmlimpl0a8e4b$BodyElementEventsImplementation$Dart.prototype.resize$getter = function(){
+  return this._get$htmlimpl0a8e4b$$member_('resize');
 }
 ;
 function htmlimpl0a8e4b$DocumentEventsImplementation$Dart(){
@@ -61759,6 +61783,10 @@ htmlimpl0a8e4b$WindowEventsImplementation$Dart.prototype.mouseWheel$getter = fun
   return this._get$htmlimpl0a8e4b$$member_('mousewheel');
 }
 ;
+htmlimpl0a8e4b$WindowEventsImplementation$Dart.prototype.resize$getter = function(){
+  return this._get$htmlimpl0a8e4b$$member_('resize');
+}
+;
 htmlimpl0a8e4b$WindowEventsImplementation$Dart.prototype.scroll$named = function(){
   return this.scroll$getter().apply(this, arguments);
 }
@@ -65932,95 +65960,115 @@ unnamed537e9a$DartBoardClient$Dart.prototype.scrollHeight$setter = function(tmp$
   this.scrollHeight$field = tmp$0;
 }
 ;
-function unnamed537e9a$DartBoardClient$Dart$run$c0$34_34$Hoisted(mw){
+function unnamed537e9a$DartBoardClient$Dart$run$c0$34_34$Hoisted(dartc_scp$1, rect){
+  var tmp$1, tmp$2, tmp$0;
+  dartc_scp$1.view.style$getter().left$setter(tmp$0 = '50%') , tmp$0;
+  dartc_scp$1.view.style$getter().top$setter(tmp$1 = '50%') , tmp$1;
+  dartc_scp$1.view.style$getter().marginLeft$setter(tmp$2 = ADD$operator(DIV$operator(SUB$operator(rect.client$getter().width$getter(), 350), 2).toString$named(0, $noargs), 'px')) , tmp$2;
+}
+function unnamed537e9a$DartBoardClient$Dart$run$c0$34_34$Hoisted$named($s0, $n, $o, rect){
+  if ($o.count || $n != 1)
+    $nsme();
+  return unnamed537e9a$DartBoardClient$Dart$run$c0$34_34$Hoisted($s0, rect);
+}
+function unnamed537e9a$DartBoardClient$Dart$run$c0$34_34$Hoisted$named$named_$lookupRTT(){
+  return RTT.createFunction([htmld071c1$ElementRect$Dart.$lookupRTT()], RTT.dynamicType.$lookupRTT());
+}
+function unnamed537e9a$DartBoardClient$Dart$run$c1$34_34$Hoisted(dartc_scp$1, event_0){
+  htmld071c1$document$getter().rect$getter().then$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c0$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c0$34_34$Hoisted$named$named_$lookupRTT, $Dart$Null, dartc_scp$1));
+}
+function unnamed537e9a$DartBoardClient$Dart$run$c1$34_34$Hoisted$named($s0, $n, $o, event_0){
+  if ($o.count || $n != 1)
+    $nsme();
+  return unnamed537e9a$DartBoardClient$Dart$run$c1$34_34$Hoisted.call(this, $s0, event_0);
+}
+function unnamed537e9a$DartBoardClient$Dart$run$c1$34_34$Hoisted$named$named_$lookupRTT(){
+  return RTT.createFunction([RTT.dynamicType.$lookupRTT()], RTT.dynamicType.$lookupRTT());
+}
+function unnamed537e9a$DartBoardClient$Dart$run$c2$34_34$Hoisted(mw){
   if (NE$operator(mw, $Dart$Null)) {
     print$getter()(1, $noargs, mw.type$getter());
   }
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c0$34_34$Hoisted$named($n, $o, mw){
+function unnamed537e9a$DartBoardClient$Dart$run$c2$34_34$Hoisted$named($n, $o, mw){
   if ($o.count || $n != 1)
     $nsme();
-  return unnamed537e9a$DartBoardClient$Dart$run$c0$34_34$Hoisted.call(this, mw);
-}
-function unnamed537e9a$DartBoardClient$Dart$run$c0$34_34$Hoisted$named$named_$lookupRTT(){
-  return RTT.createFunction([RTT.dynamicType.$lookupRTT()], RTT.dynamicType.$lookupRTT());
-}
-function unnamed537e9a$DartBoardClient$Dart$run$c1$34_34$Hoisted(dartc_scp$1, rect){
-  var tmp$1, tmp$0;
-  var scrollTop = rect.scroll$getter().top$getter();
-  var left = rect.scroll$getter().left$getter();
-  print$getter()(1, $noargs, 'scrollTop=' + $toString(scrollTop) + '');
-  print$getter()(1, $noargs, 'left=' + $toString(left) + '');
-  dartc_scp$1.scrollContainer.style$getter().top$setter(tmp$0 = negate$operator(scrollTop)) , tmp$0;
-  dartc_scp$1.scrollContainer.style$getter().left$setter(tmp$1 = negate$operator(left)) , tmp$1;
-}
-function unnamed537e9a$DartBoardClient$Dart$run$c1$34_34$Hoisted$named($s0, $n, $o, rect){
-  if ($o.count || $n != 1)
-    $nsme();
-  return unnamed537e9a$DartBoardClient$Dart$run$c1$34_34$Hoisted.call(this, $s0, rect);
-}
-function unnamed537e9a$DartBoardClient$Dart$run$c1$34_34$Hoisted$named$named_$lookupRTT(){
-  return RTT.createFunction([htmld071c1$ElementRect$Dart.$lookupRTT()], RTT.dynamicType.$lookupRTT());
-}
-function unnamed537e9a$DartBoardClient$Dart$run$c2$34_34$Hoisted(dartc_scp$1, sc){
-  if (NE$operator(sc, $Dart$Null)) {
-    print$getter()(1, $noargs, sc.type$getter());
-    dartc_scp$1.textAreaElement.rect$getter().then$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c1$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c1$34_34$Hoisted$named$named_$lookupRTT, this, dartc_scp$1));
-  }
-}
-function unnamed537e9a$DartBoardClient$Dart$run$c2$34_34$Hoisted$named($s0, $n, $o, sc){
-  if ($o.count || $n != 1)
-    $nsme();
-  return unnamed537e9a$DartBoardClient$Dart$run$c2$34_34$Hoisted.call(this, $s0, sc);
+  return unnamed537e9a$DartBoardClient$Dart$run$c2$34_34$Hoisted.call(this, mw);
 }
 function unnamed537e9a$DartBoardClient$Dart$run$c2$34_34$Hoisted$named$named_$lookupRTT(){
   return RTT.createFunction([RTT.dynamicType.$lookupRTT()], RTT.dynamicType.$lookupRTT());
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c3$34_34$Hoisted(dartc_scp$4, rect){
+function unnamed537e9a$DartBoardClient$Dart$run$c3$34_34$Hoisted(dartc_scp$1, rect){
+  var tmp$1, tmp$0;
+  var scrollTop = rect.scroll$getter().top$getter();
+  var left = rect.scroll$getter().left$getter();
+  dartc_scp$1.scrollContainer.style$getter().top$setter(tmp$0 = negate$operator(scrollTop)) , tmp$0;
+  dartc_scp$1.scrollContainer.style$getter().left$setter(tmp$1 = negate$operator(left)) , tmp$1;
+}
+function unnamed537e9a$DartBoardClient$Dart$run$c3$34_34$Hoisted$named($s0, $n, $o, rect){
+  if ($o.count || $n != 1)
+    $nsme();
+  return unnamed537e9a$DartBoardClient$Dart$run$c3$34_34$Hoisted($s0, rect);
+}
+function unnamed537e9a$DartBoardClient$Dart$run$c3$34_34$Hoisted$named$named_$lookupRTT(){
+  return RTT.createFunction([htmld071c1$ElementRect$Dart.$lookupRTT()], RTT.dynamicType.$lookupRTT());
+}
+function unnamed537e9a$DartBoardClient$Dart$run$c4$34_34$Hoisted(dartc_scp$1, sc){
+  if (NE$operator(sc, $Dart$Null)) {
+    print$getter()(1, $noargs, sc.type$getter());
+    dartc_scp$1.textAreaElement.rect$getter().then$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c3$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c3$34_34$Hoisted$named$named_$lookupRTT, $Dart$Null, dartc_scp$1));
+  }
+}
+function unnamed537e9a$DartBoardClient$Dart$run$c4$34_34$Hoisted$named($s0, $n, $o, sc){
+  if ($o.count || $n != 1)
+    $nsme();
+  return unnamed537e9a$DartBoardClient$Dart$run$c4$34_34$Hoisted.call(this, $s0, sc);
+}
+function unnamed537e9a$DartBoardClient$Dart$run$c4$34_34$Hoisted$named$named_$lookupRTT(){
+  return RTT.createFunction([RTT.dynamicType.$lookupRTT()], RTT.dynamicType.$lookupRTT());
+}
+function unnamed537e9a$DartBoardClient$Dart$run$c5$34_34$Hoisted(dartc_scp$4, rect){
   var tmp$1, tmp$2, tmp$3, tmp$4, tmp$0;
   var editorWidth = rect.client$getter().width$getter();
   var offsetWidth = rect.offset$getter().width$getter();
   this.scrollWidth$setter(tmp$0 = rect.scroll$getter().width$getter()) , tmp$0;
   this.scrollHeight$setter(tmp$1 = rect.scroll$getter().height$getter()) , tmp$1;
-  print$getter()(1, $noargs, 'scrollWidth=' + $toString(this.scrollWidth$getter()) + '');
-  print$getter()(1, $noargs, 'offsetWidth=' + $toString(offsetWidth) + '');
-  print$getter()(1, $noargs, 'editorWidth=' + $toString(editorWidth) + '');
   dartc_scp$4.d.style$getter().width$setter(tmp$2 = this.scrollWidth$getter()) , tmp$2;
   dartc_scp$4.d.style$getter().height$setter(tmp$3 = this.scrollHeight$getter()) , tmp$3;
   dartc_scp$4.d.firstElementChild$getter().style$getter().height$setter(tmp$4 = this.scrollHeight$getter()) , tmp$4;
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c3$34_34$Hoisted$named($s0, $n, $o, rect){
+function unnamed537e9a$DartBoardClient$Dart$run$c5$34_34$Hoisted$named($s0, $n, $o, rect){
   if ($o.count || $n != 1)
     $nsme();
-  return unnamed537e9a$DartBoardClient$Dart$run$c3$34_34$Hoisted.call(this, $s0, rect);
+  return unnamed537e9a$DartBoardClient$Dart$run$c5$34_34$Hoisted.call(this, $s0, rect);
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c3$34_34$Hoisted$named$named_$lookupRTT(){
+function unnamed537e9a$DartBoardClient$Dart$run$c5$34_34$Hoisted$named$named_$lookupRTT(){
   return RTT.createFunction([htmld071c1$ElementRect$Dart.$lookupRTT()], RTT.dynamicType.$lookupRTT());
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c4$34_34$Hoisted(dartc_scp$4, _s){
+function unnamed537e9a$DartBoardClient$Dart$run$c6$34_34$Hoisted(dartc_scp$4, _s){
   dartc_scp$4.sb.add$named(1, $noargs, ADD$operator(ADD$operator("<div style='top:" + $toString(dartc_scp$4.i) + '; position: absolute;width:' + $toString(this.scrollWidth$getter()) + ";font-family: monospace; font-size: 15px;line-height: 1.2;  overflow:scroll;overflow-x: scroll;overflow-y: scroll;'><span>", _s), '<\/span><\/div>'));
   dartc_scp$4.i = ADD$operator(dartc_scp$4.i, 17);
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c4$34_34$Hoisted$named($s0, $n, $o, _s){
+function unnamed537e9a$DartBoardClient$Dart$run$c6$34_34$Hoisted$named($s0, $n, $o, _s){
   if ($o.count || $n != 1)
     $nsme();
-  return unnamed537e9a$DartBoardClient$Dart$run$c4$34_34$Hoisted.call(this, $s0, _s);
+  return unnamed537e9a$DartBoardClient$Dart$run$c6$34_34$Hoisted.call(this, $s0, _s);
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c4$34_34$Hoisted$named$named_$lookupRTT(){
+function unnamed537e9a$DartBoardClient$Dart$run$c6$34_34$Hoisted$named$named_$lookupRTT(){
   return RTT.createFunction([RTT.dynamicType.$lookupRTT()], RTT.dynamicType.$lookupRTT());
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c5$34_34$Hoisted(n){
+function unnamed537e9a$DartBoardClient$Dart$run$c7$34_34$Hoisted(n){
   n.remove$named(0, $noargs);
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c5$34_34$Hoisted$named($n, $o, n){
+function unnamed537e9a$DartBoardClient$Dart$run$c7$34_34$Hoisted$named($n, $o, n){
   if ($o.count || $n != 1)
     $nsme();
-  return unnamed537e9a$DartBoardClient$Dart$run$c5$34_34$Hoisted(n);
+  return unnamed537e9a$DartBoardClient$Dart$run$c7$34_34$Hoisted(n);
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c5$34_34$Hoisted$named$named_$lookupRTT(){
+function unnamed537e9a$DartBoardClient$Dart$run$c7$34_34$Hoisted$named$named_$lookupRTT(){
   return RTT.createFunction([RTT.dynamicType.$lookupRTT()], RTT.dynamicType.$lookupRTT());
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c6$34_34$Hoisted(dartc_scp$1, event_0){
+function unnamed537e9a$DartBoardClient$Dart$run$c8$34_34$Hoisted(dartc_scp$1, event_0){
   var dartc_scp$4;
   dartc_scp$4 = {};
   var s = Strings$Dart.String$fromCharCodes$6$Factory(RTT.setTypeInfo([event_0.keyCode$getter()], Array.$lookupRTT()));
@@ -66032,74 +66080,75 @@ function unnamed537e9a$DartBoardClient$Dart$run$c6$34_34$Hoisted(dartc_scp$1, ev
   print$getter()(1, $noargs, ADD$operator('selectionStart = ', dartc_scp$1.editorBuffer.selectionStart$getter()));
   print$getter()(1, $noargs, '=================');
   dartc_scp$4.d = htmld071c1$document$getter().query$named(1, $noargs, '#editorBufferContainer');
-  dartc_scp$1.editorBuffer.rect$getter().then$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c3$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c3$34_34$Hoisted$named$named_$lookupRTT, this, dartc_scp$4));
+  dartc_scp$1.editorBuffer.rect$getter().then$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c5$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c5$34_34$Hoisted$named$named_$lookupRTT, this, dartc_scp$4));
   dartc_scp$4.sb = StringBufferImpl$Dart.StringBufferImpl$$Factory('');
   dartc_scp$4.i = 0;
-  dartc_scp$1.editorBuffer.value$getter().split$named(1, $noargs, '\n').forEach$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c4$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c4$34_34$Hoisted$named$named_$lookupRTT, this, dartc_scp$4));
+  dartc_scp$1.editorBuffer.value$getter().split$named(1, $noargs, '\n').forEach$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c6$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c6$34_34$Hoisted$named$named_$lookupRTT, this, dartc_scp$4));
   var textEl = htmlimpl0a8e4b$ElementWrappingImplementation$Dart.ElementWrappingImplementation$html$29$Factory(ADD$operator(ADD$operator("<div style='top:0;position: absolute;height:" + $toString(this.scrollHeight$getter()) + ';width:' + $toString(this.scrollWidth$getter()) + ";font-family: monospace; font-size: 15px;line-height: 1.2;overflow:scroll;overflow-x: scroll;overflow-y: scroll;'>", dartc_scp$4.sb.toString$named(0, $noargs)), '<\/div>'));
-  dartc_scp$4.d.nodes$getter().forEach$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c5$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c5$34_34$Hoisted$named$named_$lookupRTT, $Dart$Null));
+  dartc_scp$4.d.nodes$getter().forEach$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c7$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c7$34_34$Hoisted$named$named_$lookupRTT, $Dart$Null));
   dartc_scp$4.d.nodes$getter().add$named(1, $noargs, textEl);
   dartc_scp$4 = $Dart$Null;
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c6$34_34$Hoisted$named($s0, $n, $o, event_0){
+function unnamed537e9a$DartBoardClient$Dart$run$c8$34_34$Hoisted$named($s0, $n, $o, event_0){
   if ($o.count || $n != 1)
     $nsme();
-  return unnamed537e9a$DartBoardClient$Dart$run$c6$34_34$Hoisted.call(this, $s0, event_0);
+  return unnamed537e9a$DartBoardClient$Dart$run$c8$34_34$Hoisted.call(this, $s0, event_0);
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c6$34_34$Hoisted$named$named_$lookupRTT(){
+function unnamed537e9a$DartBoardClient$Dart$run$c8$34_34$Hoisted$named$named_$lookupRTT(){
   return RTT.createFunction([htmld071c1$KeyboardEvent$Dart.$lookupRTT()], RTT.dynamicType.$lookupRTT());
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c7$34_34$Hoisted(response){
+function unnamed537e9a$DartBoardClient$Dart$run$c9$34_34$Hoisted(response){
   var tmp$0;
-  print$getter()(1, $noargs, 'on success');
   print$getter()(1, $noargs, response.INDEX$operator('console'));
   var p = htmld071c1$document$getter().query$named(1, $noargs, '#results');
   p.innerHTML$setter(tmp$0 = response.INDEX$operator('console')) , tmp$0;
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c7$34_34$Hoisted$named($n, $o, response){
+function unnamed537e9a$DartBoardClient$Dart$run$c9$34_34$Hoisted$named($n, $o, response){
   if ($o.count || $n != 1)
     $nsme();
-  return unnamed537e9a$DartBoardClient$Dart$run$c7$34_34$Hoisted.call(this, response);
+  return unnamed537e9a$DartBoardClient$Dart$run$c9$34_34$Hoisted.call(this, response);
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c7$34_34$Hoisted$named$named_$lookupRTT(){
+function unnamed537e9a$DartBoardClient$Dart$run$c9$34_34$Hoisted$named$named_$lookupRTT(){
   return RTT.createFunction([Map$Dart.$lookupRTT()], RTT.dynamicType.$lookupRTT());
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c8$34_34$Hoisted(){
+function unnamed537e9a$DartBoardClient$Dart$run$c10$34_34$Hoisted(){
   print$getter()(1, $noargs, 'message failed');
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c8$34_34$Hoisted$named($n, $o){
+function unnamed537e9a$DartBoardClient$Dart$run$c10$34_34$Hoisted$named($n, $o){
   if ($o.count || $n != 0)
     $nsme();
-  return unnamed537e9a$DartBoardClient$Dart$run$c8$34_34$Hoisted.call(this);
+  return unnamed537e9a$DartBoardClient$Dart$run$c10$34_34$Hoisted.call(this);
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c8$34_34$Hoisted$named$named_$lookupRTT(){
+function unnamed537e9a$DartBoardClient$Dart$run$c10$34_34$Hoisted$named$named_$lookupRTT(){
   return RTT.createFunction(null, RTT.dynamicType.$lookupRTT());
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c9$34_34$Hoisted(event_0){
+function unnamed537e9a$DartBoardClient$Dart$run$c11$34_34$Hoisted(event_0){
   var tmp$0;
   print$getter()(1, $noargs, 'click submit button');
   var t = htmld071c1$document$getter().query$named(1, $noargs, '#editorBuffer');
   var messageRequest = (tmp$0 = LinkedHashMapImplementation$Dart.LinkedHashMapImplementation$$Factory(LinkedHashMapImplementation$Dart.$lookupRTT()) , tmp$0.ASSIGN_INDEX$operator('code', t.value$getter()) , tmp$0);
-  this.sendRequest$member('/dartExec', messageRequest, $bind(unnamed537e9a$DartBoardClient$Dart$run$c7$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c7$34_34$Hoisted$named$named_$lookupRTT, this), $bind(unnamed537e9a$DartBoardClient$Dart$run$c8$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c8$34_34$Hoisted$named$named_$lookupRTT, this));
+  this.sendRequest$member('/dartExec', messageRequest, $bind(unnamed537e9a$DartBoardClient$Dart$run$c9$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c9$34_34$Hoisted$named$named_$lookupRTT, this), $bind(unnamed537e9a$DartBoardClient$Dart$run$c10$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c10$34_34$Hoisted$named$named_$lookupRTT, this));
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c9$34_34$Hoisted$named($n, $o, event_0){
+function unnamed537e9a$DartBoardClient$Dart$run$c11$34_34$Hoisted$named($n, $o, event_0){
   if ($o.count || $n != 1)
     $nsme();
-  return unnamed537e9a$DartBoardClient$Dart$run$c9$34_34$Hoisted.call(this, event_0);
+  return unnamed537e9a$DartBoardClient$Dart$run$c11$34_34$Hoisted.call(this, event_0);
 }
-function unnamed537e9a$DartBoardClient$Dart$run$c9$34_34$Hoisted$named$named_$lookupRTT(){
+function unnamed537e9a$DartBoardClient$Dart$run$c11$34_34$Hoisted$named$named_$lookupRTT(){
   return RTT.createFunction([RTT.dynamicType.$lookupRTT()], RTT.dynamicType.$lookupRTT());
 }
 unnamed537e9a$DartBoardClient$Dart.prototype.run$member = function(){
   var dartc_scp$1;
   dartc_scp$1 = {};
+  dartc_scp$1.view = htmld071c1$document$getter().query$named(1, $noargs, '#view');
+  htmld071c1$document$getter().window$getter().on$getter().resize$getter().add$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c1$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c1$34_34$Hoisted$named$named_$lookupRTT, this, dartc_scp$1));
   dartc_scp$1.textAreaElement = htmld071c1$document$getter().query$named(1, $noargs, '#editorBuffer');
   dartc_scp$1.scrollContainer = htmld071c1$document$getter().query$named(1, $noargs, '#scroll-container');
-  dartc_scp$1.textAreaElement.on$getter().mouseWheel$getter().add$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c0$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c0$34_34$Hoisted$named$named_$lookupRTT, this));
-  dartc_scp$1.textAreaElement.on$getter().scroll$getter().add$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c2$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c2$34_34$Hoisted$named$named_$lookupRTT, this, dartc_scp$1));
+  dartc_scp$1.textAreaElement.on$getter().mouseWheel$getter().add$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c2$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c2$34_34$Hoisted$named$named_$lookupRTT, this));
+  dartc_scp$1.textAreaElement.on$getter().scroll$getter().add$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c4$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c4$34_34$Hoisted$named$named_$lookupRTT, this, dartc_scp$1));
   dartc_scp$1.editorBuffer = htmld071c1$document$getter().query$named(1, $noargs, '#editorBuffer');
-  dartc_scp$1.editorBuffer.on$getter().keyUp$getter().add$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c6$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c6$34_34$Hoisted$named$named_$lookupRTT, this, dartc_scp$1));
-  htmld071c1$document$getter().query$named(1, $noargs, '#submitButton').on$getter().click$getter().add$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c9$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c9$34_34$Hoisted$named$named_$lookupRTT, this));
+  dartc_scp$1.editorBuffer.on$getter().keyUp$getter().add$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c8$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c8$34_34$Hoisted$named$named_$lookupRTT, this, dartc_scp$1));
+  htmld071c1$document$getter().query$named(1, $noargs, '#submitButton').on$getter().click$getter().add$named(1, $noargs, $bind(unnamed537e9a$DartBoardClient$Dart$run$c11$34_34$Hoisted$named, unnamed537e9a$DartBoardClient$Dart$run$c11$34_34$Hoisted$named$named_$lookupRTT, this));
   dartc_scp$1 = $Dart$Null;
 }
 ;

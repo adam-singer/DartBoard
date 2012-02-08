@@ -8,6 +8,17 @@ class DartBoardClient {
   int scrollWidth=400;
   int scrollHeight=400;
   void run() {
+    DivElement view = document.query('#view');
+    document.window.on.resize.add((var event) {
+      document.rect.then((ElementRect rect) {
+       view.style.left = "50%";
+       view.style.top = "50%";
+       //print("rect.client.height = ${rect.client.height}");
+       //print("rect.client.width = ${rect.client.width}");
+       view.style.marginLeft = ((rect.client.width-350)/2).toString() + "px";
+      });
+    });
+    
     TextAreaElement textAreaElement = document.query('#editorBuffer');
     DivElement scrollContainer = document.query('#scroll-container');
     
@@ -28,8 +39,8 @@ class DartBoardClient {
         textAreaElement.rect.then((ElementRect rect) {
           int scrollTop = rect.scroll.top;
           int left = rect.scroll.left;
-          print("scrollTop=${scrollTop}");
-          print("left=${left}");
+          //print("scrollTop=${scrollTop}");
+          //print("left=${left}");
           scrollContainer.style.top = -scrollTop;
           scrollContainer.style.left = -left;
         });
@@ -70,14 +81,17 @@ class DartBoardClient {
         int offsetWidth = rect.offset.width;
         scrollWidth = rect.scroll.width;
         scrollHeight = rect.scroll.height;
-        print("scrollWidth=${scrollWidth}");
-        print("offsetWidth=${offsetWidth}");
-        print("editorWidth=${editorWidth}");
+        //print("scrollWidth=${scrollWidth}");
+        //print("offsetWidth=${offsetWidth}");
+        //print("editorWidth=${editorWidth}");
         d.style.width=scrollWidth;
         d.style.height=scrollHeight;
         d.firstElementChild.style.height=scrollHeight;
       });
       
+      /*
+        set the style of the text area to transparent after data entered. 
+       */
       StringBuffer sb = new StringBuffer();
       num i = 0;
       editorBuffer.value.split('\n').forEach((var _s) {
@@ -110,7 +124,7 @@ class DartBoardClient {
       var messageRequest = {"code":t.value};
       sendRequest("/dartExec", messageRequest,
         (Map response) {
-         print("on success");   
+         //print("on success");   
          print(response["console"]);
          ParagraphElement p = document.query('#results');
          p.innerHTML = response["console"];
@@ -135,8 +149,7 @@ class DartBoardClient {
     request.open("POST", url, true);
     request.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
     print('sendRequest '+ url+ " " + JSON.stringify(data));
-    request.send(JSON.stringify(data));
-    
+    request.send(JSON.stringify(data));   
     return request;
   }
   

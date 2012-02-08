@@ -1,0 +1,141 @@
+/* some of this we might want calculated */
+.view {
+	left : 50%;
+	top: 50%;
+	margin-left: 350px;
+	width:701px; 
+	min-height:333px;
+	-webkit-align: center; 
+}
+
+.keepcentered {
+    position:    absolute;
+    left:        50%;        /* Start with top left in the center */
+    top:         50%;
+    /*width:       200px;*/      /* The fixed width... */
+    /*height:      100px;*/      /* ...and height */
+    margin-left: -100px;     /* Shift over half the width */
+    margin-top:  -50px;      /* Shift up half the height */
+    /*border: 1px solid black;*/ /* Just for demo */
+}
+
+.container {
+	position: relative;
+	/*left:50%;
+	right:50%;*/
+	/*
+	left : 50%;
+	align: center; */
+	/*
+	width: 400px;
+	margin-left:auto;
+	margin-right:auto;
+	left : 50%;
+	margin-left: -200px;*/
+	/*
+	width: 50%;
+	border: 1px solid gray;
+	margin: 0 auto;
+	*/
+	/*
+	left : 50%;
+	top: 50%;
+	*/
+}
+
+body {
+	background: url('photo.jpg') no-repeat; 
+	background-size: 100%;
+    margin:none;
+    padding:none;
+    position: fixed; 
+    left: 0px; 
+    top: 0px; 
+    z-index: -99999;
+    -webkit-background-size: 100%;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.body {
+	top: 34px; 
+	 
+	position: absolute; 
+	overflow: hidden;
+	height:400;
+	width:400;
+
+
+}
+
+.textarea-container {
+	left: 0px; 
+	position: absolute;
+	background-image: -webkit-gradient(
+  linear, left top, left bottom, from(rgba(50,50,50,0.8)),
+  to(rgba(80,80,80,0.2)), color-stop(.5,#333333)
+);
+}
+
+.textarea {
+	color: blue; 
+	background-color: transparent; 
+	height:400; 
+	width:400;
+	font-family: monospace;
+	font-size: 15px;
+	line-height: 1.2;
+	overflow: auto;
+	overflow-x: auto;
+	overflow-y: auto;
+	resize: none;
+	white-space: pre;
+	word-wrap: normal;
+	cursor: auto;
+	letter-spacing: normal;
+	word-spacing: normal;
+	line-height: normal;
+	text-transform: none;
+	text-indent: 0px;
+	text-shadow: none;
+	display: inline-block;
+	text-align: -webkit-auto;
+}
+
+.scroll-y-container {
+	position: absolute; 
+	top:0px; 
+	left: 0px; 
+	z-index:-1; 
+}
+
+.scroll-x-container {
+	position: absolute; 
+	top:0px; 
+	left: 0px; 
+	z-index:-1; 
+	height:10000; 
+	width:400;
+	font-family: monospace; 
+	font-size: 15px;
+	line-height: 1.2;
+	overflow: scroll;
+	overflow-x: scroll;
+	overflow-y: scroll;
+
+	resize: none;
+	white-space: pre;
+	word-wrap: normal;
+	cursor: auto;
+	letter-spacing: normal;
+	word-spacing: normal;
+	line-height: normal;
+	text-transform: none;
+	text-indent: 0px;
+	text-shadow: none;
+	display: inline-block;
+	text-align: -webkit-auto;
+}
