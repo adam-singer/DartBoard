@@ -81,6 +81,7 @@ class IsolatedServer extends Isolate {
   // Serve the content of a file.
   void fileHandler(
       HTTPRequest request, HTTPResponse response, [String fileName = null]) {
+    debugPrint("fileHandler: $fileName");
     final int BUFFER_SIZE = 4096;
     if (fileName == null) {
       fileName = request.path.substring(1);

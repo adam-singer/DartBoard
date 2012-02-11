@@ -1,5 +1,6 @@
 #import('dart:html');
 #import('dart:json');
+#source('CouchDBWrapperImpl.dart');
 class DartBoardClient {
 
   DartBoardClient() {
@@ -61,6 +62,9 @@ class DartBoardClient {
       //print(event.keyCode);
     //});
     editorBuffer.on.keyUp.add((KeyboardEvent event) {
+      
+      return;
+      
       String s = new String.fromCharCodes([event.keyCode]);
       // careful of dartium, some events get fired twice. 
       print("event.keyCode = " + event.keyCode);
@@ -92,6 +96,7 @@ class DartBoardClient {
       /*
         set the style of the text area to transparent after data entered. 
        */
+      
       StringBuffer sb = new StringBuffer();
       num i = 0;
       editorBuffer.value.split('\n').forEach((var _s) {

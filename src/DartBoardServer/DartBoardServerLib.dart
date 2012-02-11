@@ -27,23 +27,62 @@ class DartBoardServer extends IsolatedServer {
   
   DartBoardServer() : super() {
     //TODO: not the right place to put this
-    Map DARTBOARDCLIENT={
-"DartBoardClient.html":"/Users/adam/dart/DartBoard/src/DartBoardClient/DartBoardClient.html", 
-"DartBoardClient.dart":"/Users/adam/dart/DartBoard/src/DartBoardClient/DartBoardClient.dart"
-};
+    String DARTBOARDCLIENTHTMLLOCATION="/Users/adam/dart/DartBoard/src/DartBoardClient/DartBoardClient.html";
+    String DARTBOARDCLIENTDARTLOCATION="/Users/adam/dart/DartBoard/src/DartBoardClient/DartBoardClient.dart";
+    String DARTBOARDCLIENTDARTJSLOCATION="/Users/adam/dart/DartBoard/src/DartBoardClient/DartBoardClient.dart.js";
+    String DARTBOARDCSSLOCATION="/Users/adam/dart/DartBoard/src/DartBoardClient/dartboard.css";
+    String PHOTOLOCATION="/Users/adam/dart/DartBoard/src/DartBoardClient/photo.jpg";
+    String STYLELOCATION="/Users/adam/dart/DartBoard/src/DartBoardClient/style.css"; 
+    
+    String DARTBOARDCLIENTHTMLREQUEST="/DartBoardClient.html";
+    String DARTBOARDCLIENTDARTREQUEST="/DartBoardClient.dart";
+    String DARTBOARDCLIENTDARTJSREQUEST="/DartBoardClient.dart.js";
+    String DARTBOARDCSSREQUEST="/dartboard.css";
+    String PHOTOREQUEST="/photo.jpg";
+    String STYLEREQUEST="/style.css";
+    
+    Map DARTBOARDCLIENT={};
+    DARTBOARDCLIENT[DARTBOARDCLIENTHTMLREQUEST]= DARTBOARDCLIENTHTMLLOCATION;
+    DARTBOARDCLIENT[DARTBOARDCLIENTDARTREQUEST]= DARTBOARDCLIENTDARTLOCATION;
+    DARTBOARDCLIENT[DARTBOARDCLIENTDARTJSREQUEST]= DARTBOARDCLIENTDARTJSLOCATION;
+    DARTBOARDCLIENT[DARTBOARDCSSREQUEST]= DARTBOARDCSSLOCATION;
+    DARTBOARDCLIENT[PHOTOREQUEST]= PHOTOLOCATION;
+    DARTBOARDCLIENT[STYLEREQUEST]= STYLELOCATION;
+    
+//"DartBoardClient.html":"/Users/adam/dart/DartBoard/src/DartBoardClient/DartBoardClient.html", 
+//"DartBoardClient.dart":"/Users/adam/dart/DartBoard/src/DartBoardClient/DartBoardClient.dart"
 
+ 
+    
     addHandler("/",
       (HTTPRequest request, HTTPResponse response) =>
           redirectPageHandler(
-              request, response, "DartBoardClient.html"));
+              request, response, DARTBOARDCLIENTHTMLREQUEST));
     
-    addHandler("/DartBoardClient.html",
+// Roll this into a loop
+    addHandler(DARTBOARDCLIENTHTMLREQUEST,
       (HTTPRequest request, HTTPResponse response) =>
-          fileHandler(request, response, DARTBOARDCLIENT["DartBoardClient.html"]));
+          fileHandler(request, response, DARTBOARDCLIENT[DARTBOARDCLIENTHTMLREQUEST]));
     
-    addHandler("/DartBoardClient.dart",
+    addHandler(DARTBOARDCLIENTDARTREQUEST,
       (HTTPRequest request, HTTPResponse response) =>
-          fileHandler(request, response, DARTBOARDCLIENT["DartBoardClient.dart"]));
+          fileHandler(request, response, DARTBOARDCLIENT[DARTBOARDCLIENTDARTREQUEST]));
+    
+    addHandler(DARTBOARDCLIENTDARTJSREQUEST,
+      (HTTPRequest request, HTTPResponse response) =>
+          fileHandler(request, response, DARTBOARDCLIENT[DARTBOARDCLIENTDARTJSREQUEST]));
+    
+    addHandler(DARTBOARDCSSREQUEST,
+      (HTTPRequest request, HTTPResponse response) =>
+          fileHandler(request, response, DARTBOARDCLIENT[DARTBOARDCSSREQUEST]));
+    
+    addHandler(PHOTOREQUEST,
+      (HTTPRequest request, HTTPResponse response) =>
+          fileHandler(request, response, DARTBOARDCLIENT[PHOTOREQUEST]));
+    
+    addHandler(STYLEREQUEST,
+      (HTTPRequest request, HTTPResponse response) =>
+          fileHandler(request, response, DARTBOARDCLIENT[STYLEREQUEST]));
     
     addHandler("/dartExec", (request, response) {
       debugPrint("calling /dartExec");
