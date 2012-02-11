@@ -1,6 +1,6 @@
 #import('dart:html');
 #import('dart:json');
-#source('CouchDBWrapperImpl.dart');
+
 class DartBoardClient {
 
   DartBoardClient() {

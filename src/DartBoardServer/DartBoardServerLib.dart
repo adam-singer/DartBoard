@@ -4,7 +4,7 @@
 #import("../../third_party/HttpServer/http.dart");
 #import("../../third_party/json/dart_json.dart");
 
-
+#source('CouchDBWrapperImpl.dart');
 #source('IsolatedServer.dart');
 #source('ServerMain.dart');
 #source('DartBoardServerStatus.dart');
@@ -85,6 +85,31 @@ class DartBoardServer extends IsolatedServer {
           fileHandler(request, response, DARTBOARDCLIENT[STYLEREQUEST]));
     
     addHandler("/dartExec", (request, response) {
+      /*
+      In this handler
+      
+      HTTPClient h = new HTTPClient();
+      h.open('GET', "127.0.0.1", 5984, "/_all_dbs");
+      h.openHandler = (HTTPClientRequest r) {
+        
+        print("XXXXXXXXXXXopen handler called");
+        r.setHeader('Accept', 'application/json');
+        r.responseReceived = (HTTPClientResponse rr) {
+          rr.dataReceived = (List<int> data) {
+            print("XXXXXXXXXXXXXX= " + data.length);
+            String s = new String.fromCharCodes(data);
+            print("XXXXXXXXXXXXXX= " + s);
+            //return s;
+          };
+        };
+        
+        r.writeDone();
+      };
+      */ 
+      
+      
+      // Send back to client if both parts of the data was recivied.
+      
       debugPrint("calling /dartExec");
       void dataEndHandler(String data) {
         if (data is! String) {
@@ -94,23 +119,57 @@ class DartBoardServer extends IsolatedServer {
         var requestData = JSON.parse(data);
         debugPrint(requestData);
 
+        Map responseMessage = new Map();
+        
         final receivePort = new ReceivePort();
         receivePort.receive((var message, SendPort notUsedHere) {
           debugPrint("Received message:");
           debugPrint("console = ${message['console']}");
           debugPrint("error = ${message['error']}");
           receivePort.close();
-          _sendJSONResponse(response,message);
+          
+          responseMessage['console'] = message['console'];
+          responseMessage['error'] = message['error'];
+          
+          if (responseMessage.containsKey('url')) {
+            _sendJSONResponse(response,responseMessage);
+          }
         });
 
         var c = requestData["code"];       
         new ExeIsolate().spawn().then((SendPort sendPort) {
           sendPort.send(c, receivePort.toSendPort());
-        });        
+        }); 
+        
+        /*
+          Create isolate to store the requestData["code"] into
+          couchdb, when message returns then close connection
+          and bubble response to client.  
+        */
+        debugPrint("calling CouchIsolate");
+        final receiveCouchPort = new ReceivePort();
+        receiveCouchPort.receive((var message, SendPort notUsedHere) {
+          debugPrint("receiveCouchPort.message = ${message}");
+          receiveCouchPort.close();
+          
+          responseMessage['url'] = message;
+          
+          if (responseMessage.containsKey('console')) {
+            _sendJSONResponse(response,responseMessage);
+          }
+        });
+        
+        new CouchIsolate().spawn().then((SendPort sp) {
+          sp.send("CreateUrl", receiveCouchPort.toSendPort());
+        });
+        
       };
       
       request.dataEnd = dataEndHandler;
     });
+   
+    
+
     
   }
 }
