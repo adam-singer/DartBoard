@@ -11,35 +11,46 @@ class CouchIsolate extends Isolate {
   }
   
   void main() {
-    port.receive((String _, SendPort replyTo) {
+    port.receive((Map message, SendPort replyTo) {
       debugPrint("Entering CouchIsolate");
-      HTTPClient h = new HTTPClient();
-      h.open('GET', "127.0.0.1", 5984, "/_all_dbs");
-      h.openHandler = (HTTPClientRequest r) {
+      CouchDBWrapperImpl couch = new CouchDBWrapperImpl(replyTo);
+      
+      
+      if (message['command']=='createDatabase') {
+        couch.createDb(message['dbName']);
+      } else if (message['command']=='saveCode') {
+        //TODO: json what we want not the whole message
+        couch.saveDoc(message['dbName'], JSON.stringify(message));
+      } else if (message['command']=='getCode') {
+        couch.openDoc(message['dbName'], message['docId']);
+      } else if (message['command']=='getCodeList') {
         
-        debugPrint("CouchIsolate open handler called");
-        r.setHeader('Accept', 'application/json');
-        r.responseReceived = (HTTPClientResponse rr) {
-          rr.dataReceived = (List<int> data) {
-            debugPrint("CouchIsolate= " + data.length);
-            String s = new String.fromCharCodes(data);
-            debugPrint("CouchIsolate= " + s);
-            //return s;
-            replyTo.send(s);
-          };
-        };
+      }
+      
+      /*
+      if (message=='createDatabase') {
+        couch.createDb('codeDb');
+      } else if (message=='saveCode') {
         
-        r.writeDone();
-      };
+      } else if (message=='getCode') {
+        
+      } else if (message=='') {
+        
+      }
+      */
+      
     });
   }
 }
 
 class CouchDBWrapperImpl {
-  bool DEBUG=true;
+  bool DEBUG;
   String baseUri = '';
-  String host = '127.0.0.1';
-  int port = 5984;
+  String host;
+  int port;
+  SendPort replyTo;
+  
+  CouchDBWrapperImpl(SendPort this.replyTo, [String this.host='127.0.0.1', int this.port=5984, bool this.DEBUG=true]) { }
   
   _print(var d) {
     if (DEBUG) {
@@ -104,77 +115,73 @@ class CouchDBWrapperImpl {
     _print(s);
     return s;
   }
-  
-  HTTPClient connect() {    
-    var _xmlHttpRequest = new HTTPClient();
-    //_xmlHttpRequest.on.error.add((var event) {
-    //   _print('on error: '+event);
-    //});
-    //_xmlHttpRequest.on.abort.add((var event) {
-    //  _print('on abort: '+event);
-    //});
-    _xmlHttpRequest.errorHandler = (int status) {
-      print('on error: ${status}');
-    };
     
-    return _xmlHttpRequest;
-  }
-  
-  
   // Basic http methods
   getHttp(var uri) {
-    
-    HTTPClient c = connect(); 
-     
-    _print('GET ' + host + ":" + port + uri);
-    c.open('GET', host, port, uri);
-    
-    c.openHandler = (HTTPClientRequest request) {
-      _print("open handler called");
+    HTTPClient h = new HTTPClient();
+    h.open('GET', host, port, uri);
+    h.openHandler = (HTTPClientRequest request) {
       request.setHeader('Accept', 'application/json');
       request.responseReceived = (HTTPClientResponse response) {
         response.dataReceived = (List<int> data) {
-          _print(data.length);
-          String s = new String.fromCharCodes(data);
-          _print(s);
-          //return s;
+          String s = new String.fromCharCodes(data);          
+          replyTo.send(s);
         };
       };
+      request.writeDone();
     };
-    
-    return "";
-
-//    c.open('GET', uri, false);
-//    c.setRequestHeader('Accept', 'application/json');
-//    c.send();
-//    return c.responseText;
   }
   
   postHttp(var uri, var body) {
-    HTTPClient c = connect();
-//    c.open('POST', uri, false);
-//    c.setRequestHeader('Content-type', 'application/json');
-//    c.send(body);
-//    return c.responseText;
+    HTTPClient h = new HTTPClient();
+    h.open('POST', host, port, uri);
+    h.openHandler = (HTTPClientRequest request) {
+      request.setHeader('Content-type', 'application/json');
+      
+      request.responseReceived = (HTTPClientResponse response) {
+        response.dataReceived = (List<int> data) {
+          String s = new String.fromCharCodes(data);          
+          replyTo.send(s);
+        };
+      };
+      
+      request.writeString(body, ()=>print('postHttp write'));
+      request.writeDone();
+    };
   }
   
   putHttp(var uri, [var body]) {
-    HTTPClient c = connect();
-//    c.open('PUT', uri, false);
-//    if (body is String && body.length > 0) {
-//      c.setRequestHeader('Content-type', 'application/json');
-//      c.send(body);
-//    } else {
-//      c.send();
-//    }
-//    
-//    return c.responseText;
+    HTTPClient h = new HTTPClient();
+    h.open('PUT', host, port, uri);
+    h.openHandler = (HTTPClientRequest request) {
+      request.setHeader('Content-type', 'application/json');
+      
+      request.responseReceived = (HTTPClientResponse response) {
+        response.dataReceived = (List<int> data) {
+          String s = new String.fromCharCodes(data);          
+          replyTo.send(s);
+        };
+      };
+      
+      if (body is String && body.length > 0) {
+        request.writeString(body, ()=>print('postHttp write'));
+      }
+      
+      request.writeDone();
+    };
   }
   
   deleteHttp(var uri) {
-    HTTPClient c = connect();
-//    c.open('DELETE', uri, false);
-//    c.send();
-//    return c.responseText;
+    HTTPClient h = new HTTPClient();
+    h.open('DELETE', host, port, uri);
+    h.openHandler = (HTTPClientRequest request) {
+      request.responseReceived = (HTTPClientResponse response) {
+        response.dataReceived = (List<int> data) {
+          String s = new String.fromCharCodes(data);          
+          replyTo.send(s);
+        };
+      };
+      request.writeDone();
+    };
   }
 }

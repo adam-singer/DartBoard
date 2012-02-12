@@ -51,13 +51,14 @@ class DartBoardServer extends IsolatedServer {
     
 //"DartBoardClient.html":"/Users/adam/dart/DartBoard/src/DartBoardClient/DartBoardClient.html", 
 //"DartBoardClient.dart":"/Users/adam/dart/DartBoard/src/DartBoardClient/DartBoardClient.dart"
+    
 
- 
+    InitDb();
     
     addHandler("/",
       (HTTPRequest request, HTTPResponse response) =>
           redirectPageHandler(
-              request, response, DARTBOARDCLIENTHTMLREQUEST));
+              request, response, DARTBOARDCLIENTHTMLREQUEST.substring(1)));
     
 // Roll this into a loop
     addHandler(DARTBOARDCLIENTHTMLREQUEST,
@@ -160,7 +161,8 @@ class DartBoardServer extends IsolatedServer {
         });
         
         new CouchIsolate().spawn().then((SendPort sp) {
-          sp.send("CreateUrl", receiveCouchPort.toSendPort());
+          Map m = {'command':'saveCode', 'dbName':'codedb' ,'code':requestData["code"]};
+          sp.send(m, receiveCouchPort.toSendPort());
         });
         
       };
@@ -172,5 +174,22 @@ class DartBoardServer extends IsolatedServer {
 
     
   }
+  
+  
+  InitDb() {
+    debugPrint("calling InitDb");
+    final receiveCouchPort = new ReceivePort();
+    receiveCouchPort.receive((var message, SendPort notUsedHere) {
+      debugPrint("receiveCouchPort.message = ${message}");
+      receiveCouchPort.close();
+    });
+    
+    new CouchIsolate().spawn().then((SendPort sp) {
+      Map m = {'command':'createDatabase', 'dbName':'codedb'};
+      sp.send(m, receiveCouchPort.toSendPort());
+    });
+    
+  }
+  
 }
 

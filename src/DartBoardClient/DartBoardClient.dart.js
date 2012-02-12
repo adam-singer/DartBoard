@@ -1311,6 +1311,13 @@ function _constMap(itemsAndKeys) {
 // ********** Code for _DOMTypeJs **************
 $dynamic("get$dartObjectLocalStorage").DOMType = function() { return this.dartObjectLocalStorage; };
 $dynamic("set$dartObjectLocalStorage").DOMType = function(value) { return this.dartObjectLocalStorage = value; };
+// ********** Code for _EventTargetJs **************
+$dynamic("addEventListener$3").EventTarget = function($0, $1, $2) {
+  if (Object.getPrototypeOf(this).hasOwnProperty("addEventListener$3")) {
+    return this.addEventListener($0, $wrap_call$1(to$call$1($1)), $2);
+  }
+  return Object.prototype.addEventListener$3.call(this, $0, $1, $2);
+};
 // ********** Code for _AbstractWorkerJs **************
 $dynamic("addEventListener$3").AbstractWorker = function($0, $1, $2) {
   return this.addEventListener($0, $wrap_call$1(to$call$1($1)), $2);
@@ -1550,10 +1557,6 @@ $dynamic("get$length").EntryArraySync = function() { return this.length; };
 // ********** Code for _EventSourceJs **************
 $dynamic("get$readyState").EventSource = function() { return this.readyState; };
 $dynamic("addEventListener$3").EventSource = function($0, $1, $2) {
-  return this.addEventListener($0, $wrap_call$1(to$call$1($1)), $2);
-};
-// ********** Code for _EventTargetJs **************
-$dynamic("addEventListener$3").EventTarget = function($0, $1, $2) {
   return this.addEventListener($0, $wrap_call$1(to$call$1($1)), $2);
 };
 // ********** Code for _FileJs **************
@@ -7024,7 +7027,7 @@ function main() {
 }
 // 179 dynamic types.
 // 495 types
-// 42 !leaf
+// 43 !leaf
 function $dynamicSetMetadata(inputTable) {
   // TODO: Deal with light isolates.
   var table = [];
@@ -7052,29 +7055,30 @@ function $dynamicSetMetadata(inputTable) {
   var v8/*Document*/ = 'Document|HTMLDocument|SVGDocument';
   var v9/*Element*/ = [v2/*HTMLElement*/,v3/*SVGComponentTransferFunctionElement*/,v4/*SVGGradientElement*/,v5/*SVGTextContentElement*/,'Element|SVGElement|SVGAElement|SVGAltGlyphDefElement|SVGAltGlyphItemElement|SVGAnimationElement|SVGAnimateColorElement|SVGAnimateElement|SVGAnimateMotionElement|SVGAnimateTransformElement|SVGSetElement|SVGCircleElement|SVGClipPathElement|SVGCursorElement|SVGDefsElement|SVGDescElement|SVGEllipseElement|SVGFEBlendElement|SVGFEColorMatrixElement|SVGFEComponentTransferElement|SVGFECompositeElement|SVGFEConvolveMatrixElement|SVGFEDiffuseLightingElement|SVGFEDisplacementMapElement|SVGFEDistantLightElement|SVGFEDropShadowElement|SVGFEFloodElement|SVGFEGaussianBlurElement|SVGFEImageElement|SVGFEMergeElement|SVGFEMergeNodeElement|SVGFEMorphologyElement|SVGFEOffsetElement|SVGFEPointLightElement|SVGFESpecularLightingElement|SVGFESpotLightElement|SVGFETileElement|SVGFETurbulenceElement|SVGFilterElement|SVGFontElement|SVGFontFaceElement|SVGFontFaceFormatElement|SVGFontFaceNameElement|SVGFontFaceSrcElement|SVGFontFaceUriElement|SVGForeignObjectElement|SVGGElement|SVGGlyphElement|SVGGlyphRefElement|SVGHKernElement|SVGImageElement|SVGLineElement|SVGMPathElement|SVGMarkerElement|SVGMaskElement|SVGMetadataElement|SVGMissingGlyphElement|SVGPathElement|SVGPatternElement|SVGPolygonElement|SVGPolylineElement|SVGRectElement|SVGSVGElement|SVGScriptElement|SVGStopElement|SVGStyleElement|SVGSwitchElement|SVGSymbolElement|SVGTitleElement|SVGUseElement|SVGVKernElement|SVGViewElement'].join('|');
   var v10/*AbstractWorker*/ = 'AbstractWorker|SharedWorker|Worker';
-  var v11/*Uint8Array*/ = 'Uint8Array|Uint8ClampedArray';
-  var v12/*AudioParam*/ = 'AudioParam|AudioGain';
-  var v13/*Blob*/ = 'Blob|File';
-  var v14/*CSSRule*/ = 'CSSRule|CSSCharsetRule|CSSFontFaceRule|CSSImportRule|CSSMediaRule|CSSPageRule|CSSStyleRule|CSSUnknownRule|WebKitCSSKeyframeRule|WebKitCSSKeyframesRule|WebKitCSSRegionRule';
-  var v15/*CSSValueList*/ = 'CSSValueList|WebKitCSSTransformValue';
-  var v16/*DOMTokenList*/ = 'DOMTokenList|DOMSettableTokenList';
-  var v17/*EntrySync*/ = 'EntrySync|DirectoryEntrySync|FileEntrySync';
-  var v18/*Event*/ = [v6/*UIEvent*/,'Event|AudioProcessingEvent|BeforeLoadEvent|CloseEvent|CustomEvent|DeviceMotionEvent|DeviceOrientationEvent|ErrorEvent|HashChangeEvent|IDBVersionChangeEvent|MessageEvent|MutationEvent|OfflineAudioCompletionEvent|OverflowEvent|PageTransitionEvent|PopStateEvent|ProgressEvent|XMLHttpRequestProgressEvent|SpeechInputEvent|StorageEvent|TrackEvent|WebGLContextEvent|WebKitAnimationEvent|WebKitTransitionEvent'].join('|');
-  var v19/*HTMLCollection*/ = 'HTMLCollection|HTMLOptionsCollection';
-  var v20/*IDBRequest*/ = 'IDBRequest|IDBVersionChangeRequest';
-  var v21/*Node*/ = [v7/*CharacterData*/,v8/*Document*/,v9/*Element*/,'Node|Attr|DocumentFragment|DocumentType|Entity|EntityReference|Notation|ProcessingInstruction'].join('|');
-  var v22/*SVGStylable*/ = 'SVGStylable|SVGFilterPrimitiveStandardAttributes';
-  var v23/*StyleSheet*/ = 'StyleSheet|CSSStyleSheet';
-  var v24/*WorkerContext*/ = 'WorkerContext|DedicatedWorkerContext|SharedWorkerContext';
+  var v11/*Node*/ = [v7/*CharacterData*/,v8/*Document*/,v9/*Element*/,'Node|Attr|DocumentFragment|DocumentType|Entity|EntityReference|Notation|ProcessingInstruction'].join('|');
+  var v12/*Uint8Array*/ = 'Uint8Array|Uint8ClampedArray';
+  var v13/*AudioParam*/ = 'AudioParam|AudioGain';
+  var v14/*Blob*/ = 'Blob|File';
+  var v15/*CSSRule*/ = 'CSSRule|CSSCharsetRule|CSSFontFaceRule|CSSImportRule|CSSMediaRule|CSSPageRule|CSSStyleRule|CSSUnknownRule|WebKitCSSKeyframeRule|WebKitCSSKeyframesRule|WebKitCSSRegionRule';
+  var v16/*CSSValueList*/ = 'CSSValueList|WebKitCSSTransformValue';
+  var v17/*DOMTokenList*/ = 'DOMTokenList|DOMSettableTokenList';
+  var v18/*EntrySync*/ = 'EntrySync|DirectoryEntrySync|FileEntrySync';
+  var v19/*Event*/ = [v6/*UIEvent*/,'Event|AudioProcessingEvent|BeforeLoadEvent|CloseEvent|CustomEvent|DeviceMotionEvent|DeviceOrientationEvent|ErrorEvent|HashChangeEvent|IDBVersionChangeEvent|MessageEvent|MutationEvent|OfflineAudioCompletionEvent|OverflowEvent|PageTransitionEvent|PopStateEvent|ProgressEvent|XMLHttpRequestProgressEvent|SpeechInputEvent|StorageEvent|TrackEvent|WebGLContextEvent|WebKitAnimationEvent|WebKitTransitionEvent'].join('|');
+  var v20/*EventTarget*/ = [v10/*AbstractWorker*/,v11/*Node*/,'EventTarget|DOMApplicationCache|DOMWindow|EventSource|MessagePort|Notification|SVGElementInstance|WebSocket|XMLHttpRequest|XMLHttpRequestUpload'].join('|');
+  var v21/*HTMLCollection*/ = 'HTMLCollection|HTMLOptionsCollection';
+  var v22/*IDBRequest*/ = 'IDBRequest|IDBVersionChangeRequest';
+  var v23/*SVGStylable*/ = 'SVGStylable|SVGFilterPrimitiveStandardAttributes';
+  var v24/*StyleSheet*/ = 'StyleSheet|CSSStyleSheet';
+  var v25/*WorkerContext*/ = 'WorkerContext|DedicatedWorkerContext|SharedWorkerContext';
   var table = [
     // [dynamic-dispatch-tag, tags of classes implementing dynamic-dispatch-tag]
     ['AbstractWorker', v10/*AbstractWorker*/]
-    , ['AudioParam', v12/*AudioParam*/]
-    , ['Blob', v13/*Blob*/]
-    , ['CSSRule', v14/*CSSRule*/]
-    , ['CSSValueList', v15/*CSSValueList*/]
+    , ['AudioParam', v13/*AudioParam*/]
+    , ['Blob', v14/*Blob*/]
+    , ['CSSRule', v15/*CSSRule*/]
+    , ['CSSValueList', v16/*CSSValueList*/]
     , ['CharacterData', v7/*CharacterData*/]
-    , ['DOMTokenList', v16/*DOMTokenList*/]
+    , ['DOMTokenList', v17/*DOMTokenList*/]
     , ['Document', v8/*Document*/]
     , ['HTMLInputElement', v0/*HTMLInputElement*/]
     , ['HTMLMediaElement', v1/*HTMLMediaElement*/]
@@ -7083,17 +7087,18 @@ function $dynamicSetMetadata(inputTable) {
     , ['SVGGradientElement', v4/*SVGGradientElement*/]
     , ['SVGTextContentElement', v5/*SVGTextContentElement*/]
     , ['Element', v9/*Element*/]
-    , ['EntrySync', v17/*EntrySync*/]
+    , ['EntrySync', v18/*EntrySync*/]
     , ['UIEvent', v6/*UIEvent*/]
-    , ['Event', v18/*Event*/]
-    , ['HTMLCollection', v19/*HTMLCollection*/]
-    , ['IDBRequest', v20/*IDBRequest*/]
-    , ['Node', v21/*Node*/]
-    , ['SVGStylable', v22/*SVGStylable*/]
-    , ['StyleSheet', v23/*StyleSheet*/]
-    , ['Uint8Array', v11/*Uint8Array*/]
-    , ['WorkerContext', v24/*WorkerContext*/]
-    , ['DOMType', [v10/*AbstractWorker*/,v11/*Uint8Array*/,v12/*AudioParam*/,v13/*Blob*/,v14/*CSSRule*/,v15/*CSSValueList*/,v16/*DOMTokenList*/,v17/*EntrySync*/,v18/*Event*/,v19/*HTMLCollection*/,v20/*IDBRequest*/,v21/*Node*/,v22/*SVGStylable*/,v23/*StyleSheet*/,v24/*WorkerContext*/,'DOMType|ArrayBuffer|ArrayBufferView|DataView|Float32Array|Float64Array|Int16Array|Int32Array|Int8Array|Uint16Array|Uint32Array|AudioBuffer|AudioContext|AudioListener|AudioNode|AudioChannelMerger|AudioChannelSplitter|AudioDestinationNode|AudioGainNode|AudioPannerNode|AudioSourceNode|AudioBufferSourceNode|MediaElementAudioSourceNode|BiquadFilterNode|ConvolverNode|DelayNode|DynamicsCompressorNode|HighPass2FilterNode|JavaScriptAudioNode|LowPass2FilterNode|RealtimeAnalyserNode|WaveShaperNode|BarInfo|CSSRuleList|CSSStyleDeclaration|CSSValue|CSSPrimitiveValue|SVGColor|SVGPaint|CanvasGradient|CanvasPattern|CanvasPixelArray|CanvasRenderingContext|CanvasRenderingContext2D|WebGLRenderingContext|ClientRect|ClientRectList|Clipboard|Coordinates|Counter|Crypto|DOMApplicationCache|DOMException|DOMFileSystem|DOMFileSystemSync|DOMFormData|DOMImplementation|DOMMimeType|DOMMimeTypeArray|DOMParser|DOMPlugin|DOMPluginArray|DOMSelection|DOMURL|DOMWindow|DataTransferItem|DataTransferItemList|Database|DatabaseSync|DirectoryReader|DirectoryReaderSync|ElementTimeControl|ElementTraversal|Entry|DirectoryEntry|FileEntry|EntryArray|EntryArraySync|EventException|EventSource|EventTarget|FileError|FileException|FileList|FileReader|FileReaderSync|FileWriter|FileWriterSync|Geolocation|Geoposition|HTMLAllCollection|History|IDBAny|IDBCursor|IDBCursorWithValue|IDBDatabase|IDBDatabaseError|IDBDatabaseException|IDBFactory|IDBIndex|IDBKey|IDBKeyRange|IDBObjectStore|IDBTransaction|ImageData|JavaScriptCallFrame|Location|MediaController|MediaError|MediaList|MediaQueryList|MediaQueryListListener|MemoryInfo|MessageChannel|MessagePort|Metadata|NamedNodeMap|Navigator|NodeFilter|NodeIterator|NodeList|NodeSelector|Notification|NotificationCenter|OESStandardDerivatives|OESTextureFloat|OESVertexArrayObject|OperationNotAllowedException|Performance|PerformanceNavigation|PerformanceTiming|PositionError|RGBColor|Range|RangeException|Rect|SQLError|SQLException|SQLResultSet|SQLResultSetRowList|SQLTransaction|SQLTransactionSync|SVGAngle|SVGAnimatedAngle|SVGAnimatedBoolean|SVGAnimatedEnumeration|SVGAnimatedInteger|SVGAnimatedLength|SVGAnimatedLengthList|SVGAnimatedNumber|SVGAnimatedNumberList|SVGAnimatedPreserveAspectRatio|SVGAnimatedRect|SVGAnimatedString|SVGAnimatedTransformList|SVGElementInstance|SVGElementInstanceList|SVGException|SVGExternalResourcesRequired|SVGFitToViewBox|SVGLangSpace|SVGLength|SVGLengthList|SVGLocatable|SVGTransformable|SVGMatrix|SVGNumber|SVGNumberList|SVGPathSeg|SVGPathSegArcAbs|SVGPathSegArcRel|SVGPathSegClosePath|SVGPathSegCurvetoCubicAbs|SVGPathSegCurvetoCubicRel|SVGPathSegCurvetoCubicSmoothAbs|SVGPathSegCurvetoCubicSmoothRel|SVGPathSegCurvetoQuadraticAbs|SVGPathSegCurvetoQuadraticRel|SVGPathSegCurvetoQuadraticSmoothAbs|SVGPathSegCurvetoQuadraticSmoothRel|SVGPathSegLinetoAbs|SVGPathSegLinetoHorizontalAbs|SVGPathSegLinetoHorizontalRel|SVGPathSegLinetoRel|SVGPathSegLinetoVerticalAbs|SVGPathSegLinetoVerticalRel|SVGPathSegMovetoAbs|SVGPathSegMovetoRel|SVGPathSegList|SVGPoint|SVGPointList|SVGPreserveAspectRatio|SVGRect|SVGRenderingIntent|SVGStringList|SVGTests|SVGTransform|SVGTransformList|SVGURIReference|SVGUnitTypes|SVGZoomAndPan|SVGViewSpec|Screen|ScriptProfile|ScriptProfileNode|SpeechInputResult|SpeechInputResultList|Storage|StorageInfo|StyleMedia|StyleSheetList|TextMetrics|TextTrack|TextTrackCue|TextTrackCueList|TextTrackList|TimeRanges|Touch|TouchList|TreeWalker|ValidityState|WebGLActiveInfo|WebGLBuffer|WebGLCompressedTextures|WebGLContextAttributes|WebGLDebugRendererInfo|WebGLDebugShaders|WebGLFramebuffer|WebGLLoseContext|WebGLProgram|WebGLRenderbuffer|WebGLShader|WebGLTexture|WebGLUniformLocation|WebGLVertexArrayObjectOES|WebKitAnimation|WebKitAnimationList|WebKitBlobBuilder|WebKitCSSMatrix|WebKitNamedFlow|WebKitPoint|WebSocket|WorkerLocation|WorkerNavigator|XMLHttpRequest|XMLHttpRequestException|XMLHttpRequestUpload|XMLSerializer|XPathEvaluator|XPathException|XPathExpression|XPathNSResolver|XPathResult|XSLTProcessor'].join('|')]
+    , ['Event', v19/*Event*/]
+    , ['Node', v11/*Node*/]
+    , ['EventTarget', v20/*EventTarget*/]
+    , ['HTMLCollection', v21/*HTMLCollection*/]
+    , ['IDBRequest', v22/*IDBRequest*/]
+    , ['SVGStylable', v23/*SVGStylable*/]
+    , ['StyleSheet', v24/*StyleSheet*/]
+    , ['Uint8Array', v12/*Uint8Array*/]
+    , ['WorkerContext', v25/*WorkerContext*/]
+    , ['DOMType', [v12/*Uint8Array*/,v13/*AudioParam*/,v14/*Blob*/,v15/*CSSRule*/,v16/*CSSValueList*/,v17/*DOMTokenList*/,v18/*EntrySync*/,v19/*Event*/,v20/*EventTarget*/,v21/*HTMLCollection*/,v22/*IDBRequest*/,v23/*SVGStylable*/,v24/*StyleSheet*/,v25/*WorkerContext*/,'DOMType|ArrayBuffer|ArrayBufferView|DataView|Float32Array|Float64Array|Int16Array|Int32Array|Int8Array|Uint16Array|Uint32Array|AudioBuffer|AudioContext|AudioListener|AudioNode|AudioChannelMerger|AudioChannelSplitter|AudioDestinationNode|AudioGainNode|AudioPannerNode|AudioSourceNode|AudioBufferSourceNode|MediaElementAudioSourceNode|BiquadFilterNode|ConvolverNode|DelayNode|DynamicsCompressorNode|HighPass2FilterNode|JavaScriptAudioNode|LowPass2FilterNode|RealtimeAnalyserNode|WaveShaperNode|BarInfo|CSSRuleList|CSSStyleDeclaration|CSSValue|CSSPrimitiveValue|SVGColor|SVGPaint|CanvasGradient|CanvasPattern|CanvasPixelArray|CanvasRenderingContext|CanvasRenderingContext2D|WebGLRenderingContext|ClientRect|ClientRectList|Clipboard|Coordinates|Counter|Crypto|DOMException|DOMFileSystem|DOMFileSystemSync|DOMFormData|DOMImplementation|DOMMimeType|DOMMimeTypeArray|DOMParser|DOMPlugin|DOMPluginArray|DOMSelection|DOMURL|DataTransferItem|DataTransferItemList|Database|DatabaseSync|DirectoryReader|DirectoryReaderSync|ElementTimeControl|ElementTraversal|Entry|DirectoryEntry|FileEntry|EntryArray|EntryArraySync|EventException|FileError|FileException|FileList|FileReader|FileReaderSync|FileWriter|FileWriterSync|Geolocation|Geoposition|HTMLAllCollection|History|IDBAny|IDBCursor|IDBCursorWithValue|IDBDatabase|IDBDatabaseError|IDBDatabaseException|IDBFactory|IDBIndex|IDBKey|IDBKeyRange|IDBObjectStore|IDBTransaction|ImageData|JavaScriptCallFrame|Location|MediaController|MediaError|MediaList|MediaQueryList|MediaQueryListListener|MemoryInfo|MessageChannel|Metadata|NamedNodeMap|Navigator|NodeFilter|NodeIterator|NodeList|NodeSelector|NotificationCenter|OESStandardDerivatives|OESTextureFloat|OESVertexArrayObject|OperationNotAllowedException|Performance|PerformanceNavigation|PerformanceTiming|PositionError|RGBColor|Range|RangeException|Rect|SQLError|SQLException|SQLResultSet|SQLResultSetRowList|SQLTransaction|SQLTransactionSync|SVGAngle|SVGAnimatedAngle|SVGAnimatedBoolean|SVGAnimatedEnumeration|SVGAnimatedInteger|SVGAnimatedLength|SVGAnimatedLengthList|SVGAnimatedNumber|SVGAnimatedNumberList|SVGAnimatedPreserveAspectRatio|SVGAnimatedRect|SVGAnimatedString|SVGAnimatedTransformList|SVGElementInstanceList|SVGException|SVGExternalResourcesRequired|SVGFitToViewBox|SVGLangSpace|SVGLength|SVGLengthList|SVGLocatable|SVGTransformable|SVGMatrix|SVGNumber|SVGNumberList|SVGPathSeg|SVGPathSegArcAbs|SVGPathSegArcRel|SVGPathSegClosePath|SVGPathSegCurvetoCubicAbs|SVGPathSegCurvetoCubicRel|SVGPathSegCurvetoCubicSmoothAbs|SVGPathSegCurvetoCubicSmoothRel|SVGPathSegCurvetoQuadraticAbs|SVGPathSegCurvetoQuadraticRel|SVGPathSegCurvetoQuadraticSmoothAbs|SVGPathSegCurvetoQuadraticSmoothRel|SVGPathSegLinetoAbs|SVGPathSegLinetoHorizontalAbs|SVGPathSegLinetoHorizontalRel|SVGPathSegLinetoRel|SVGPathSegLinetoVerticalAbs|SVGPathSegLinetoVerticalRel|SVGPathSegMovetoAbs|SVGPathSegMovetoRel|SVGPathSegList|SVGPoint|SVGPointList|SVGPreserveAspectRatio|SVGRect|SVGRenderingIntent|SVGStringList|SVGTests|SVGTransform|SVGTransformList|SVGURIReference|SVGUnitTypes|SVGZoomAndPan|SVGViewSpec|Screen|ScriptProfile|ScriptProfileNode|SpeechInputResult|SpeechInputResultList|Storage|StorageInfo|StyleMedia|StyleSheetList|TextMetrics|TextTrack|TextTrackCue|TextTrackCueList|TextTrackList|TimeRanges|Touch|TouchList|TreeWalker|ValidityState|WebGLActiveInfo|WebGLBuffer|WebGLCompressedTextures|WebGLContextAttributes|WebGLDebugRendererInfo|WebGLDebugShaders|WebGLFramebuffer|WebGLLoseContext|WebGLProgram|WebGLRenderbuffer|WebGLShader|WebGLTexture|WebGLUniformLocation|WebGLVertexArrayObjectOES|WebKitAnimation|WebKitAnimationList|WebKitBlobBuilder|WebKitCSSMatrix|WebKitNamedFlow|WebKitPoint|WorkerLocation|WorkerNavigator|XMLHttpRequestException|XMLSerializer|XPathEvaluator|XPathException|XPathExpression|XPathNSResolver|XPathResult|XSLTProcessor'].join('|')]
   ];
   $dynamicSetMetadata(table);
 })();
