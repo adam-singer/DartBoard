@@ -1,6 +1,6 @@
 #import('dart:html');
 #import('dart:json');
-
+#import("../../third_party/uri/uri.dart");
 class DartBoardClient {
 
   DartBoardClient() {
@@ -9,6 +9,34 @@ class DartBoardClient {
   int scrollWidth=400;
   int scrollHeight=400;
   void run() {
+    Map queryArguments = {};
+    Uri u;
+    try {
+// TODO: log as error on dartbug
+//      if (window.location.getParameter('docId') is String) {
+//        print('getting docId = ' + window.location.getParameter('docId'));
+//      }
+//      
+      print('href = ' + document.window.location.href);
+      u = new Uri.fromString(document.window.location.href);
+      print('query = ${u.query}');
+      
+      u.query.split('&').forEach((String s) {
+        List arg = s.split('=');
+        
+        if (arg.length == 2 && !arg[0].isEmpty()) {
+          // {arg[0], arg[1]}
+          queryArguments[arg[0]] = arg[1];
+        }
+      });
+      
+      queryArguments.forEach((var k, var v) {
+        print('k=${k},v=${v}');
+      });
+    } catch (Exception ex) {
+      print('url parse exception: '+ex.toString());
+    }
+    
     DivElement view = document.query('#view');
     document.window.on.resize.add((var event) {
       document.rect.then((ElementRect rect) {
@@ -21,6 +49,18 @@ class DartBoardClient {
     });
     
     TextAreaElement textAreaElement = document.query('#editorBuffer');
+    if (queryArguments.containsKey('docId')) {
+      // If we have docId then try and fetch from server. 
+      sendRequest("/getCode?docId=${queryArguments['docId']}", {}, (Map response){
+        print("/getCode");
+        response.forEach((var k, var v) {
+          print('k=${k},v=${v}');
+        });
+        
+        textAreaElement.value = response['code'];
+      }, ()=>print("message failed"));
+    }
+    
     DivElement scrollContainer = document.query('#scroll-container');
     
     textAreaElement.on.mouseWheel.add((var mw) {
@@ -116,8 +156,6 @@ class DartBoardClient {
       
     });
     
-    //editorBuffer.style.visibility = "hidden"; 
-    
     
     document.query('#submitButton').on.click.add((var event) {
       print("click submit button");
@@ -133,6 +171,11 @@ class DartBoardClient {
          print(response["console"]);
          ParagraphElement p = document.query('#results');
          p.innerHTML = response["console"];
+         // print debug 
+         response.forEach((var k, var v) {
+           print('k=${k},v=${v}');
+         });
+         p.innerHTML = p.innerHTML + '<br/>' + u.path + "?docId=" + JSON.parse(response['url'])['id'];
         }, 
         () {
         print("message failed");
@@ -157,6 +200,7 @@ class DartBoardClient {
     request.send(JSON.stringify(data));   
     return request;
   }
+  
   
 }
 

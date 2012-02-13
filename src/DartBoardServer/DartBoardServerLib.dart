@@ -85,29 +85,33 @@ class DartBoardServer extends IsolatedServer {
       (HTTPRequest request, HTTPResponse response) =>
           fileHandler(request, response, DARTBOARDCLIENT[STYLEREQUEST]));
     
-    addHandler("/dartExec", (request, response) {
-      /*
-      In this handler
-      
-      HTTPClient h = new HTTPClient();
-      h.open('GET', "127.0.0.1", 5984, "/_all_dbs");
-      h.openHandler = (HTTPClientRequest r) {
-        
-        print("XXXXXXXXXXXopen handler called");
-        r.setHeader('Accept', 'application/json');
-        r.responseReceived = (HTTPClientResponse rr) {
-          rr.dataReceived = (List<int> data) {
-            print("XXXXXXXXXXXXXX= " + data.length);
-            String s = new String.fromCharCodes(data);
-            print("XXXXXXXXXXXXXX= " + s);
-            //return s;
-          };
+    addHandler("/getCode", (HTTPRequest request, HTTPResponse response) {
+      if (request.queryParameters.containsKey('docId')) {
+        String docId = request.queryParameters['docId'];
+        debugPrint('/getCode requested docId = ${docId}');
+        request.dataEnd = (String data) {
+          final receiveCouchPort = new ReceivePort();
+          receiveCouchPort.receive((var message, SendPort notUsedHere) {
+            debugPrint("/getCode receiveCouchPort.message = ${message}");
+            receiveCouchPort.close();
+            _sendJSONResponse(response,{'docId':docId, 'code': JSON.parse(message)['code']});
+          });
+          
+          new CouchIsolate().spawn().then((SendPort sp) {
+            Map m = {'command':'getCode', 'dbName':'codedb' ,'docId':docId};
+            sp.send(m, receiveCouchPort.toSendPort());
+          });  
         };
-        
-        r.writeDone();
-      };
-      */ 
+      } else {
+        request.dataEnd = (String data) {
+          _sendJSONResponse(response,{});
+        };
+      }
       
+      
+    });
+    
+    addHandler("/dartExec", (request, response) {
       
       // Send back to client if both parts of the data was recivied.
       
