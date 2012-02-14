@@ -1,6 +1,7 @@
 #import('dart:html');
 #import('dart:json');
 #import("../../third_party/uri/uri.dart");
+#source('debug.dart');
 class DartBoardClient {
 
   DartBoardClient() {
@@ -10,28 +11,24 @@ class DartBoardClient {
   int scrollHeight=400;
   void run() {
     Map queryArguments = {};
-    Uri u;
-    try {
-// TODO: log as error on dartbug
-//      if (window.location.getParameter('docId') is String) {
-//        print('getting docId = ' + window.location.getParameter('docId'));
-//      }
-//      
-      print('href = ' + document.window.location.href);
-      u = new Uri.fromString(document.window.location.href);
-      print('query = ${u.query}');
+    Uri uri;
+    try { 
+      debugPrint('href = ' + document.window.location.href);
+      uri = new Uri.fromString(document.window.location.href);
+      debugPrint('query = ${uri.query}');
       
-      u.query.split('&').forEach((String s) {
+      uri.query.split('&').forEach((String s) {
         List arg = s.split('=');
-        
         if (arg.length == 2 && !arg[0].isEmpty()) {
-          // {arg[0], arg[1]}
           queryArguments[arg[0]] = arg[1];
         }
       });
       
-      queryArguments.forEach((var k, var v) {
-        print('k=${k},v=${v}');
+      
+      debugPrintMethod( () {
+        queryArguments.forEach((var k, var v) {
+          print('k=${k},v=${v}');
+        });
       });
     } catch (Exception ex) {
       print('url parse exception: '+ex.toString());
@@ -42,8 +39,8 @@ class DartBoardClient {
       document.rect.then((ElementRect rect) {
        view.style.left = "50%";
        view.style.top = "50%";
-       //print("rect.client.height = ${rect.client.height}");
-       //print("rect.client.width = ${rect.client.width}");
+       debugPrint("rect.client.height = ${rect.client.height}");
+       debugPrint("rect.client.width = ${rect.client.width}");
        view.style.marginLeft = ((rect.client.width-350)/2).toString() + "px";
       });
     });
@@ -52,68 +49,44 @@ class DartBoardClient {
     if (queryArguments.containsKey('docId')) {
       // If we have docId then try and fetch from server. 
       sendRequest("/getCode?docId=${queryArguments['docId']}", {}, (Map response){
-        print("/getCode");
-        response.forEach((var k, var v) {
-          print('k=${k},v=${v}');
+        debugPrintMethod( () { 
+          debugPrint("/getCode");
+          response.forEach((var k, var v) {
+            print('k=${k},v=${v}');
+          });
         });
         
         textAreaElement.value = response['code'];
-      }, ()=>print("message failed"));
+      }, ()=>debugPrint("message failed"));
     }
     
     DivElement scrollContainer = document.query('#scroll-container');
-    
-    textAreaElement.on.mouseWheel.add((var mw) {
-      if (mw != null) {
-        print (mw.type);
-      }  
-    });
-    
+        
     textAreaElement.on.scroll.add((var sc) {
       if (sc != null) {
-        print(sc.type);
-       
-        //print(sc.rect.scroll.top);
-        //print(sc.x);
-        //print(sc.y);
-        
         textAreaElement.rect.then((ElementRect rect) {
           int scrollTop = rect.scroll.top;
           int left = rect.scroll.left;
-          //print("scrollTop=${scrollTop}");
-          //print("left=${left}");
           scrollContainer.style.top = -scrollTop;
           scrollContainer.style.left = -left;
         });
       }
-      //print(textAreaElement.scroll);
-      //int sl = textAreaElement.scrollLeft;
-      //int st = textAreaElement.scrollTop;
-      
-      //print("textAreaElement.scrollTop=${st}");
-      //print("textAreaElement.scrollLeft=${sl}");
     });
     
-    //PreElement codeEl = document.query('#code');
-    //print(codeEl.);
     TextAreaElement editorBuffer = document.query('#editorBuffer');
-    //  editorBuffer.on.input.add((KeyboardEvent event) {
-    //  print(event.type);
-      //print(event.keyCode);
-    //});
     editorBuffer.on.keyUp.add((KeyboardEvent event) {
       
       return;
       
       String s = new String.fromCharCodes([event.keyCode]);
       // careful of dartium, some events get fired twice. 
-      print("event.keyCode = " + event.keyCode);
-      print("event.keyIdentifier = " + event.keyIdentifier);
-      print("event.keyCode.toString = " + s);
-      print("event.keyLocation = " + event.keyLocation);
-      print("selectionEnd = " + editorBuffer.selectionEnd);
-      print("selectionStart = " + editorBuffer.selectionStart);
-      print("=================");
+      debugPrint("event.keyCode = " + event.keyCode);
+      debugPrint("event.keyIdentifier = " + event.keyIdentifier);
+      debugPrint("event.keyCode.toString = " + s);
+      debugPrint("event.keyLocation = " + event.keyLocation);
+      debugPrint("selectionEnd = " + editorBuffer.selectionEnd);
+      debugPrint("selectionStart = " + editorBuffer.selectionStart);
+      debugPrint("=================");
       //editorBuffer.innerHTML = "";
       //editorBuffer.value = "";
       DivElement d = document.query('#editorBufferContainer');//.insertAdjacentText(text:editorBuffer.value);
@@ -175,10 +148,14 @@ class DartBoardClient {
          response.forEach((var k, var v) {
            print('k=${k},v=${v}');
          });
-         p.innerHTML = p.innerHTML + '<br/>' + u.path + "?docId=" + JSON.parse(response['url'])['id'];
+         p.innerHTML = p.innerHTML + '<br/>'; 
+         String codeUri = uri.path + "?docId=" + JSON.parse(response['url'])['id'];
+         var a = new Element.html('<a href="${codeUri}">Code</a>');
+         p.nodes.add(a);
+         //+ uri.path + "?docId=" + JSON.parse(response['url'])['id'];
         }, 
         () {
-        print("message failed");
+          debugPrint("message failed");
       });
     });
   }
@@ -196,7 +173,7 @@ class DartBoardClient {
     
     request.open("POST", url, true);
     request.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
-    print('sendRequest '+ url+ " " + JSON.stringify(data));
+    debugPrint('sendRequest '+ url+ " " + JSON.stringify(data));
     request.send(JSON.stringify(data));   
     return request;
   }
