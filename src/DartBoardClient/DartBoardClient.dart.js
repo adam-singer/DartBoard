@@ -79,12 +79,20 @@ function $eq(x, y) {
 $defProp(Object.prototype, '$eq', function(other) {
   return this === other;
 });
+function $mul(x, y) {
+  return (typeof(x) == 'number' && typeof(y) == 'number')
+    ? x * y : x.$mul(y);
+}
 function $ne(x, y) {
   if (x == null) return y != null;
   return (typeof(x) == 'number' && typeof(y) == 'number') ||
          (typeof(x) == 'boolean' && typeof(y) == 'boolean') ||
          (typeof(x) == 'string' && typeof(y) == 'string')
     ? x != y : !x.$eq(y);
+}
+function $sub(x, y) {
+  return (typeof(x) == 'number' && typeof(y) == 'number')
+    ? x - y : x.$sub(y);
 }
 function $truncdiv(x, y) {
   if (typeof(x) == 'number' && typeof(y) == 'number') {
@@ -112,6 +120,9 @@ $defProp(Object.prototype, "addEventListener$3", function($0, $1, $2) {
 $defProp(Object.prototype, "clear$0", function() {
   return this.noSuchMethod("clear", []);
 });
+$defProp(Object.prototype, "end$0", function() {
+  return this.noSuchMethod("end", []);
+});
 $defProp(Object.prototype, "filter$1", function($0) {
   return this.noSuchMethod("filter", [$0]);
 });
@@ -135,6 +146,9 @@ $defProp(Object.prototype, "is$html_Document", function() {
 });
 $defProp(Object.prototype, "is$html_Element", function() {
   return false;
+});
+$defProp(Object.prototype, "item$1", function($0) {
+  return this.noSuchMethod("item", [$0]);
 });
 $defProp(Object.prototype, "open$2", function($0, $1) {
   return this.noSuchMethod("open", [$0, $1]);
@@ -168,6 +182,9 @@ $defProp(Object.prototype, "send$0", function() {
 });
 $defProp(Object.prototype, "send$1", function($0) {
   return this.noSuchMethod("send", [$0]);
+});
+$defProp(Object.prototype, "start$0", function() {
+  return this.noSuchMethod("start", []);
 });
 // ********** Code for IndexOutOfRangeException **************
 function IndexOutOfRangeException(_index) {
@@ -448,16 +465,16 @@ $defProp(ListFactory.prototype, "forEach$1", function($0) {
 // ********** Code for ListIterator **************
 function ListIterator(array) {
   this._array = array;
-  this._pos = (0);
+  this._dart_coreimpl_pos = (0);
 }
 ListIterator.prototype.hasNext = function() {
-  return this._array.get$length() > this._pos;
+  return this._array.get$length() > this._dart_coreimpl_pos;
 }
 ListIterator.prototype.next = function() {
   if (!this.hasNext()) {
-    $throw(const$0003);
+    $throw(const$0005);
   }
-  return this._array.$index(this._pos++);
+  return this._array.$index(this._dart_coreimpl_pos++);
 }
 // ********** Code for ImmutableList **************
 /** Implements extends for Dart classes on JavaScript prototypes. */
@@ -482,19 +499,19 @@ ImmutableList.prototype.get$length = function() {
   return this.length;
 }
 ImmutableList.prototype.set$length = function(length) {
-  $throw(const$0007);
+  $throw(const$0003);
 }
 ImmutableList.prototype.$setindex = function(index, value) {
-  $throw(const$0007);
+  $throw(const$0003);
 }
 ImmutableList.prototype.add = function(element) {
-  $throw(const$0007);
+  $throw(const$0003);
 }
 ImmutableList.prototype.addAll = function(elements) {
-  $throw(const$0007);
+  $throw(const$0003);
 }
 ImmutableList.prototype.clear = function() {
-  $throw(const$0007);
+  $throw(const$0003);
 }
 ImmutableList.prototype.toString = function() {
   return ListFactory.ListFactory$from$factory(this).toString();
@@ -522,13 +539,13 @@ ImmutableMap.prototype.containsKey = function(key) {
   return this._internal.containsKey(key);
 }
 ImmutableMap.prototype.$setindex = function(key, value) {
-  $throw(const$0007);
+  $throw(const$0003);
 }
 ImmutableMap.prototype.putIfAbsent = function(key, ifAbsent) {
-  $throw(const$0007);
+  $throw(const$0003);
 }
 ImmutableMap.prototype.clear = function() {
-  $throw(const$0007);
+  $throw(const$0003);
 }
 ImmutableMap.prototype.clear$0 = ImmutableMap.prototype.clear;
 ImmutableMap.prototype.forEach$1 = function($0) {
@@ -559,6 +576,12 @@ JSSyntaxRegExp.prototype._matchStart = function(m) {
 JSSyntaxRegExp.prototype.get$_lastIndex = function() {
   return this.re.lastIndex;
 }
+JSSyntaxRegExp.prototype.allMatches = function(str) {
+  return new _AllMatchesIterable(this, str);
+}
+JSSyntaxRegExp.prototype.get$_global = function() {
+  return new JSSyntaxRegExp._create$ctor(this.pattern, $add($add("g", (this.multiLine ? "m" : "")), (this.ignoreCase ? "i" : "")));
+}
 // ********** Code for MatchImplementation **************
 function MatchImplementation(pattern, str, _start, _end, _groups) {
   this.str = str;
@@ -567,13 +590,59 @@ function MatchImplementation(pattern, str, _start, _end, _groups) {
   this.pattern = pattern;
   this._end = _end;
 }
+MatchImplementation.prototype.start = function() {
+  return this._start;
+}
+MatchImplementation.prototype.end = function() {
+  return this._end;
+}
 MatchImplementation.prototype.group = function(group) {
   return this._groups.$index(group);
 }
 MatchImplementation.prototype.$index = function(group) {
   return this._groups.$index(group);
 }
+MatchImplementation.prototype.end$0 = MatchImplementation.prototype.end;
 MatchImplementation.prototype.group$1 = MatchImplementation.prototype.group;
+MatchImplementation.prototype.start$0 = MatchImplementation.prototype.start;
+// ********** Code for _AllMatchesIterable **************
+function _AllMatchesIterable(_re, _str) {
+  this._re = _re;
+  this._str = _str;
+}
+_AllMatchesIterable.prototype.iterator = function() {
+  return new _AllMatchesIterator(this._re, this._str);
+}
+// ********** Code for _AllMatchesIterator **************
+function _AllMatchesIterator(re, _str) {
+  this._done = false;
+  this._re = re.get$_global();
+  this._str = _str;
+}
+_AllMatchesIterator.prototype.next = function() {
+  if (!this.hasNext()) {
+    $throw(const$0005);
+  }
+  var next = this._dart_coreimpl_next;
+  this._dart_coreimpl_next = null;
+  return next;
+}
+_AllMatchesIterator.prototype.hasNext = function() {
+  if (this._done) {
+    return false;
+  }
+  else if (this._dart_coreimpl_next != null) {
+    return true;
+  }
+  this._dart_coreimpl_next = this._re.firstMatch(this._str);
+  if (this._dart_coreimpl_next == null) {
+    this._done = true;
+    return false;
+  }
+  else {
+    return true;
+  }
+}
 // ********** Code for NumImplementation **************
 NumImplementation = Number;
 NumImplementation.prototype.$negate = function() {
@@ -840,6 +909,9 @@ function HashMapImplementation_Dynamic$DoubleLinkedQueueEntry_KeyValuePair() {
 }
 HashMapImplementation_Dynamic$DoubleLinkedQueueEntry_KeyValuePair.prototype.is$Map_dart_core_String$Dynamic = function(){return true};
 HashMapImplementation_Dynamic$DoubleLinkedQueueEntry_KeyValuePair.prototype.clear$0 = HashMapImplementation_Dynamic$DoubleLinkedQueueEntry_KeyValuePair.prototype.clear;
+HashMapImplementation_Dynamic$DoubleLinkedQueueEntry_KeyValuePair.prototype.forEach$1 = function($0) {
+  return this.forEach(to$call$2($0));
+};
 // ********** Code for HashSetImplementation **************
 function HashSetImplementation() {
   this._backingMap = new HashMapImplementation();
@@ -904,7 +976,7 @@ HashSetIterator.prototype.hasNext = function() {
 }
 HashSetIterator.prototype.next = function() {
   if (!this.hasNext()) {
-    $throw(const$0003);
+    $throw(const$0005);
   }
   var res = this._entries.$index(this._nextValidIndex);
   this._advance();
@@ -933,21 +1005,21 @@ KeyValuePair.prototype.get$value = function() { return this.value; };
 KeyValuePair.prototype.set$value = function(value) { return this.value = value; };
 // ********** Code for LinkedHashMapImplementation **************
 function LinkedHashMapImplementation() {
-  this._map = new HashMapImplementation_Dynamic$DoubleLinkedQueueEntry_KeyValuePair();
+  this._dart_coreimpl_map = new HashMapImplementation_Dynamic$DoubleLinkedQueueEntry_KeyValuePair();
   this._list = new DoubleLinkedQueue_KeyValuePair();
 }
 LinkedHashMapImplementation.prototype.is$Map_dart_core_String$Dynamic = function(){return true};
 LinkedHashMapImplementation.prototype.$setindex = function(key, value) {
-  if (this._map.containsKey(key)) {
-    this._map.$index(key).get$element().set$value(value);
+  if (this._dart_coreimpl_map.containsKey(key)) {
+    this._dart_coreimpl_map.$index(key).get$element().set$value(value);
   }
   else {
     this._list.addLast(new KeyValuePair(key, value));
-    this._map.$setindex(key, this._list.lastEntry());
+    this._dart_coreimpl_map.$setindex(key, this._list.lastEntry());
   }
 }
 LinkedHashMapImplementation.prototype.$index = function(key) {
-  var entry = this._map.$index(key);
+  var entry = this._dart_coreimpl_map.$index(key);
   if (null == entry) return null;
   return entry.get$element().get$value();
 }
@@ -966,16 +1038,16 @@ LinkedHashMapImplementation.prototype.forEach = function(f) {
   );
 }
 LinkedHashMapImplementation.prototype.containsKey = function(key) {
-  return this._map.containsKey(key);
+  return this._dart_coreimpl_map.containsKey(key);
 }
 LinkedHashMapImplementation.prototype.get$length = function() {
-  return this._map.get$length();
+  return this._dart_coreimpl_map.get$length();
 }
 LinkedHashMapImplementation.prototype.isEmpty = function() {
   return this.get$length() == (0);
 }
 LinkedHashMapImplementation.prototype.clear = function() {
-  this._map.clear();
+  this._dart_coreimpl_map.clear();
   this._list.clear();
 }
 LinkedHashMapImplementation.prototype.clear$0 = LinkedHashMapImplementation.prototype.clear;
@@ -1025,13 +1097,13 @@ function _DoubleLinkedQueueEntrySentinel() {
   this._link(this, this);
 }
 _DoubleLinkedQueueEntrySentinel.prototype.remove = function() {
-  $throw(const$0008);
+  $throw(const$0001);
 }
 _DoubleLinkedQueueEntrySentinel.prototype._asNonSentinelEntry = function() {
   return null;
 }
 _DoubleLinkedQueueEntrySentinel.prototype.get$element = function() {
-  $throw(const$0008);
+  $throw(const$0001);
 }
 _DoubleLinkedQueueEntrySentinel.prototype.remove$0 = _DoubleLinkedQueueEntrySentinel.prototype.remove;
 // ********** Code for _DoubleLinkedQueueEntrySentinel_KeyValuePair **************
@@ -1133,7 +1205,7 @@ _DoubleLinkedQueueIterator.prototype.hasNext = function() {
 }
 _DoubleLinkedQueueIterator.prototype.next = function() {
   if (!this.hasNext()) {
-    $throw(const$0003);
+    $throw(const$0005);
   }
   this._currentEntry = this._currentEntry._next;
   return this._currentEntry.get$element();
@@ -1203,6 +1275,29 @@ StringImplementation = String;
 StringImplementation.prototype.get$length = function() { return this.length; };
 StringImplementation.prototype.isEmpty = function() {
   return this.length == (0);
+}
+StringImplementation.prototype._replaceRegExp = function(from, to) {
+  'use strict';return this.replace(from.re, to);
+}
+StringImplementation.prototype._replaceAll = function(from, to) {
+  'use strict';
+  from = new RegExp(from.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"), 'g');
+  to = to.replace(/\$/g, '$$$$'); // Escape sequences are fun!
+  return this.replace(from, to);
+}
+StringImplementation.prototype.replaceAll = function(from, to) {
+  if ((typeof(from) == 'string')) return this._replaceAll(from, to);
+  if (!!(from && from.is$RegExp())) return this._replaceRegExp(from.get$dynamic().get$_global(), to);
+  var buffer = new StringBufferImpl("");
+  var lastMatchEnd = (0);
+  var $$list = from.allMatches(this);
+  for (var $$i = $$list.iterator(); $$i.hasNext(); ) {
+    var match = $$i.next();
+    buffer.add$1(this.substring(lastMatchEnd, match.start$0()));
+    buffer.add$1(to);
+    lastMatchEnd = match.end$0();
+  }
+  buffer.add$1(this.substring(lastMatchEnd));
 }
 StringImplementation.prototype.split_ = function(pattern) {
   if ((typeof(pattern) == 'string')) return this._split(pattern);
@@ -1381,6 +1476,7 @@ $dynamic("addEventListener$3").AbstractWorker = function($0, $1, $2) {
 $dynamic("get$childNodes").Node = function() { return this.childNodes; };
 $dynamic("get$firstChild").Node = function() { return this.firstChild; };
 $dynamic("get$parentNode").Node = function() { return this.parentNode; };
+$dynamic("get$textContent").Node = function() { return this.textContent; };
 $dynamic("set$textContent").Node = function(value) { return this.textContent = value; };
 $dynamic("addEventListener$3").Node = function($0, $1, $2) {
   return this.addEventListener($0, $wrap_call$1(to$call$1($1)), $2);
@@ -1427,8 +1523,14 @@ $dynamic("get$style").CSSPageRule = function() { return this.style; };
 // ********** Code for _CSSPrimitiveValueJs **************
 // ********** Code for _CSSRuleListJs **************
 $dynamic("get$length").CSSRuleList = function() { return this.length; };
+$dynamic("item$1").CSSRuleList = function($0) {
+  return this.item($0);
+};
 // ********** Code for _CSSStyleDeclarationJs **************
 $dynamic("get$length").CSSStyleDeclaration = function() { return this.length; };
+$dynamic("item$1").CSSStyleDeclaration = function($0) {
+  return this.item($0);
+};
 // ********** Code for _CSSStyleRuleJs **************
 $dynamic("get$style").CSSStyleRule = function() { return this.style; };
 // ********** Code for _StyleSheetJs **************
@@ -1437,6 +1539,9 @@ $dynamic("get$href").StyleSheet = function() { return this.href; };
 // ********** Code for _CSSUnknownRuleJs **************
 // ********** Code for _CSSValueListJs **************
 $dynamic("get$length").CSSValueList = function() { return this.length; };
+$dynamic("item$1").CSSValueList = function($0) {
+  return this.item($0);
+};
 // ********** Code for _CanvasGradientJs **************
 // ********** Code for _CanvasPatternJs **************
 // ********** Code for _CanvasPixelArrayJs **************
@@ -1479,11 +1584,13 @@ $dynamic("forEach$1").CanvasPixelArray = function($0) {
 // ********** Code for _ClientRectJs **************
 // ********** Code for _ClientRectListJs **************
 $dynamic("get$length").ClientRectList = function() { return this.length; };
+$dynamic("item$1").ClientRectList = function($0) {
+  return this.item($0);
+};
 // ********** Code for _ClipboardJs **************
 // ********** Code for _CloseEventJs **************
 // ********** Code for _CommentJs **************
 // ********** Code for _UIEventJs **************
-$dynamic("get$keyCode").UIEvent = function() { return this.keyCode; };
 // ********** Code for _CompositionEventJs **************
 // ********** Code for _ConsoleJs **************
 _ConsoleJs = (typeof console == 'undefined' ? {} : console);
@@ -1507,16 +1614,28 @@ $dynamic("addEventListener$3").DOMApplicationCache = function($0, $1, $2) {
 // ********** Code for _DOMMimeTypeJs **************
 // ********** Code for _DOMMimeTypeArrayJs **************
 $dynamic("get$length").DOMMimeTypeArray = function() { return this.length; };
+$dynamic("item$1").DOMMimeTypeArray = function($0) {
+  return this.item($0);
+};
 // ********** Code for _DOMParserJs **************
 // ********** Code for _DOMPluginJs **************
 $dynamic("get$length").DOMPlugin = function() { return this.length; };
+$dynamic("item$1").DOMPlugin = function($0) {
+  return this.item($0);
+};
 // ********** Code for _DOMPluginArrayJs **************
 $dynamic("get$length").DOMPluginArray = function() { return this.length; };
+$dynamic("item$1").DOMPluginArray = function($0) {
+  return this.item($0);
+};
 // ********** Code for _DOMSelectionJs **************
 // ********** Code for _DOMTokenListJs **************
 $dynamic("get$length").DOMTokenList = function() { return this.length; };
 $dynamic("add$1").DOMTokenList = function($0) {
   return this.add($0);
+};
+$dynamic("item$1").DOMTokenList = function($0) {
+  return this.item($0);
 };
 // ********** Code for _DOMSettableTokenListJs **************
 $dynamic("get$value").DOMSettableTokenList = function() { return this.value; };
@@ -1548,6 +1667,7 @@ $dynamic("scroll$2").DOMWindow = function($0, $1) {
   return this.scroll($0, $1);
 };
 // ********** Code for _DataTransferItemJs **************
+$dynamic("get$kind").DataTransferItem = function() { return this.kind; };
 // ********** Code for _DataTransferItemListJs **************
 $dynamic("get$length").DataTransferItemList = function() { return this.length; };
 $dynamic("add$1").DataTransferItemList = function($0) {
@@ -1555,6 +1675,9 @@ $dynamic("add$1").DataTransferItemList = function($0) {
 };
 $dynamic("clear$0").DataTransferItemList = function() {
   return this.clear();
+};
+$dynamic("item$1").DataTransferItemList = function($0) {
+  return this.item($0);
 };
 // ********** Code for _DataViewJs **************
 // ********** Code for _DatabaseJs **************
@@ -1584,6 +1707,7 @@ $dynamic("remove$0").EntrySync = function() {
 // ********** Code for _DirectoryReaderJs **************
 // ********** Code for _DirectoryReaderSyncJs **************
 // ********** Code for _DocumentJs **************
+$dynamic("get$body").Document = function() { return this.body; };
 $dynamic("get$defaultView").Document = function() { return this.defaultView; };
 $dynamic("get$documentElement").Document = function() { return this.documentElement; };
 $dynamic("get$location").Document = function() { return this.location; };
@@ -1603,8 +1727,14 @@ $dynamic("get$firstElementChild").ElementTraversal = function() { return this.fi
 // ********** Code for _EntityReferenceJs **************
 // ********** Code for _EntryArrayJs **************
 $dynamic("get$length").EntryArray = function() { return this.length; };
+$dynamic("item$1").EntryArray = function($0) {
+  return this.item($0);
+};
 // ********** Code for _EntryArraySyncJs **************
 $dynamic("get$length").EntryArraySync = function() { return this.length; };
+$dynamic("item$1").EntryArraySync = function($0) {
+  return this.item($0);
+};
 // ********** Code for _ErrorEventJs **************
 // ********** Code for _EventExceptionJs **************
 // ********** Code for _EventSourceJs **************
@@ -1619,6 +1749,9 @@ $dynamic("addEventListener$3").EventSource = function($0, $1, $2) {
 // ********** Code for _FileExceptionJs **************
 // ********** Code for _FileListJs **************
 $dynamic("get$length").FileList = function() { return this.length; };
+$dynamic("item$1").FileList = function($0) {
+  return this.item($0);
+};
 // ********** Code for _FileReaderJs **************
 $dynamic("get$readyState").FileReader = function() { return this.readyState; };
 $dynamic("addEventListener$3").FileReader = function($0, $1, $2) {
@@ -1706,12 +1839,16 @@ $dynamic("forEach$1").Float64Array = function($0) {
 // ********** Code for _GeopositionJs **************
 // ********** Code for _HTMLAllCollectionJs **************
 $dynamic("get$length").HTMLAllCollection = function() { return this.length; };
+$dynamic("item$1").HTMLAllCollection = function($0) {
+  return this.item($0);
+};
 // ********** Code for _HTMLElementJs **************
 $dynamic("get$children").HTMLElement = function() { return this.children; };
 $dynamic("get$innerHTML").HTMLElement = function() { return this.innerHTML; };
 $dynamic("set$innerHTML").HTMLElement = function(value) { return this.innerHTML = value; };
 // ********** Code for _HTMLAnchorElementJs **************
 $dynamic("get$href").HTMLAnchorElement = function() { return this.href; };
+$dynamic("get$text").HTMLAnchorElement = function() { return this.text; };
 // ********** Code for _HTMLAppletElementJs **************
 // ********** Code for _HTMLAreaElementJs **************
 $dynamic("get$href").HTMLAreaElement = function() { return this.href; };
@@ -1723,6 +1860,7 @@ $dynamic("get$readyState").HTMLMediaElement = function() { return this.readyStat
 $dynamic("get$href").HTMLBaseElement = function() { return this.href; };
 // ********** Code for _HTMLBaseFontElementJs **************
 // ********** Code for _HTMLBodyElementJs **************
+$dynamic("get$text").HTMLBodyElement = function() { return this.text; };
 // ********** Code for _HTMLButtonElementJs **************
 $dynamic("get$value").HTMLButtonElement = function() { return this.value; };
 $dynamic("set$value").HTMLButtonElement = function(value) { return this.value = value; };
@@ -1765,6 +1903,9 @@ $dynamic("filter$1").HTMLCollection = function($0) {
 $dynamic("forEach$1").HTMLCollection = function($0) {
   return this.forEach($wrap_call$1(to$call$1($0)));
 };
+$dynamic("item$1").HTMLCollection = function($0) {
+  return this.item($0);
+};
 // ********** Code for _HTMLDListElementJs **************
 // ********** Code for _HTMLDetailsElementJs **************
 // ********** Code for _HTMLDirectoryElementJs **************
@@ -1789,8 +1930,6 @@ $dynamic("get$location").HTMLFrameElement = function() { return this.location; }
 // ********** Code for _HTMLIFrameElementJs **************
 // ********** Code for _HTMLImageElementJs **************
 // ********** Code for _HTMLInputElementJs **************
-$dynamic("get$selectionEnd").HTMLInputElement = function() { return this.selectionEnd; };
-$dynamic("get$selectionStart").HTMLInputElement = function() { return this.selectionStart; };
 $dynamic("get$value").HTMLInputElement = function() { return this.value; };
 $dynamic("set$value").HTMLInputElement = function(value) { return this.value = value; };
 $dynamic("get$click").HTMLInputElement = function() {
@@ -1807,6 +1946,9 @@ $dynamic("set$value").HTMLLIElement = function(value) { return this.value = valu
 $dynamic("get$href").HTMLLinkElement = function() { return this.href; };
 // ********** Code for _HTMLMapElementJs **************
 // ********** Code for _HTMLMarqueeElementJs **************
+$dynamic("start$0").HTMLMarqueeElement = function() {
+  return this.start();
+};
 // ********** Code for _HTMLMenuElementJs **************
 // ********** Code for _HTMLMetaElementJs **************
 // ********** Code for _HTMLMeterElementJs **************
@@ -1817,6 +1959,7 @@ $dynamic("set$value").HTMLMeterElement = function(value) { return this.value = v
 // ********** Code for _HTMLObjectElementJs **************
 // ********** Code for _HTMLOptGroupElementJs **************
 // ********** Code for _HTMLOptionElementJs **************
+$dynamic("get$text").HTMLOptionElement = function() { return this.text; };
 $dynamic("get$value").HTMLOptionElement = function() { return this.value; };
 $dynamic("set$value").HTMLOptionElement = function(value) { return this.value = value; };
 // ********** Code for _HTMLOptionsCollectionJs **************
@@ -1836,10 +1979,14 @@ $dynamic("get$value").HTMLProgressElement = function() { return this.value; };
 $dynamic("set$value").HTMLProgressElement = function(value) { return this.value = value; };
 // ********** Code for _HTMLQuoteElementJs **************
 // ********** Code for _HTMLScriptElementJs **************
+$dynamic("get$text").HTMLScriptElement = function() { return this.text; };
 // ********** Code for _HTMLSelectElementJs **************
 $dynamic("get$length").HTMLSelectElement = function() { return this.length; };
 $dynamic("get$value").HTMLSelectElement = function() { return this.value; };
 $dynamic("set$value").HTMLSelectElement = function(value) { return this.value = value; };
+$dynamic("item$1").HTMLSelectElement = function($0) {
+  return this.item($0);
+};
 // ********** Code for _HTMLSourceElementJs **************
 // ********** Code for _HTMLSpanElementJs **************
 // ********** Code for _HTMLStyleElementJs **************
@@ -1850,12 +1997,12 @@ $dynamic("set$value").HTMLSelectElement = function(value) { return this.value = 
 // ********** Code for _HTMLTableRowElementJs **************
 // ********** Code for _HTMLTableSectionElementJs **************
 // ********** Code for _HTMLTextAreaElementJs **************
-$dynamic("get$selectionEnd").HTMLTextAreaElement = function() { return this.selectionEnd; };
-$dynamic("get$selectionStart").HTMLTextAreaElement = function() { return this.selectionStart; };
 $dynamic("get$value").HTMLTextAreaElement = function() { return this.value; };
 $dynamic("set$value").HTMLTextAreaElement = function(value) { return this.value = value; };
 // ********** Code for _HTMLTitleElementJs **************
+$dynamic("get$text").HTMLTitleElement = function() { return this.text; };
 // ********** Code for _HTMLTrackElementJs **************
+$dynamic("get$kind").HTMLTrackElement = function() { return this.kind; };
 $dynamic("get$readyState").HTMLTrackElement = function() { return this.readyState; };
 // ********** Code for _HTMLUListElementJs **************
 // ********** Code for _HTMLUnknownElementJs **************
@@ -2008,8 +2155,6 @@ $dynamic("forEach$1").Int8Array = function($0) {
 // ********** Code for _JavaScriptAudioNodeJs **************
 // ********** Code for _JavaScriptCallFrameJs **************
 // ********** Code for _KeyboardEventJs **************
-$dynamic("get$keyIdentifier").KeyboardEvent = function() { return this.keyIdentifier; };
-$dynamic("get$keyLocation").KeyboardEvent = function() { return this.keyLocation; };
 // ********** Code for _LocationJs **************
 $dynamic("get$href").Location = function() { return this.href; };
 // ********** Code for _LowPass2FilterNodeJs **************
@@ -2054,6 +2199,9 @@ $dynamic("filter$1").MediaList = function($0) {
 $dynamic("forEach$1").MediaList = function($0) {
   return this.forEach($wrap_call$1(to$call$1($0)));
 };
+$dynamic("item$1").MediaList = function($0) {
+  return this.item($0);
+};
 // ********** Code for _MediaQueryListJs **************
 // ********** Code for _MediaQueryListListenerJs **************
 // ********** Code for _MemoryInfoJs **************
@@ -2068,6 +2216,9 @@ $dynamic("postMessage$1").MessagePort = function($0) {
 };
 $dynamic("postMessage$2").MessagePort = function($0, $1) {
   return this.postMessage($0, $1);
+};
+$dynamic("start$0").MessagePort = function() {
+  return this.start();
 };
 // ********** Code for _MetadataJs **************
 // ********** Code for _MouseEventJs **************
@@ -2107,6 +2258,9 @@ $dynamic("filter$1").NamedNodeMap = function($0) {
 $dynamic("forEach$1").NamedNodeMap = function($0) {
   return this.forEach($wrap_call$1(to$call$1($0)));
 };
+$dynamic("item$1").NamedNodeMap = function($0) {
+  return this.item($0);
+};
 // ********** Code for _NavigatorJs **************
 // ********** Code for _NodeFilterJs **************
 // ********** Code for _NodeIteratorJs **************
@@ -2145,6 +2299,9 @@ $dynamic("filter$1").NodeList = function($0) {
 $dynamic("forEach$1").NodeList = function($0) {
   return this.forEach($wrap_call$1(to$call$1($0)));
 };
+$dynamic("item$1").NodeList = function($0) {
+  return this.item($0);
+};
 // ********** Code for _NodeSelectorJs **************
 // ********** Code for _NotationJs **************
 // ********** Code for _NotificationJs **************
@@ -2176,6 +2333,9 @@ $dynamic("addEventListener$3").Notification = function($0, $1, $2) {
 // ********** Code for _SQLResultSetJs **************
 // ********** Code for _SQLResultSetRowListJs **************
 $dynamic("get$length").SQLResultSetRowList = function() { return this.length; };
+$dynamic("item$1").SQLResultSetRowList = function($0) {
+  return this.item($0);
+};
 // ********** Code for _SQLTransactionJs **************
 // ********** Code for _SQLTransactionSyncJs **************
 // ********** Code for _SVGElementJs **************
@@ -2225,6 +2385,9 @@ $dynamic("addEventListener$3").SVGElementInstance = function($0, $1, $2) {
 };
 // ********** Code for _SVGElementInstanceListJs **************
 $dynamic("get$length").SVGElementInstanceList = function() { return this.length; };
+$dynamic("item$1").SVGElementInstanceList = function($0) {
+  return this.item($0);
+};
 // ********** Code for _SVGEllipseElementJs **************
 // ********** Code for _SVGExceptionJs **************
 // ********** Code for _SVGExternalResourcesRequiredJs **************
@@ -2387,6 +2550,9 @@ $dynamic("get$children").ScriptProfileNode = function() { return this.children; 
 // ********** Code for _SpeechInputResultJs **************
 // ********** Code for _SpeechInputResultListJs **************
 $dynamic("get$length").SpeechInputResultList = function() { return this.length; };
+$dynamic("item$1").SpeechInputResultList = function($0) {
+  return this.item($0);
+};
 // ********** Code for _StorageJs **************
 $dynamic("get$length").Storage = function() { return this.length; };
 $dynamic("get$dartObjectLocalStorage").Storage = function() {
@@ -2446,22 +2612,33 @@ $dynamic("filter$1").StyleSheetList = function($0) {
 $dynamic("forEach$1").StyleSheetList = function($0) {
   return this.forEach($wrap_call$1(to$call$1($0)));
 };
+$dynamic("item$1").StyleSheetList = function($0) {
+  return this.item($0);
+};
 // ********** Code for _TextEventJs **************
 // ********** Code for _TextMetricsJs **************
 // ********** Code for _TextTrackJs **************
+$dynamic("get$kind").TextTrack = function() { return this.kind; };
 $dynamic("addEventListener$3").TextTrack = function($0, $1, $2) {
   return this.addEventListener($0, $wrap_call$1(to$call$1($1)), $2);
 };
 // ********** Code for _TextTrackCueJs **************
+$dynamic("get$text").TextTrackCue = function() { return this.text; };
 $dynamic("addEventListener$3").TextTrackCue = function($0, $1, $2) {
   return this.addEventListener($0, $wrap_call$1(to$call$1($1)), $2);
 };
 // ********** Code for _TextTrackCueListJs **************
 $dynamic("get$length").TextTrackCueList = function() { return this.length; };
+$dynamic("item$1").TextTrackCueList = function($0) {
+  return this.item($0);
+};
 // ********** Code for _TextTrackListJs **************
 $dynamic("get$length").TextTrackList = function() { return this.length; };
 $dynamic("addEventListener$3").TextTrackList = function($0, $1, $2) {
   return this.addEventListener($0, $wrap_call$1(to$call$1($1)), $2);
+};
+$dynamic("item$1").TextTrackList = function($0) {
+  return this.item($0);
 };
 // ********** Code for _TimeRangesJs **************
 $dynamic("get$length").TimeRanges = function() { return this.length; };
@@ -2501,6 +2678,9 @@ $dynamic("filter$1").TouchList = function($0) {
 };
 $dynamic("forEach$1").TouchList = function($0) {
   return this.forEach($wrap_call$1(to$call$1($0)));
+};
+$dynamic("item$1").TouchList = function($0) {
+  return this.item($0);
 };
 // ********** Code for _TrackEventJs **************
 // ********** Code for _TreeWalkerJs **************
@@ -2642,6 +2822,9 @@ var _Uint8ClampedArrayJs = {};
 // ********** Code for _WebKitAnimationEventJs **************
 // ********** Code for _WebKitAnimationListJs **************
 $dynamic("get$length").WebKitAnimationList = function() { return this.length; };
+$dynamic("item$1").WebKitAnimationList = function($0) {
+  return this.item($0);
+};
 // ********** Code for _WebKitBlobBuilderJs **************
 // ********** Code for _WebKitCSSKeyframeRuleJs **************
 $dynamic("get$style").WebKitCSSKeyframeRule = function() { return this.style; };
@@ -2752,7 +2935,7 @@ dom__VariableSizeListIterator.prototype.hasNext = function() {
 }
 dom__VariableSizeListIterator.prototype.next = function() {
   if (!this.hasNext()) {
-    $throw(const$0003);
+    $throw(const$0005);
   }
   return this._dom_array.$index(this._dom_pos++);
 }
@@ -2873,6 +3056,9 @@ NodeWrappingImplementation.prototype.get$nodes = function() {
   }
   return this._nodes;
 }
+NodeWrappingImplementation.prototype.get$text = function() {
+  return this._ptr.get$textContent();
+}
 NodeWrappingImplementation.prototype.replaceWith = function(otherNode) {
   try {
     this._ptr.get$parentNode().replaceChild(LevelDom.unwrap(otherNode), this._ptr);
@@ -2902,11 +3088,11 @@ ElementWrappingImplementation.prototype.is$html_Element = function(){return true
 ElementWrappingImplementation.ElementWrappingImplementation$html$factory = function(html) {
   var parentTag = "div";
   var tag;
-  var match = const$0006.firstMatch(html);
+  var match = const$0000.firstMatch(html);
   if (null != match) {
     tag = match.group$1((1)).toLowerCase();
-    if (const$0009.containsKey(tag)) {
-      parentTag = const$0009.$index(tag);
+    if (const$0004.containsKey(tag)) {
+      parentTag = const$0004.$index(tag);
     }
   }
   var temp = get$document().createElement(parentTag);
@@ -2916,7 +3102,7 @@ ElementWrappingImplementation.ElementWrappingImplementation$html$factory = funct
     element = LevelDom.wrapElement(temp.get$firstElementChild());
   }
   else if (parentTag == "html" && temp.get$childElementCount() == (2)) {
-    element = LevelDom.wrapElement(temp.get$children().item(tag == "head" ? (0) : (1)));
+    element = LevelDom.wrapElement(temp.get$children().item$1(tag == "head" ? (0) : (1)));
   }
   else {
     $throw(new IllegalArgumentException($add(("HTML had " + temp.get$childElementCount() + " "), "top level elements but 1 expected")));
@@ -2974,6 +3160,9 @@ function AnchorElementWrappingImplementation() {}
 AnchorElementWrappingImplementation.prototype.is$html_Element = function(){return true};
 AnchorElementWrappingImplementation.prototype.get$href = function() {
   return this._ptr.get$href();
+}
+AnchorElementWrappingImplementation.prototype.get$text = function() {
+  return this._ptr.get$text();
 }
 AnchorElementWrappingImplementation.prototype.toString = function() {
   return this._ptr.toString();
@@ -3237,12 +3426,6 @@ InputElementWrappingImplementation._wrap$ctor = function(ptr) {
 InputElementWrappingImplementation._wrap$ctor.prototype = InputElementWrappingImplementation.prototype;
 function InputElementWrappingImplementation() {}
 InputElementWrappingImplementation.prototype.is$html_Element = function(){return true};
-InputElementWrappingImplementation.prototype.get$selectionEnd = function() {
-  return this._ptr.get$selectionEnd();
-}
-InputElementWrappingImplementation.prototype.get$selectionStart = function() {
-  return this._ptr.get$selectionStart();
-}
 InputElementWrappingImplementation.prototype.get$value = function() {
   return this._ptr.get$value();
 }
@@ -3334,6 +3517,11 @@ MarqueeElementWrappingImplementation._wrap$ctor = function(ptr) {
 MarqueeElementWrappingImplementation._wrap$ctor.prototype = MarqueeElementWrappingImplementation.prototype;
 function MarqueeElementWrappingImplementation() {}
 MarqueeElementWrappingImplementation.prototype.is$html_Element = function(){return true};
+MarqueeElementWrappingImplementation.prototype.start = function() {
+  this._ptr.start();
+  return;
+}
+MarqueeElementWrappingImplementation.prototype.start$0 = MarqueeElementWrappingImplementation.prototype.start;
 // ********** Code for MenuElementWrappingImplementation **************
 $inherits(MenuElementWrappingImplementation, ElementWrappingImplementation);
 MenuElementWrappingImplementation._wrap$ctor = function(ptr) {
@@ -3410,6 +3598,9 @@ OptionElementWrappingImplementation._wrap$ctor = function(ptr) {
 OptionElementWrappingImplementation._wrap$ctor.prototype = OptionElementWrappingImplementation.prototype;
 function OptionElementWrappingImplementation() {}
 OptionElementWrappingImplementation.prototype.is$html_Element = function(){return true};
+OptionElementWrappingImplementation.prototype.get$text = function() {
+  return this._ptr.get$text();
+}
 OptionElementWrappingImplementation.prototype.get$value = function() {
   return this._ptr.get$value();
 }
@@ -4356,9 +4547,6 @@ UIEventWrappingImplementation._wrap$ctor = function(ptr) {
 }
 UIEventWrappingImplementation._wrap$ctor.prototype = UIEventWrappingImplementation.prototype;
 function UIEventWrappingImplementation() {}
-UIEventWrappingImplementation.prototype.get$keyCode = function() {
-  return this._ptr.get$keyCode();
-}
 // ********** Code for SVGZoomEventWrappingImplementation **************
 $inherits(SVGZoomEventWrappingImplementation, UIEventWrappingImplementation);
 SVGZoomEventWrappingImplementation._wrap$ctor = function(ptr) {
@@ -4374,6 +4562,9 @@ ScriptElementWrappingImplementation._wrap$ctor = function(ptr) {
 ScriptElementWrappingImplementation._wrap$ctor.prototype = ScriptElementWrappingImplementation.prototype;
 function ScriptElementWrappingImplementation() {}
 ScriptElementWrappingImplementation.prototype.is$html_Element = function(){return true};
+ScriptElementWrappingImplementation.prototype.get$text = function() {
+  return this._ptr.get$text();
+}
 // ********** Code for SelectElementWrappingImplementation **************
 $inherits(SelectElementWrappingImplementation, ElementWrappingImplementation);
 SelectElementWrappingImplementation._wrap$ctor = function(ptr) {
@@ -4392,8 +4583,9 @@ SelectElementWrappingImplementation.prototype.set$value = function(value) {
   this._ptr.set$value(value);
 }
 SelectElementWrappingImplementation.prototype.item = function(index) {
-  return LevelDom.wrapNode(this._ptr.item(index));
+  return LevelDom.wrapNode(this._ptr.item$1(index));
 }
+SelectElementWrappingImplementation.prototype.item$1 = SelectElementWrappingImplementation.prototype.item;
 // ********** Code for SourceElementWrappingImplementation **************
 $inherits(SourceElementWrappingImplementation, ElementWrappingImplementation);
 SourceElementWrappingImplementation._wrap$ctor = function(ptr) {
@@ -4481,12 +4673,6 @@ TextAreaElementWrappingImplementation._wrap$ctor = function(ptr) {
 TextAreaElementWrappingImplementation._wrap$ctor.prototype = TextAreaElementWrappingImplementation.prototype;
 function TextAreaElementWrappingImplementation() {}
 TextAreaElementWrappingImplementation.prototype.is$html_Element = function(){return true};
-TextAreaElementWrappingImplementation.prototype.get$selectionEnd = function() {
-  return this._ptr.get$selectionEnd();
-}
-TextAreaElementWrappingImplementation.prototype.get$selectionStart = function() {
-  return this._ptr.get$selectionStart();
-}
 TextAreaElementWrappingImplementation.prototype.get$value = function() {
   return this._ptr.get$value();
 }
@@ -4501,6 +4687,9 @@ TitleElementWrappingImplementation._wrap$ctor = function(ptr) {
 TitleElementWrappingImplementation._wrap$ctor.prototype = TitleElementWrappingImplementation.prototype;
 function TitleElementWrappingImplementation() {}
 TitleElementWrappingImplementation.prototype.is$html_Element = function(){return true};
+TitleElementWrappingImplementation.prototype.get$text = function() {
+  return this._ptr.get$text();
+}
 // ********** Code for TrackElementWrappingImplementation **************
 $inherits(TrackElementWrappingImplementation, ElementWrappingImplementation);
 TrackElementWrappingImplementation._wrap$ctor = function(ptr) {
@@ -4509,6 +4698,9 @@ TrackElementWrappingImplementation._wrap$ctor = function(ptr) {
 TrackElementWrappingImplementation._wrap$ctor.prototype = TrackElementWrappingImplementation.prototype;
 function TrackElementWrappingImplementation() {}
 TrackElementWrappingImplementation.prototype.is$html_Element = function(){return true};
+TrackElementWrappingImplementation.prototype.get$kind = function() {
+  return this._ptr.get$kind();
+}
 // ********** Code for UListElementWrappingImplementation **************
 $inherits(UListElementWrappingImplementation, ElementWrappingImplementation);
 UListElementWrappingImplementation._wrap$ctor = function(ptr) {
@@ -5999,9 +6191,9 @@ EventsImplementation._wrap$ctor.prototype = EventsImplementation.prototype;
 function EventsImplementation() {}
 EventsImplementation.prototype.get$_ptr = function() { return this._ptr; };
 EventsImplementation.prototype.$index = function(type) {
-  return this._get(type.toLowerCase());
+  return this._htmlimpl_get(type.toLowerCase());
 }
-EventsImplementation.prototype._get = function(type) {
+EventsImplementation.prototype._htmlimpl_get = function(type) {
   var $this = this; // closure support
   return this._listenerMap.putIfAbsent(type, (function () {
     return new EventListenerListImplementation($this._ptr, type);
@@ -6016,13 +6208,16 @@ ElementEventsImplementation._wrap$ctor = function(_ptr) {
 ElementEventsImplementation._wrap$ctor.prototype = ElementEventsImplementation.prototype;
 function ElementEventsImplementation() {}
 ElementEventsImplementation.prototype.get$click = function() {
-  return this._get("click");
+  return this._htmlimpl_get("click");
+}
+ElementEventsImplementation.prototype.get$input = function() {
+  return this._htmlimpl_get("input");
 }
 ElementEventsImplementation.prototype.get$keyUp = function() {
-  return this._get("keyup");
+  return this._htmlimpl_get("keyup");
 }
 ElementEventsImplementation.prototype.get$scroll = function() {
-  return this._get("scroll");
+  return this._htmlimpl_get("scroll");
 }
 // ********** Code for BodyElementEventsImplementation **************
 $inherits(BodyElementEventsImplementation, ElementEventsImplementation);
@@ -6070,7 +6265,7 @@ CSSStyleDeclarationWrappingImplementation.prototype.get$length = function() {
   return this._ptr.get$length();
 }
 CSSStyleDeclarationWrappingImplementation.prototype.item = function(index) {
-  return this._ptr.item(index);
+  return this._ptr.item$1(index);
 }
 CSSStyleDeclarationWrappingImplementation.prototype.setProperty = function(propertyName, value, priority) {
   this._ptr.setProperty(propertyName, ("" + value), priority);
@@ -6087,12 +6282,16 @@ CSSStyleDeclarationWrappingImplementation.prototype.set$left = function(value) {
 CSSStyleDeclarationWrappingImplementation.prototype.set$marginLeft = function(value) {
   this.setProperty("margin-left", value, "");
 }
+CSSStyleDeclarationWrappingImplementation.prototype.set$right = function(value) {
+  this.setProperty("right", value, "");
+}
 CSSStyleDeclarationWrappingImplementation.prototype.set$top = function(value) {
   this.setProperty("top", value, "");
 }
 CSSStyleDeclarationWrappingImplementation.prototype.set$width = function(value) {
   this.setProperty("width", value, "");
 }
+CSSStyleDeclarationWrappingImplementation.prototype.item$1 = CSSStyleDeclarationWrappingImplementation.prototype.item;
 // ********** Code for CustomEventWrappingImplementation **************
 $inherits(CustomEventWrappingImplementation, EventWrappingImplementation);
 CustomEventWrappingImplementation._wrap$ctor = function(ptr) {
@@ -6186,11 +6385,11 @@ EmptyStyleDeclaration.prototype.setProperty = function(propertyName, value, prio
 }
 // ********** Code for EmptyElementRect **************
 function EmptyElementRect() {
-  this.client = const$0010;
-  this.scroll = const$0010;
-  this.bounding = const$0010;
-  this.clientRects = const$0011;
-  this.offset = const$0010;
+  this.client = const$0008;
+  this.scroll = const$0008;
+  this.bounding = const$0008;
+  this.clientRects = const$0009;
+  this.offset = const$0008;
 }
 EmptyElementRect.prototype.get$scroll = function() { return this.scroll; };
 // ********** Code for DocumentFragmentWrappingImplementation **************
@@ -6209,7 +6408,7 @@ DocumentFragmentWrappingImplementation.prototype.get$elements = function() {
 }
 DocumentFragmentWrappingImplementation.prototype.get$innerHTML = function() {
   var e = ElementWrappingImplementation.ElementWrappingImplementation$tag$factory("div");
-  e.get$nodes().add(this.clone(true));
+  e.get$nodes().add$1(this.clone(true));
   return e.get$innerHTML();
 }
 DocumentFragmentWrappingImplementation.prototype.set$innerHTML = function(value) {
@@ -6227,7 +6426,7 @@ DocumentFragmentWrappingImplementation.prototype.get$on = function() {
 }
 DocumentFragmentWrappingImplementation.prototype.get$rect = function() {
   return _createMeasurementFuture((function () {
-    return const$0012;
+    return const$0010;
   })
   , new CompleterImpl_ElementRect());
 }
@@ -6261,6 +6460,9 @@ DocumentWrappingImplementation._wrap$ctor.prototype = DocumentWrappingImplementa
 function DocumentWrappingImplementation() {}
 DocumentWrappingImplementation.prototype.is$html_Document = function(){return true};
 DocumentWrappingImplementation.prototype.is$html_Element = function(){return true};
+DocumentWrappingImplementation.prototype.get$body = function() {
+  return LevelDom.wrapElement(this._documentPtr.get$body());
+}
 DocumentWrappingImplementation.prototype.get$window = function() {
   return LevelDom.wrapWindow(this._documentPtr.get$defaultView());
 }
@@ -6307,7 +6509,7 @@ _ChildrenElementList.prototype.$index = function(index) {
   return LevelDom.wrapElement(this._childElements.$index(index));
 }
 _ChildrenElementList.prototype.$setindex = function(index, value) {
-  this._element.replaceChild(LevelDom.unwrap(value), this._childElements.item(index));
+  this._element.replaceChild(LevelDom.unwrap(value), this._childElements.item$1(index));
 }
 _ChildrenElementList.prototype.add = function(value) {
   this._element.appendChild(LevelDom.unwrap(value));
@@ -6339,10 +6541,10 @@ _ListWrapper.prototype.iterator = function() {
   return this._list.iterator();
 }
 _ListWrapper.prototype.forEach = function(f) {
-  return this._list.forEach(f);
+  return this._list.forEach$1(f);
 }
 _ListWrapper.prototype.filter = function(f) {
-  return this._list.filter(f);
+  return this._list.filter$1(f);
 }
 _ListWrapper.prototype.isEmpty = function() {
   return this._list.isEmpty();
@@ -6376,26 +6578,26 @@ _ListWrapper.prototype.filter$1 = function($0) {
 _ListWrapper.prototype.forEach$1 = function($0) {
   return this.forEach(to$call$1($0));
 };
-// ********** Code for _ListWrapper_Element **************
-$inherits(_ListWrapper_Element, _ListWrapper);
-function _ListWrapper_Element(_list) {
+// ********** Code for _ListWrapper_html_Element **************
+$inherits(_ListWrapper_html_Element, _ListWrapper);
+function _ListWrapper_html_Element(_list) {
   this._list = _list;
 }
-_ListWrapper_Element.prototype.add$1 = _ListWrapper_Element.prototype.add;
-_ListWrapper_Element.prototype.clear$0 = _ListWrapper_Element.prototype.clear;
-_ListWrapper_Element.prototype.filter$1 = function($0) {
+_ListWrapper_html_Element.prototype.add$1 = _ListWrapper_html_Element.prototype.add;
+_ListWrapper_html_Element.prototype.clear$0 = _ListWrapper_html_Element.prototype.clear;
+_ListWrapper_html_Element.prototype.filter$1 = function($0) {
   return this.filter(to$call$1($0));
 };
-_ListWrapper_Element.prototype.forEach$1 = function($0) {
+_ListWrapper_html_Element.prototype.forEach$1 = function($0) {
   return this.forEach(to$call$1($0));
 };
 // ********** Code for _ElementList **************
-$inherits(_ElementList, _ListWrapper_Element);
+$inherits(_ElementList, _ListWrapper_html_Element);
 function _ElementList(list) {
-  _ListWrapper_Element.call(this, list);
+  _ListWrapper_html_Element.call(this, list);
 }
 _ElementList.prototype.filter = function(f) {
-  return new _ElementList(_ListWrapper_Element.prototype.filter.call(this, f));
+  return new _ElementList(_ListWrapper_html_Element.prototype.filter.call(this, f));
 }
 _ElementList.prototype.filter$1 = function($0) {
   return this.filter(to$call$1($0));
@@ -6491,12 +6693,6 @@ KeyboardEventWrappingImplementation._wrap$ctor = function(ptr) {
 }
 KeyboardEventWrappingImplementation._wrap$ctor.prototype = KeyboardEventWrappingImplementation.prototype;
 function KeyboardEventWrappingImplementation() {}
-KeyboardEventWrappingImplementation.prototype.get$keyIdentifier = function() {
-  return this._ptr.get$keyIdentifier();
-}
-KeyboardEventWrappingImplementation.prototype.get$keyLocation = function() {
-  return this._ptr.get$keyLocation();
-}
 // ********** Code for _MeasurementRequest **************
 function _MeasurementRequest(computeValue, completer) {
   this.computeValue = computeValue;
@@ -6586,26 +6782,26 @@ _ChildrenNodeList.prototype.filter$1 = function($0) {
 _ChildrenNodeList.prototype.forEach$1 = function($0) {
   return this.forEach(to$call$1($0));
 };
-// ********** Code for _ListWrapper_Node **************
-$inherits(_ListWrapper_Node, _ListWrapper);
-function _ListWrapper_Node(_list) {
+// ********** Code for _ListWrapper_html_Node **************
+$inherits(_ListWrapper_html_Node, _ListWrapper);
+function _ListWrapper_html_Node(_list) {
   this._list = _list;
 }
-_ListWrapper_Node.prototype.add$1 = _ListWrapper_Node.prototype.add;
-_ListWrapper_Node.prototype.clear$0 = _ListWrapper_Node.prototype.clear;
-_ListWrapper_Node.prototype.filter$1 = function($0) {
+_ListWrapper_html_Node.prototype.add$1 = _ListWrapper_html_Node.prototype.add;
+_ListWrapper_html_Node.prototype.clear$0 = _ListWrapper_html_Node.prototype.clear;
+_ListWrapper_html_Node.prototype.filter$1 = function($0) {
   return this.filter(to$call$1($0));
 };
-_ListWrapper_Node.prototype.forEach$1 = function($0) {
+_ListWrapper_html_Node.prototype.forEach$1 = function($0) {
   return this.forEach(to$call$1($0));
 };
 // ********** Code for _NodeList **************
-$inherits(_NodeList, _ListWrapper_Node);
+$inherits(_NodeList, _ListWrapper_html_Node);
 function _NodeList(list) {
-  _ListWrapper_Node.call(this, list);
+  _ListWrapper_html_Node.call(this, list);
 }
 _NodeList.prototype.filter = function(f) {
-  return new _NodeList(_ListWrapper_Node.prototype.filter.call(this, f));
+  return new _NodeList(_ListWrapper_html_Node.prototype.filter.call(this, f));
 }
 _NodeList.prototype.filter$1 = function($0) {
   return this.filter(to$call$1($0));
@@ -6709,19 +6905,22 @@ WindowEventsImplementation._wrap$ctor = function(_ptr) {
 WindowEventsImplementation._wrap$ctor.prototype = WindowEventsImplementation.prototype;
 function WindowEventsImplementation() {}
 WindowEventsImplementation.prototype.get$click = function() {
-  return this._get("click");
+  return this._htmlimpl_get("click");
+}
+WindowEventsImplementation.prototype.get$input = function() {
+  return this._htmlimpl_get("input");
 }
 WindowEventsImplementation.prototype.get$keyUp = function() {
-  return this._get("keyup");
+  return this._htmlimpl_get("keyup");
 }
 WindowEventsImplementation.prototype.get$message = function() {
-  return this._get("message");
+  return this._htmlimpl_get("message");
 }
 WindowEventsImplementation.prototype.get$resize = function() {
-  return this._get("resize");
+  return this._htmlimpl_get("resize");
 }
 WindowEventsImplementation.prototype.get$scroll = function() {
-  return this._get("scroll");
+  return this._htmlimpl_get("scroll");
 }
 // ********** Code for WindowWrappingImplementation **************
 $inherits(WindowWrappingImplementation, EventTargetWrappingImplementation);
@@ -6797,7 +6996,7 @@ XMLHttpRequestEventsImplementation._wrap$ctor = function(_ptr) {
 XMLHttpRequestEventsImplementation._wrap$ctor.prototype = XMLHttpRequestEventsImplementation.prototype;
 function XMLHttpRequestEventsImplementation() {}
 XMLHttpRequestEventsImplementation.prototype.get$readyStateChange = function() {
-  return this._get("readystatechange");
+  return this._htmlimpl_get("readystatechange");
 }
 // ********** Code for XMLHttpRequestWrappingImplementation **************
 $inherits(XMLHttpRequestWrappingImplementation, EventTargetWrappingImplementation);
@@ -7002,7 +7201,7 @@ function _jsKeys(obj) {
 //  ********** Library uri **************
 // ********** Code for Uri **************
 Uri.fromString$ctor = function(uri) {
-  Uri._fromMatch$ctor.call(this, const$0001.firstMatch(uri));
+  Uri._fromMatch$ctor.call(this, const$0012.firstMatch(uri));
 }
 Uri.fromString$ctor.prototype = Uri.prototype;
 Uri._fromMatch$ctor = function(m) {
@@ -7056,14 +7255,1849 @@ Uri._addIfNonEmpty = function(sb, test, first, second) {
   }
 }
 // ********** Code for top level **************
+//  ********** Library file_system **************
+// ********** Code for top level **************
+//  ********** Library lang **************
+// ********** Code for Token **************
+function Token(kind, source, start, end) {
+  this.end = end;
+  this.kind = kind;
+  this.start = start;
+  this.source = source;
+}
+Token.prototype.get$kind = function() { return this.kind; };
+Token.prototype.get$text = function() {
+  return this.source.get$text().substring(this.start, this.end);
+}
+Token.prototype.toString = function() {
+  var kindText = TokenKind.kindToString(this.kind);
+  var actualText = this.get$text();
+  if ($ne(kindText, actualText)) {
+    if (actualText.get$length() > (10)) {
+      actualText = $add(actualText.substring((0), (8)), "...");
+    }
+    return ("" + kindText + "(" + actualText + ")");
+  }
+  else {
+    return kindText;
+  }
+}
+// ********** Code for LiteralToken **************
+$inherits(LiteralToken, Token);
+function LiteralToken(kind, source, start, end, value) {
+  this.value = value;
+  Token.call(this, kind, source, start, end);
+}
+LiteralToken.prototype.get$value = function() { return this.value; };
+LiteralToken.prototype.set$value = function(value) { return this.value = value; };
+// ********** Code for ErrorToken **************
+$inherits(ErrorToken, Token);
+function ErrorToken(kind, source, start, end, message) {
+  this.message = message;
+  Token.call(this, kind, source, start, end);
+}
+// ********** Code for SourceFile **************
+function SourceFile(filename, _text) {
+  this._text = _text;
+  this.filename = filename;
+}
+SourceFile.prototype.get$text = function() {
+  return this._text;
+}
+// ********** Code for InterpStack **************
+function InterpStack(previous, quote, isMultiline) {
+  this.quote = quote;
+  this.isMultiline = isMultiline;
+  this.depth = (-1);
+  this.previous = previous;
+}
+InterpStack.prototype.set$previous = function(value) { return this.previous = value; };
+InterpStack.prototype.get$quote = function() { return this.quote; };
+InterpStack.prototype.get$isMultiline = function() { return this.isMultiline; };
+InterpStack.prototype.pop = function() {
+  return this.previous;
+}
+InterpStack.push = function(stack, quote, isMultiline) {
+  var newStack = new InterpStack(stack, quote, isMultiline);
+  if (stack != null) newStack.set$previous(stack);
+  return newStack;
+}
+// ********** Code for TokenizerHelpers **************
+function TokenizerHelpers() {
+
+}
+TokenizerHelpers.isIdentifierStart = function(c) {
+  return ((c >= (97) && c <= (122)) || (c >= (65) && c <= (90)) || c == (95));
+}
+TokenizerHelpers.isDigit = function(c) {
+  return (c >= (48) && c <= (57));
+}
+TokenizerHelpers.isIdentifierPart = function(c) {
+  return (TokenizerHelpers.isIdentifierStart(c) || TokenizerHelpers.isDigit(c) || c == (36));
+}
+TokenizerHelpers.isInterpIdentifierPart = function(c) {
+  return (TokenizerHelpers.isIdentifierStart(c) || TokenizerHelpers.isDigit(c));
+}
+// ********** Code for TokenizerBase **************
+$inherits(TokenizerBase, TokenizerHelpers);
+function TokenizerBase(_source, _skipWhitespace, index) {
+  this._lang_index = index;
+  this._skipWhitespace = _skipWhitespace;
+  this._source = _source;
+  TokenizerHelpers.call(this);
+  this._text = this._source.get$text();
+}
+TokenizerBase.prototype._nextChar = function() {
+  if (this._lang_index < this._text.length) {
+    return this._text.charCodeAt(this._lang_index++);
+  }
+  else {
+    return (0);
+  }
+}
+TokenizerBase.prototype._peekChar = function() {
+  if (this._lang_index < this._text.length) {
+    return this._text.charCodeAt(this._lang_index);
+  }
+  else {
+    return (0);
+  }
+}
+TokenizerBase.prototype._maybeEatChar = function(ch) {
+  if (this._lang_index < this._text.length) {
+    if (this._text.charCodeAt(this._lang_index) == ch) {
+      this._lang_index++;
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+  else {
+    return false;
+  }
+}
+TokenizerBase.prototype._finishToken = function(kind) {
+  return new Token(kind, this._source, this._startIndex, this._lang_index);
+}
+TokenizerBase.prototype._errorToken = function(message) {
+  return new ErrorToken((65), this._source, this._startIndex, this._lang_index, message);
+}
+TokenizerBase.prototype.finishWhitespace = function() {
+  this._lang_index--;
+  while (this._lang_index < this._text.length) {
+    var ch = this._text.charCodeAt(this._lang_index++);
+    if ($eq(ch, (32)) || $eq(ch, (9)) || $eq(ch, (13))) {
+    }
+    else if ($eq(ch, (10))) {
+      if (!this._skipWhitespace) {
+        return this._finishToken((63));
+      }
+    }
+    else {
+      this._lang_index--;
+      if (this._skipWhitespace) {
+        return this.next();
+      }
+      else {
+        return this._finishToken((63));
+      }
+    }
+  }
+  return this._finishToken((1));
+}
+TokenizerBase.prototype.finishHashBang = function() {
+  while (true) {
+    var ch = this._nextChar();
+    if (ch == (0) || ch == (10) || ch == (13)) {
+      return this._finishToken((13));
+    }
+  }
+}
+TokenizerBase.prototype.finishSingleLineComment = function() {
+  while (true) {
+    var ch = this._nextChar();
+    if (ch == (0) || ch == (10) || ch == (13)) {
+      if (this._skipWhitespace) {
+        return this.next();
+      }
+      else {
+        return this._finishToken((64));
+      }
+    }
+  }
+}
+TokenizerBase.prototype.finishMultiLineComment = function() {
+  var nesting = (1);
+  do {
+    var ch = this._nextChar();
+    if (ch == (0)) {
+      return this._errorToken();
+    }
+    else if (ch == (42)) {
+      if (this._maybeEatChar((47))) {
+        nesting--;
+      }
+    }
+    else if (ch == (47)) {
+      if (this._maybeEatChar((42))) {
+        nesting++;
+      }
+    }
+  }
+  while (nesting > (0))
+  if (this._skipWhitespace) {
+    return this.next();
+  }
+  else {
+    return this._finishToken((64));
+  }
+}
+TokenizerBase.prototype.eatDigits = function() {
+  while (this._lang_index < this._text.length) {
+    if (TokenizerHelpers.isDigit(this._text.charCodeAt(this._lang_index))) {
+      this._lang_index++;
+    }
+    else {
+      return;
+    }
+  }
+}
+TokenizerBase._hexDigit = function(c) {
+  if (c >= (48) && c <= (57)) {
+    return c - (48);
+  }
+  else if (c >= (97) && c <= (102)) {
+    return c - (87);
+  }
+  else if (c >= (65) && c <= (70)) {
+    return c - (55);
+  }
+  else {
+    return (-1);
+  }
+}
+TokenizerBase.prototype.readHex = function(hexLength) {
+  var maxIndex;
+  if (null == hexLength) {
+    maxIndex = this._text.length - (1);
+  }
+  else {
+    maxIndex = this._lang_index + hexLength;
+    if (maxIndex >= this._text.length) return (-1);
+  }
+  var result = (0);
+  while (this._lang_index < maxIndex) {
+    var digit = TokenizerBase._hexDigit(this._text.charCodeAt(this._lang_index));
+    if ($eq(digit, (-1))) {
+      if (null == hexLength) {
+        return result;
+      }
+      else {
+        return (-1);
+      }
+    }
+    TokenizerBase._hexDigit(this._text.charCodeAt(this._lang_index));
+    result = $add(($mul(result, (16))), digit);
+    this._lang_index++;
+  }
+  return result;
+}
+TokenizerBase.prototype.finishHex = function() {
+  var value = this.readHex();
+  return new LiteralToken((61), this._source, this._startIndex, this._lang_index, value);
+}
+TokenizerBase.prototype.finishNumber = function() {
+  this.eatDigits();
+  if (this._peekChar() == (46)) {
+    this._nextChar();
+    if (TokenizerHelpers.isDigit(this._peekChar())) {
+      this.eatDigits();
+      return this.finishNumberExtra((62));
+    }
+    else {
+      this._lang_index--;
+    }
+  }
+  return this.finishNumberExtra((60));
+}
+TokenizerBase.prototype.finishNumberExtra = function(kind) {
+  if (this._maybeEatChar((101)) || this._maybeEatChar((69))) {
+    kind = (62);
+    this._maybeEatChar((45));
+    this._maybeEatChar((43));
+    this.eatDigits();
+  }
+  if (this._peekChar() != (0) && TokenizerHelpers.isIdentifierStart(this._peekChar())) {
+    this._nextChar();
+    return this._errorToken("illegal character in number");
+  }
+  return this._finishToken(kind);
+}
+TokenizerBase.prototype._makeStringToken = function(buf, isPart) {
+  var s = Strings.String$fromCharCodes$factory(buf);
+  var kind = isPart ? (59) : (58);
+  return new LiteralToken(kind, this._source, this._startIndex, this._lang_index, s);
+}
+TokenizerBase.prototype._makeRawStringToken = function(isMultiline) {
+  var s;
+  if (isMultiline) {
+    var start = this._startIndex + (4);
+    if (this._source.get$text()[start] == "\n") start++;
+    s = this._source.get$text().substring(start, this._lang_index - (3));
+  }
+  else {
+    s = this._source.get$text().substring(this._startIndex + (2), this._lang_index - (1));
+  }
+  return new LiteralToken((58), this._source, this._startIndex, this._lang_index, s);
+}
+TokenizerBase.prototype.finishMultilineString = function(quote) {
+  var buf = [];
+  while (true) {
+    var ch = this._nextChar();
+    if (ch == (0)) {
+      return this._errorToken();
+    }
+    else if (ch == quote) {
+      if (this._maybeEatChar(quote)) {
+        if (this._maybeEatChar(quote)) {
+          return this._makeStringToken(buf, false);
+        }
+        buf.add$1(quote);
+      }
+      buf.add$1(quote);
+    }
+    else if (ch == (36)) {
+      this._interpStack = InterpStack.push(this._interpStack, quote, true);
+      return this._makeStringToken(buf, true);
+    }
+    else if (ch == (92)) {
+      var escapeVal = this.readEscapeSequence();
+      if ($eq(escapeVal, (-1))) {
+        return this._errorToken("invalid hex escape sequence");
+      }
+      else {
+        buf.add$1(escapeVal);
+      }
+    }
+    else {
+      buf.add$1(ch);
+    }
+  }
+}
+TokenizerBase.prototype._finishOpenBrace = function() {
+  var $0;
+  if (this._interpStack != null) {
+    if (this._interpStack.depth == (-1)) {
+      this._interpStack.depth = (1);
+    }
+    else {
+      ($0 = this._interpStack).depth = $0.depth + (1);
+    }
+  }
+  return this._finishToken((6));
+}
+TokenizerBase.prototype._finishCloseBrace = function() {
+  var $0;
+  if (this._interpStack != null) {
+    ($0 = this._interpStack).depth = $0.depth - (1);
+  }
+  return this._finishToken((7));
+}
+TokenizerBase.prototype.finishString = function(quote) {
+  if (this._maybeEatChar(quote)) {
+    if (this._maybeEatChar(quote)) {
+      this._maybeEatChar((10));
+      return this.finishMultilineString(quote);
+    }
+    else {
+      return this._makeStringToken(new Array(), false);
+    }
+  }
+  return this.finishStringBody(quote);
+}
+TokenizerBase.prototype.finishRawString = function(quote) {
+  if (this._maybeEatChar(quote)) {
+    if (this._maybeEatChar(quote)) {
+      return this.finishMultilineRawString(quote);
+    }
+    else {
+      return this._makeStringToken([], false);
+    }
+  }
+  while (true) {
+    var ch = this._nextChar();
+    if (ch == quote) {
+      return this._makeRawStringToken(false);
+    }
+    else if (ch == (0)) {
+      return this._errorToken();
+    }
+  }
+}
+TokenizerBase.prototype.finishMultilineRawString = function(quote) {
+  while (true) {
+    var ch = this._nextChar();
+    if (ch == (0)) {
+      return this._errorToken();
+    }
+    else if (ch == quote && this._maybeEatChar(quote) && this._maybeEatChar(quote)) {
+      return this._makeRawStringToken(true);
+    }
+  }
+}
+TokenizerBase.prototype.finishStringBody = function(quote) {
+  var buf = new Array();
+  while (true) {
+    var ch = this._nextChar();
+    if (ch == quote) {
+      return this._makeStringToken(buf, false);
+    }
+    else if (ch == (36)) {
+      this._interpStack = InterpStack.push(this._interpStack, quote, false);
+      return this._makeStringToken(buf, true);
+    }
+    else if (ch == (0)) {
+      return this._errorToken();
+    }
+    else if (ch == (92)) {
+      var escapeVal = this.readEscapeSequence();
+      if ($eq(escapeVal, (-1))) {
+        return this._errorToken("invalid hex escape sequence");
+      }
+      else {
+        buf.add$1(escapeVal);
+      }
+    }
+    else {
+      buf.add$1(ch);
+    }
+  }
+}
+TokenizerBase.prototype.readEscapeSequence = function() {
+  var ch = this._nextChar();
+  var hexValue;
+  switch (ch) {
+    case (110):
+
+      return (10);
+
+    case (114):
+
+      return (13);
+
+    case (102):
+
+      return (12);
+
+    case (98):
+
+      return (8);
+
+    case (116):
+
+      return (9);
+
+    case (118):
+
+      return (11);
+
+    case (120):
+
+      hexValue = this.readHex((2));
+      break;
+
+    case (117):
+
+      if (this._maybeEatChar((123))) {
+        hexValue = this.readHex();
+        if (!this._maybeEatChar((125))) {
+          return (-1);
+        }
+        else {
+          break;
+        }
+      }
+      else {
+        hexValue = this.readHex((4));
+        break;
+      }
+
+    default:
+
+      return ch;
+
+  }
+  if (hexValue == (-1)) return (-1);
+  if (hexValue < (55296) || hexValue > (57343) && hexValue <= (65535)) {
+    return hexValue;
+  }
+  else if (hexValue <= (1114111)) {
+    $globals.world.fatal("unicode values greater than 2 bytes not implemented yet");
+    return (-1);
+  }
+  else {
+    return (-1);
+  }
+}
+TokenizerBase.prototype.finishDot = function() {
+  if (TokenizerHelpers.isDigit(this._peekChar())) {
+    this.eatDigits();
+    return this.finishNumberExtra((62));
+  }
+  else {
+    return this._finishToken((14));
+  }
+}
+TokenizerBase.prototype.finishIdentifier = function(ch) {
+  if (this._interpStack != null && this._interpStack.depth == (-1)) {
+    this._interpStack.depth = (0);
+    if (ch == (36)) {
+      return this._errorToken("illegal character after $ in string interpolation");
+    }
+    while (this._lang_index < this._text.length) {
+      if (!TokenizerHelpers.isInterpIdentifierPart(this._text.charCodeAt(this._lang_index++))) {
+        this._lang_index--;
+        break;
+      }
+    }
+  }
+  else {
+    while (this._lang_index < this._text.length) {
+      if (!TokenizerHelpers.isIdentifierPart(this._text.charCodeAt(this._lang_index++))) {
+        this._lang_index--;
+        break;
+      }
+    }
+  }
+  var kind = this.getIdentifierKind();
+  if (kind == (70)) {
+    return this._finishToken((70));
+  }
+  else {
+    return this._finishToken(kind);
+  }
+}
+// ********** Code for Tokenizer **************
+$inherits(Tokenizer, TokenizerBase);
+function Tokenizer(source, skipWhitespace, index) {
+  TokenizerBase.call(this, source, skipWhitespace, index);
+}
+Tokenizer.prototype.next = function() {
+  this._startIndex = this._lang_index;
+  if (this._interpStack != null && this._interpStack.depth == (0)) {
+    var istack = this._interpStack;
+    this._interpStack = this._interpStack.pop();
+    if (istack.get$isMultiline()) {
+      return this.finishMultilineString(istack.get$quote());
+    }
+    else {
+      return this.finishStringBody(istack.get$quote());
+    }
+  }
+  var ch;
+  ch = this._nextChar();
+  switch (ch) {
+    case (0):
+
+      return this._finishToken((1));
+
+    case (32):
+    case (9):
+    case (10):
+    case (13):
+
+      return this.finishWhitespace();
+
+    case (33):
+
+      if (this._maybeEatChar((61))) {
+        if (this._maybeEatChar((61))) {
+          return this._finishToken((51));
+        }
+        else {
+          return this._finishToken((49));
+        }
+      }
+      else {
+        return this._finishToken((19));
+      }
+
+    case (34):
+
+      return this.finishString((34));
+
+    case (35):
+
+      if (this._maybeEatChar((33))) {
+        return this.finishHashBang();
+      }
+      else {
+        return this._finishToken((12));
+      }
+
+    case (36):
+
+      if (this._maybeEatChar((34))) {
+        return this.finishString((34));
+      }
+      else if (this._maybeEatChar((39))) {
+        return this.finishString((39));
+      }
+      else {
+        return this.finishIdentifier((36));
+      }
+
+    case (37):
+
+      if (this._maybeEatChar((61))) {
+        return this._finishToken((32));
+      }
+      else {
+        return this._finishToken((47));
+      }
+
+    case (38):
+
+      if (this._maybeEatChar((38))) {
+        return this._finishToken((35));
+      }
+      else if (this._maybeEatChar((61))) {
+        return this._finishToken((23));
+      }
+      else {
+        return this._finishToken((38));
+      }
+
+    case (39):
+
+      return this.finishString((39));
+
+    case (40):
+
+      return this._finishToken((2));
+
+    case (41):
+
+      return this._finishToken((3));
+
+    case (42):
+
+      if (this._maybeEatChar((61))) {
+        return this._finishToken((29));
+      }
+      else {
+        return this._finishToken((44));
+      }
+
+    case (43):
+
+      if (this._maybeEatChar((43))) {
+        return this._finishToken((16));
+      }
+      else if (this._maybeEatChar((61))) {
+        return this._finishToken((27));
+      }
+      else {
+        return this._finishToken((42));
+      }
+
+    case (44):
+
+      return this._finishToken((11));
+
+    case (45):
+
+      if (this._maybeEatChar((45))) {
+        return this._finishToken((17));
+      }
+      else if (this._maybeEatChar((61))) {
+        return this._finishToken((28));
+      }
+      else {
+        return this._finishToken((43));
+      }
+
+    case (46):
+
+      if (this._maybeEatChar((46))) {
+        if (this._maybeEatChar((46))) {
+          return this._finishToken((15));
+        }
+        else {
+          return this._errorToken();
+        }
+      }
+      else {
+        return this.finishDot();
+      }
+
+    case (47):
+
+      if (this._maybeEatChar((42))) {
+        return this.finishMultiLineComment();
+      }
+      else if (this._maybeEatChar((47))) {
+        return this.finishSingleLineComment();
+      }
+      else if (this._maybeEatChar((61))) {
+        return this._finishToken((30));
+      }
+      else {
+        return this._finishToken((45));
+      }
+
+    case (48):
+
+      if (this._maybeEatChar((88))) {
+        return this.finishHex();
+      }
+      else if (this._maybeEatChar((120))) {
+        return this.finishHex();
+      }
+      else {
+        return this.finishNumber();
+      }
+
+    case (58):
+
+      return this._finishToken((8));
+
+    case (59):
+
+      return this._finishToken((10));
+
+    case (60):
+
+      if (this._maybeEatChar((60))) {
+        if (this._maybeEatChar((61))) {
+          return this._finishToken((24));
+        }
+        else {
+          return this._finishToken((39));
+        }
+      }
+      else if (this._maybeEatChar((61))) {
+        return this._finishToken((54));
+      }
+      else {
+        return this._finishToken((52));
+      }
+
+    case (61):
+
+      if (this._maybeEatChar((61))) {
+        if (this._maybeEatChar((61))) {
+          return this._finishToken((50));
+        }
+        else {
+          return this._finishToken((48));
+        }
+      }
+      else if (this._maybeEatChar((62))) {
+        return this._finishToken((9));
+      }
+      else {
+        return this._finishToken((20));
+      }
+
+    case (62):
+
+      if (this._maybeEatChar((61))) {
+        return this._finishToken((55));
+      }
+      else if (this._maybeEatChar((62))) {
+        if (this._maybeEatChar((61))) {
+          return this._finishToken((25));
+        }
+        else if (this._maybeEatChar((62))) {
+          if (this._maybeEatChar((61))) {
+            return this._finishToken((26));
+          }
+          else {
+            return this._finishToken((41));
+          }
+        }
+        else {
+          return this._finishToken((40));
+        }
+      }
+      else {
+        return this._finishToken((53));
+      }
+
+    case (63):
+
+      return this._finishToken((33));
+
+    case (64):
+
+      if (this._maybeEatChar((34))) {
+        return this.finishRawString((34));
+      }
+      else if (this._maybeEatChar((39))) {
+        return this.finishRawString((39));
+      }
+      else {
+        return this._errorToken();
+      }
+
+    case (91):
+
+      if (this._maybeEatChar((93))) {
+        if (this._maybeEatChar((61))) {
+          return this._finishToken((57));
+        }
+        else {
+          return this._finishToken((56));
+        }
+      }
+      else {
+        return this._finishToken((4));
+      }
+
+    case (93):
+
+      return this._finishToken((5));
+
+    case (94):
+
+      if (this._maybeEatChar((61))) {
+        return this._finishToken((22));
+      }
+      else {
+        return this._finishToken((37));
+      }
+
+    case (123):
+
+      return this._finishOpenBrace();
+
+    case (124):
+
+      if (this._maybeEatChar((61))) {
+        return this._finishToken((21));
+      }
+      else if (this._maybeEatChar((124))) {
+        return this._finishToken((34));
+      }
+      else {
+        return this._finishToken((36));
+      }
+
+    case (125):
+
+      return this._finishCloseBrace();
+
+    case (126):
+
+      if (this._maybeEatChar((47))) {
+        if (this._maybeEatChar((61))) {
+          return this._finishToken((31));
+        }
+        else {
+          return this._finishToken((46));
+        }
+      }
+      else {
+        return this._finishToken((18));
+      }
+
+    default:
+
+      if (TokenizerHelpers.isIdentifierStart(ch)) {
+        return this.finishIdentifier(ch);
+      }
+      else if (TokenizerHelpers.isDigit(ch)) {
+        return this.finishNumber();
+      }
+      else {
+        return this._errorToken();
+      }
+
+  }
+}
+Tokenizer.prototype.getIdentifierKind = function() {
+  var i0 = this._startIndex;
+  var ch;
+  switch ($sub(this._lang_index, i0)) {
+    case (2):
+
+      ch = this._text.charCodeAt(i0);
+      if (ch == (100)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (111)) return (95);
+      }
+      else if (ch == (105)) {
+        ch = this._text.charCodeAt($add(i0, (1)));
+        if (ch == (102)) {
+          return (102);
+        }
+        else if (ch == (110)) {
+          return (103);
+        }
+        else if (ch == (115)) {
+          return (104);
+        }
+      }
+      return (70);
+
+    case (3):
+
+      ch = this._text.charCodeAt(i0);
+      if (ch == (102)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (111) && this._text.charCodeAt($add(i0, (2))) == (114)) return (101);
+      }
+      else if (ch == (103)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (101) && this._text.charCodeAt($add(i0, (2))) == (116)) return (75);
+      }
+      else if (ch == (110)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (101) && this._text.charCodeAt($add(i0, (2))) == (119)) return (105);
+      }
+      else if (ch == (115)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (101) && this._text.charCodeAt($add(i0, (2))) == (116)) return (83);
+      }
+      else if (ch == (116)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (114) && this._text.charCodeAt($add(i0, (2))) == (121)) return (113);
+      }
+      else if (ch == (118)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (97) && this._text.charCodeAt($add(i0, (2))) == (114)) return (114);
+      }
+      return (70);
+
+    case (4):
+
+      ch = this._text.charCodeAt(i0);
+      if (ch == (99)) {
+        ch = this._text.charCodeAt($add(i0, (1)));
+        if (ch == (97)) {
+          ch = this._text.charCodeAt($add(i0, (2)));
+          if (ch == (108)) {
+            if (this._text.charCodeAt($add(i0, (3))) == (108)) return (73);
+          }
+          else if (ch == (115)) {
+            if (this._text.charCodeAt($add(i0, (3))) == (101)) return (89);
+          }
+        }
+      }
+      else if (ch == (101)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (108) && this._text.charCodeAt($add(i0, (2))) == (115) && this._text.charCodeAt($add(i0, (3))) == (101)) return (96);
+      }
+      else if (ch == (110)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (117) && this._text.charCodeAt($add(i0, (2))) == (108) && this._text.charCodeAt($add(i0, (3))) == (108)) return (106);
+      }
+      else if (ch == (116)) {
+        ch = this._text.charCodeAt($add(i0, (1)));
+        if (ch == (104)) {
+          if (this._text.charCodeAt($add(i0, (2))) == (105) && this._text.charCodeAt($add(i0, (3))) == (115)) return (110);
+        }
+        else if (ch == (114)) {
+          if (this._text.charCodeAt($add(i0, (2))) == (117) && this._text.charCodeAt($add(i0, (3))) == (101)) return (112);
+        }
+      }
+      else if (ch == (118)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (111) && this._text.charCodeAt($add(i0, (2))) == (105) && this._text.charCodeAt($add(i0, (3))) == (100)) return (115);
+      }
+      return (70);
+
+    case (5):
+
+      ch = this._text.charCodeAt(i0);
+      if (ch == (97)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (119) && this._text.charCodeAt($add(i0, (2))) == (97) && this._text.charCodeAt($add(i0, (3))) == (105) && this._text.charCodeAt($add(i0, (4))) == (116)) return (87);
+      }
+      else if (ch == (98)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (114) && this._text.charCodeAt($add(i0, (2))) == (101) && this._text.charCodeAt($add(i0, (3))) == (97) && this._text.charCodeAt($add(i0, (4))) == (107)) return (88);
+      }
+      else if (ch == (99)) {
+        ch = this._text.charCodeAt($add(i0, (1)));
+        if (ch == (97)) {
+          if (this._text.charCodeAt($add(i0, (2))) == (116) && this._text.charCodeAt($add(i0, (3))) == (99) && this._text.charCodeAt($add(i0, (4))) == (104)) return (90);
+        }
+        else if (ch == (108)) {
+          if (this._text.charCodeAt($add(i0, (2))) == (97) && this._text.charCodeAt($add(i0, (3))) == (115) && this._text.charCodeAt($add(i0, (4))) == (115)) return (91);
+        }
+        else if (ch == (111)) {
+          if (this._text.charCodeAt($add(i0, (2))) == (110) && this._text.charCodeAt($add(i0, (3))) == (115) && this._text.charCodeAt($add(i0, (4))) == (116)) return (92);
+        }
+      }
+      else if (ch == (102)) {
+        ch = this._text.charCodeAt($add(i0, (1)));
+        if (ch == (97)) {
+          if (this._text.charCodeAt($add(i0, (2))) == (108) && this._text.charCodeAt($add(i0, (3))) == (115) && this._text.charCodeAt($add(i0, (4))) == (101)) return (98);
+        }
+        else if (ch == (105)) {
+          if (this._text.charCodeAt($add(i0, (2))) == (110) && this._text.charCodeAt($add(i0, (3))) == (97) && this._text.charCodeAt($add(i0, (4))) == (108)) return (99);
+        }
+      }
+      else if (ch == (115)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (117) && this._text.charCodeAt($add(i0, (2))) == (112) && this._text.charCodeAt($add(i0, (3))) == (101) && this._text.charCodeAt($add(i0, (4))) == (114)) return (108);
+      }
+      else if (ch == (116)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (104) && this._text.charCodeAt($add(i0, (2))) == (114) && this._text.charCodeAt($add(i0, (3))) == (111) && this._text.charCodeAt($add(i0, (4))) == (119)) return (111);
+      }
+      else if (ch == (119)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (104) && this._text.charCodeAt($add(i0, (2))) == (105) && this._text.charCodeAt($add(i0, (3))) == (108) && this._text.charCodeAt($add(i0, (4))) == (101)) return (116);
+      }
+      return (70);
+
+    case (6):
+
+      ch = this._text.charCodeAt(i0);
+      if (ch == (97)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (115) && this._text.charCodeAt($add(i0, (2))) == (115) && this._text.charCodeAt($add(i0, (3))) == (101) && this._text.charCodeAt($add(i0, (4))) == (114) && this._text.charCodeAt($add(i0, (5))) == (116)) return (72);
+      }
+      else if (ch == (105)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (109) && this._text.charCodeAt($add(i0, (2))) == (112) && this._text.charCodeAt($add(i0, (3))) == (111) && this._text.charCodeAt($add(i0, (4))) == (114) && this._text.charCodeAt($add(i0, (5))) == (116)) return (77);
+      }
+      else if (ch == (110)) {
+        ch = this._text.charCodeAt($add(i0, (1)));
+        if (ch == (97)) {
+          if (this._text.charCodeAt($add(i0, (2))) == (116) && this._text.charCodeAt($add(i0, (3))) == (105) && this._text.charCodeAt($add(i0, (4))) == (118) && this._text.charCodeAt($add(i0, (5))) == (101)) return (80);
+        }
+        else if (ch == (101)) {
+          if (this._text.charCodeAt($add(i0, (2))) == (103) && this._text.charCodeAt($add(i0, (3))) == (97) && this._text.charCodeAt($add(i0, (4))) == (116) && this._text.charCodeAt($add(i0, (5))) == (101)) return (81);
+        }
+      }
+      else if (ch == (114)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (101) && this._text.charCodeAt($add(i0, (2))) == (116) && this._text.charCodeAt($add(i0, (3))) == (117) && this._text.charCodeAt($add(i0, (4))) == (114) && this._text.charCodeAt($add(i0, (5))) == (110)) return (107);
+      }
+      else if (ch == (115)) {
+        ch = this._text.charCodeAt($add(i0, (1)));
+        if (ch == (111)) {
+          if (this._text.charCodeAt($add(i0, (2))) == (117) && this._text.charCodeAt($add(i0, (3))) == (114) && this._text.charCodeAt($add(i0, (4))) == (99) && this._text.charCodeAt($add(i0, (5))) == (101)) return (84);
+        }
+        else if (ch == (116)) {
+          if (this._text.charCodeAt($add(i0, (2))) == (97) && this._text.charCodeAt($add(i0, (3))) == (116) && this._text.charCodeAt($add(i0, (4))) == (105) && this._text.charCodeAt($add(i0, (5))) == (99)) return (85);
+        }
+        else if (ch == (119)) {
+          if (this._text.charCodeAt($add(i0, (2))) == (105) && this._text.charCodeAt($add(i0, (3))) == (116) && this._text.charCodeAt($add(i0, (4))) == (99) && this._text.charCodeAt($add(i0, (5))) == (104)) return (109);
+        }
+      }
+      return (70);
+
+    case (7):
+
+      ch = this._text.charCodeAt(i0);
+      if (ch == (100)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (101) && this._text.charCodeAt($add(i0, (2))) == (102) && this._text.charCodeAt($add(i0, (3))) == (97) && this._text.charCodeAt($add(i0, (4))) == (117) && this._text.charCodeAt($add(i0, (5))) == (108) && this._text.charCodeAt($add(i0, (6))) == (116)) return (94);
+      }
+      else if (ch == (101)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (120) && this._text.charCodeAt($add(i0, (2))) == (116) && this._text.charCodeAt($add(i0, (3))) == (101) && this._text.charCodeAt($add(i0, (4))) == (110) && this._text.charCodeAt($add(i0, (5))) == (100) && this._text.charCodeAt($add(i0, (6))) == (115)) return (97);
+      }
+      else if (ch == (102)) {
+        ch = this._text.charCodeAt($add(i0, (1)));
+        if (ch == (97)) {
+          if (this._text.charCodeAt($add(i0, (2))) == (99) && this._text.charCodeAt($add(i0, (3))) == (116) && this._text.charCodeAt($add(i0, (4))) == (111) && this._text.charCodeAt($add(i0, (5))) == (114) && this._text.charCodeAt($add(i0, (6))) == (121)) return (74);
+        }
+        else if (ch == (105)) {
+          if (this._text.charCodeAt($add(i0, (2))) == (110) && this._text.charCodeAt($add(i0, (3))) == (97) && this._text.charCodeAt($add(i0, (4))) == (108) && this._text.charCodeAt($add(i0, (5))) == (108) && this._text.charCodeAt($add(i0, (6))) == (121)) return (100);
+        }
+      }
+      else if (ch == (108)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (105) && this._text.charCodeAt($add(i0, (2))) == (98) && this._text.charCodeAt($add(i0, (3))) == (114) && this._text.charCodeAt($add(i0, (4))) == (97) && this._text.charCodeAt($add(i0, (5))) == (114) && this._text.charCodeAt($add(i0, (6))) == (121)) return (79);
+      }
+      else if (ch == (116)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (121) && this._text.charCodeAt($add(i0, (2))) == (112) && this._text.charCodeAt($add(i0, (3))) == (101) && this._text.charCodeAt($add(i0, (4))) == (100) && this._text.charCodeAt($add(i0, (5))) == (101) && this._text.charCodeAt($add(i0, (6))) == (102)) return (86);
+      }
+      return (70);
+
+    case (8):
+
+      ch = this._text.charCodeAt(i0);
+      if (ch == (97)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (98) && this._text.charCodeAt($add(i0, (2))) == (115) && this._text.charCodeAt($add(i0, (3))) == (116) && this._text.charCodeAt($add(i0, (4))) == (114) && this._text.charCodeAt($add(i0, (5))) == (97) && this._text.charCodeAt($add(i0, (6))) == (99) && this._text.charCodeAt($add(i0, (7))) == (116)) return (71);
+      }
+      else if (ch == (99)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (111) && this._text.charCodeAt($add(i0, (2))) == (110) && this._text.charCodeAt($add(i0, (3))) == (116) && this._text.charCodeAt($add(i0, (4))) == (105) && this._text.charCodeAt($add(i0, (5))) == (110) && this._text.charCodeAt($add(i0, (6))) == (117) && this._text.charCodeAt($add(i0, (7))) == (101)) return (93);
+      }
+      else if (ch == (111)) {
+        if (this._text.charCodeAt($add(i0, (1))) == (112) && this._text.charCodeAt($add(i0, (2))) == (101) && this._text.charCodeAt($add(i0, (3))) == (114) && this._text.charCodeAt($add(i0, (4))) == (97) && this._text.charCodeAt($add(i0, (5))) == (116) && this._text.charCodeAt($add(i0, (6))) == (111) && this._text.charCodeAt($add(i0, (7))) == (114)) return (82);
+      }
+      return (70);
+
+    case (9):
+
+      if (this._text.charCodeAt(i0) == (105) && this._text.charCodeAt($add(i0, (1))) == (110) && this._text.charCodeAt($add(i0, (2))) == (116) && this._text.charCodeAt($add(i0, (3))) == (101) && this._text.charCodeAt($add(i0, (4))) == (114) && this._text.charCodeAt($add(i0, (5))) == (102) && this._text.charCodeAt($add(i0, (6))) == (97) && this._text.charCodeAt($add(i0, (7))) == (99) && this._text.charCodeAt($add(i0, (8))) == (101)) return (78);
+      return (70);
+
+    case (10):
+
+      if (this._text.charCodeAt(i0) == (105) && this._text.charCodeAt($add(i0, (1))) == (109) && this._text.charCodeAt($add(i0, (2))) == (112) && this._text.charCodeAt($add(i0, (3))) == (108) && this._text.charCodeAt($add(i0, (4))) == (101) && this._text.charCodeAt($add(i0, (5))) == (109) && this._text.charCodeAt($add(i0, (6))) == (101) && this._text.charCodeAt($add(i0, (7))) == (110) && this._text.charCodeAt($add(i0, (8))) == (116) && this._text.charCodeAt($add(i0, (9))) == (115)) return (76);
+      return (70);
+
+    default:
+
+      return (70);
+
+  }
+}
+// ********** Code for TokenKind **************
+function TokenKind() {}
+TokenKind.kindToString = function(kind) {
+  switch (kind) {
+    case (1):
+
+      return "end of file";
+
+    case (2):
+
+      return "(";
+
+    case (3):
+
+      return ")";
+
+    case (4):
+
+      return "[";
+
+    case (5):
+
+      return "]";
+
+    case (6):
+
+      return "{";
+
+    case (7):
+
+      return "}";
+
+    case (8):
+
+      return ":";
+
+    case (9):
+
+      return "=>";
+
+    case (10):
+
+      return ";";
+
+    case (11):
+
+      return ",";
+
+    case (12):
+
+      return "#";
+
+    case (13):
+
+      return "#!";
+
+    case (14):
+
+      return ".";
+
+    case (15):
+
+      return "...";
+
+    case (16):
+
+      return "++";
+
+    case (17):
+
+      return "--";
+
+    case (18):
+
+      return "~";
+
+    case (19):
+
+      return "!";
+
+    case (20):
+
+      return "=";
+
+    case (21):
+
+      return "|=";
+
+    case (22):
+
+      return "^=";
+
+    case (23):
+
+      return "&=";
+
+    case (24):
+
+      return "<<=";
+
+    case (25):
+
+      return ">>=";
+
+    case (26):
+
+      return ">>>=";
+
+    case (27):
+
+      return "+=";
+
+    case (28):
+
+      return "-=";
+
+    case (29):
+
+      return "*=";
+
+    case (30):
+
+      return "/=";
+
+    case (31):
+
+      return "~/=";
+
+    case (32):
+
+      return "%=";
+
+    case (33):
+
+      return "?";
+
+    case (34):
+
+      return "||";
+
+    case (35):
+
+      return "&&";
+
+    case (36):
+
+      return "|";
+
+    case (37):
+
+      return "^";
+
+    case (38):
+
+      return "&";
+
+    case (39):
+
+      return "<<";
+
+    case (40):
+
+      return ">>";
+
+    case (41):
+
+      return ">>>";
+
+    case (42):
+
+      return "+";
+
+    case (43):
+
+      return "-";
+
+    case (44):
+
+      return "*";
+
+    case (45):
+
+      return "/";
+
+    case (46):
+
+      return "~/";
+
+    case (47):
+
+      return "%";
+
+    case (48):
+
+      return "==";
+
+    case (49):
+
+      return "!=";
+
+    case (50):
+
+      return "===";
+
+    case (51):
+
+      return "!==";
+
+    case (52):
+
+      return "<";
+
+    case (53):
+
+      return ">";
+
+    case (54):
+
+      return "<=";
+
+    case (55):
+
+      return ">=";
+
+    case (56):
+
+      return "[]";
+
+    case (57):
+
+      return "[]=";
+
+    case (58):
+
+      return "string";
+
+    case (59):
+
+      return "string part";
+
+    case (60):
+
+      return "integer";
+
+    case (61):
+
+      return "hex integer";
+
+    case (62):
+
+      return "double";
+
+    case (63):
+
+      return "whitespace";
+
+    case (64):
+
+      return "comment";
+
+    case (65):
+
+      return "error";
+
+    case (66):
+
+      return "incomplete string";
+
+    case (67):
+
+      return "incomplete comment";
+
+    case (68):
+
+      return "incomplete multiline string dq";
+
+    case (69):
+
+      return "incomplete multiline string sq";
+
+    case (70):
+
+      return "identifier";
+
+    case (71):
+
+      return "pseudo-keyword 'abstract'";
+
+    case (72):
+
+      return "pseudo-keyword 'assert'";
+
+    case (73):
+
+      return "pseudo-keyword 'call'";
+
+    case (74):
+
+      return "pseudo-keyword 'factory'";
+
+    case (75):
+
+      return "pseudo-keyword 'get'";
+
+    case (76):
+
+      return "pseudo-keyword 'implements'";
+
+    case (77):
+
+      return "pseudo-keyword 'import'";
+
+    case (78):
+
+      return "pseudo-keyword 'interface'";
+
+    case (79):
+
+      return "pseudo-keyword 'library'";
+
+    case (80):
+
+      return "pseudo-keyword 'native'";
+
+    case (81):
+
+      return "pseudo-keyword 'negate'";
+
+    case (82):
+
+      return "pseudo-keyword 'operator'";
+
+    case (83):
+
+      return "pseudo-keyword 'set'";
+
+    case (84):
+
+      return "pseudo-keyword 'source'";
+
+    case (85):
+
+      return "pseudo-keyword 'static'";
+
+    case (86):
+
+      return "pseudo-keyword 'typedef'";
+
+    case (87):
+
+      return "keyword 'await'";
+
+    case (88):
+
+      return "keyword 'break'";
+
+    case (89):
+
+      return "keyword 'case'";
+
+    case (90):
+
+      return "keyword 'catch'";
+
+    case (91):
+
+      return "keyword 'class'";
+
+    case (92):
+
+      return "keyword 'const'";
+
+    case (93):
+
+      return "keyword 'continue'";
+
+    case (94):
+
+      return "keyword 'default'";
+
+    case (95):
+
+      return "keyword 'do'";
+
+    case (96):
+
+      return "keyword 'else'";
+
+    case (97):
+
+      return "keyword 'extends'";
+
+    case (98):
+
+      return "keyword 'false'";
+
+    case (99):
+
+      return "keyword 'final'";
+
+    case (100):
+
+      return "keyword 'finally'";
+
+    case (101):
+
+      return "keyword 'for'";
+
+    case (102):
+
+      return "keyword 'if'";
+
+    case (103):
+
+      return "keyword 'in'";
+
+    case (104):
+
+      return "keyword 'is'";
+
+    case (105):
+
+      return "keyword 'new'";
+
+    case (106):
+
+      return "keyword 'null'";
+
+    case (107):
+
+      return "keyword 'return'";
+
+    case (108):
+
+      return "keyword 'super'";
+
+    case (109):
+
+      return "keyword 'switch'";
+
+    case (110):
+
+      return "keyword 'this'";
+
+    case (111):
+
+      return "keyword 'throw'";
+
+    case (112):
+
+      return "keyword 'true'";
+
+    case (113):
+
+      return "keyword 'try'";
+
+    case (114):
+
+      return "keyword 'var'";
+
+    case (115):
+
+      return "keyword 'void'";
+
+    case (116):
+
+      return "keyword 'while'";
+
+    default:
+
+      return $add($add("TokenKind(", kind.toString()), ")");
+
+  }
+}
+// ********** Code for _SharedBackingMap **************
+$inherits(_SharedBackingMap, HashMapImplementation);
+function _SharedBackingMap() {
+  this.shared = (0);
+  HashMapImplementation.call(this);
+}
+_SharedBackingMap._SharedBackingMap$from$factory = function(other) {
+  var result = new _SharedBackingMap();
+  other.forEach((function (k, v) {
+    result.$setindex(k, v);
+  })
+  );
+  return result;
+}
+// ********** Code for CopyOnWriteMap **************
+function CopyOnWriteMap() {}
+CopyOnWriteMap.prototype.is$Map_dart_core_String$Dynamic = function(){return true};
+CopyOnWriteMap.prototype._ensureWritable = function() {
+  var $0;
+  if (this._map.shared > (0)) {
+    ($0 = this._map).shared = $0.shared - (1);
+    this._map = _SharedBackingMap._SharedBackingMap$from$factory(this._map);
+  }
+}
+CopyOnWriteMap.prototype.$setindex = function(key, value) {
+  this._ensureWritable();
+  this._map.$setindex(key, value);
+}
+CopyOnWriteMap.prototype.putIfAbsent = function(key, ifAbsent) {
+  this._ensureWritable();
+  return this._map.putIfAbsent(key, ifAbsent);
+}
+CopyOnWriteMap.prototype.clear = function() {
+  this._ensureWritable();
+  this._map.clear();
+}
+CopyOnWriteMap.prototype.$index = function(key) {
+  return this._map.$index(key);
+}
+CopyOnWriteMap.prototype.isEmpty = function() {
+  return this._map.isEmpty();
+}
+CopyOnWriteMap.prototype.get$length = function() {
+  return this._map.get$length();
+}
+CopyOnWriteMap.prototype.forEach = function(f) {
+  return this._map.forEach(f);
+}
+CopyOnWriteMap.prototype.containsKey = function(key) {
+  return this._map.containsKey(key);
+}
+CopyOnWriteMap.prototype.clear$0 = CopyOnWriteMap.prototype.clear;
+CopyOnWriteMap.prototype.forEach$1 = function($0) {
+  return this.forEach(to$call$2($0));
+};
+// ********** Code for top level **************
+var world;
+var experimentalAwaitPhase;
+var legCompile;
+var options;
+//  ********** Library markdown **************
+// ********** Code for top level **************
+function escapeHtml(html) {
+  return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+var _implicitLinkResolver;
+//  ********** Library classify **************
+// ********** Code for Classification **************
+function Classification() {}
+// ********** Code for top level **************
+function classifySource(src) {
+  var html = new StringBufferImpl("");
+  var tokenizer = new Tokenizer(src, false, (0));
+  var token;
+  var inString = false;
+  while ($ne((token = tokenizer.next()).get$kind(), (1))) {
+    switch (token.get$kind()) {
+      case (58):
+      case (59):
+      case (66):
+      case (68):
+      case (69):
+
+        inString = true;
+        break;
+
+    }
+    var kind = classify(token);
+    var text = escapeHtml(token.get$text());
+    if ($ne(kind)) {
+      var stringClass = inString ? "si" : "";
+      html.add$1(("<span class=\"" + kind + " " + stringClass + "\">" + text + "</span>"));
+    }
+    else {
+      html.add$1(("<span>" + text + "</span>"));
+    }
+    if ($eq(token.get$kind(), (58))) {
+      inString = false;
+    }
+  }
+  return html.toString();
+}
+function _looksLikeType(name) {
+  return _looksLikePublicType(name) || _looksLikePrivateType(name);
+}
+function _looksLikePublicType(name) {
+  return name.length >= (2) && isUpper(name[(0)]) && isLower(name[(1)]);
+}
+function _looksLikePrivateType(name) {
+  return (name.length >= (3) && name[(0)] == "_" && isUpper(name[(1)]) && isLower(name[(2)]));
+}
+function isUpper(s) {
+  return s.toLowerCase() != s;
+}
+function isLower(s) {
+  return s.toUpperCase() != s;
+}
+function classify(token) {
+  switch (token.kind) {
+    case (65):
+
+      return "e";
+
+    case (70):
+
+      if (_looksLikeType(token.get$text()) || token.get$text() == "num" || token.get$text() == "bool" || token.get$text() == "int" || token.get$text() == "double") {
+        return "t";
+      }
+      return "i";
+
+    case (115):
+
+      return "t";
+
+    case (110):
+    case (108):
+
+      return "r";
+
+    case (58):
+    case (59):
+    case (66):
+    case (68):
+    case (69):
+
+      return "s";
+
+    case (60):
+    case (61):
+    case (62):
+
+      return "n";
+
+    case (64):
+    case (67):
+
+      return "c";
+
+    case (9):
+
+      return "a";
+
+    case (13):
+    case (2):
+    case (3):
+    case (4):
+    case (5):
+    case (6):
+    case (7):
+    case (8):
+    case (10):
+    case (11):
+    case (14):
+    case (15):
+
+      return "p";
+
+    case (16):
+    case (17):
+    case (18):
+    case (19):
+    case (20):
+    case (21):
+    case (22):
+    case (23):
+    case (24):
+    case (25):
+    case (26):
+    case (27):
+    case (28):
+    case (29):
+    case (30):
+    case (31):
+    case (32):
+    case (33):
+    case (34):
+    case (35):
+    case (36):
+    case (37):
+    case (38):
+    case (39):
+    case (40):
+    case (41):
+    case (42):
+    case (43):
+    case (44):
+    case (45):
+    case (46):
+    case (47):
+    case (48):
+    case (49):
+    case (50):
+    case (51):
+    case (52):
+    case (53):
+    case (54):
+    case (55):
+    case (56):
+    case (57):
+
+      return "o";
+
+    case (12):
+    case (71):
+    case (72):
+    case (91):
+    case (97):
+    case (74):
+    case (75):
+    case (76):
+    case (77):
+    case (78):
+    case (79):
+    case (80):
+    case (81):
+    case (82):
+    case (83):
+    case (84):
+    case (85):
+    case (86):
+    case (88):
+    case (89):
+    case (90):
+    case (92):
+    case (93):
+    case (94):
+    case (95):
+    case (96):
+    case (98):
+    case (100):
+    case (101):
+    case (102):
+    case (103):
+    case (104):
+    case (105):
+    case (106):
+    case (107):
+    case (109):
+    case (111):
+    case (112):
+    case (113):
+    case (116):
+    case (114):
+    case (99):
+
+      return "k";
+
+    case (63):
+    case (1):
+
+      return null;
+
+    default:
+
+      return null;
+
+  }
+}
 //  ********** Library DartBoardClient **************
 // ********** Code for DartBoardClient **************
 function DartBoardClient() {
-  this.scrollWidth = (400);
-  this.scrollHeight = (400);
+
 }
 DartBoardClient.prototype.run = function() {
   var $this = this; // closure support
+  this.codeMirror = new CodeMirrorImpl();
+  html_get$document().get$window().get$on().get$resize().add((function (_) {
+    return $this.codeMirror.viewResizeHandler(html_get$document());
+  })
+  , false);
+  var root = this.codeMirror.getMirror();
+  html_get$document().get$body().get$nodes().add(root);
+  this.codeMirror.viewResizeHandler(html_get$document());
   var queryArguments = new HashMapImplementation();
   var uri;
   try {
@@ -7089,19 +9123,6 @@ DartBoardClient.prototype.run = function() {
     if (!(ex && ex.is$Exception())) throw ex;
     dart_core_print($add("url parse exception: ", ex.toString()));
   }
-  var view = html_get$document().query("#view");
-  html_get$document().get$window().get$on().get$resize().add((function (event) {
-    html_get$document().get$rect().then((function (rect) {
-      view.get$style().set$left("50%");
-      view.get$style().set$top("50%");
-      debugPrint(("rect.client.height = " + rect.client.get$height()));
-      debugPrint(("rect.client.width = " + rect.client.get$width()));
-      view.get$style().set$marginLeft($add(((rect.client.get$width() - (350)) / (2)).toString(), "px"));
-    })
-    );
-  })
-  , false);
-  var textAreaElement = html_get$document().query("#editorBuffer");
   if (queryArguments.containsKey("docId")) {
     this.sendRequest(("/getCode?docId=" + queryArguments.$index("docId")), new HashMapImplementation(), (function (response) {
       debugPrintMethod((function () {
@@ -7112,71 +9133,25 @@ DartBoardClient.prototype.run = function() {
         );
       })
       );
-      textAreaElement.set$value(response.$index("code"));
+      $this.codeMirror.loadText(response.$index("code"));
     })
     , (function () {
       return debugPrint("message failed");
     })
     );
   }
-  var scrollContainer = html_get$document().query("#scroll-container");
-  textAreaElement.get$on().get$scroll().add$1((function (sc) {
-    if ($ne(sc)) {
-      textAreaElement.get$rect().then((function (rect) {
-        var scrollTop = rect.scroll.get$top();
-        var left = rect.scroll.get$left();
-        scrollContainer.get$style().set$top(-scrollTop);
-        scrollContainer.get$style().set$left(-left);
-      })
-      );
-    }
-  })
-  );
-  var editorBuffer = html_get$document().query("#editorBuffer");
-  editorBuffer.get$on().get$keyUp().add((function (event) {
-    return;
-    var s = Strings.String$fromCharCodes$factory([event.get$keyCode()]);
-    debugPrint("event.keyCode = " + event.get$keyCode());
-    debugPrint($add("event.keyIdentifier = ", event.get$keyIdentifier()));
-    debugPrint($add("event.keyCode.toString = ", s));
-    debugPrint("event.keyLocation = " + event.get$keyLocation());
-    debugPrint("selectionEnd = " + editorBuffer.get$selectionEnd());
-    debugPrint("selectionStart = " + editorBuffer.get$selectionStart());
-    debugPrint("=================");
-    var d = html_get$document().query("#editorBufferContainer");
-    editorBuffer.get$rect().then((function (rect) {
-      var editorWidth = rect.client.get$width();
-      var offsetWidth = rect.offset.get$width();
-      $this.scrollWidth = rect.scroll.get$width();
-      $this.scrollHeight = rect.scroll.get$height();
-      d.get$style().set$width($this.scrollWidth);
-      d.get$style().set$height($this.scrollHeight);
-      d.get$firstElementChild().get$style().set$height($this.scrollHeight);
-    })
-    );
-    var sb = new StringBufferImpl("");
-    var i = (0);
-    editorBuffer.get$value().split_("\n").forEach$1((function (_s) {
-      sb.add($add($add(("<div style='top:" + i + "; position: absolute;width:" + $this.scrollWidth + ";font-family: monospace; font-size: 15px;line-height: 1.2;  overflow:scroll;overflow-x: scroll;overflow-y: scroll;'><span>"), _s), "</span></div>"));
-      i += (17);
-    })
-    );
-    var textEl = ElementWrappingImplementation.ElementWrappingImplementation$html$factory($add($add(("<div style='top:0;position: absolute;height:" + $this.scrollHeight + ";width:" + $this.scrollWidth + ";font-family: monospace; font-size: 15px;line-height: 1.2;overflow:scroll;overflow-x: scroll;overflow-y: scroll;'>"), sb.toString()), "</div>"));
-    d.get$nodes().forEach$1((function (n) {
-      n.remove$0();
-    })
-    );
-    d.get$nodes().add(textEl);
-  })
-  , false);
-  html_get$document().query("#submitButton").get$on().get$click().add$1((function (event) {
+  this.codeMirror.button.get$on().get$click().add$1((function (event) {
     dart_core_print("click submit button");
-    var t = html_get$document().query("#editorBuffer");
-    var messageRequest = _map(["code", t.get$value()]);
+    var messageRequest = _map(["code", $this.codeMirror.textarea.get$value()]);
     $this.sendRequest("/dartExec", messageRequest, (function (response) {
       dart_core_print(response.$index("console"));
-      var p = html_get$document().query("#results");
-      p.set$innerHTML(response.$index("console"));
+      var p = html_get$document().query("#console");
+      var sb = new StringBufferImpl("");
+      response.$index("console").split_("\n").forEach$1((function (cs) {
+        sb.add($add(cs, "<br>"));
+      })
+      );
+      p.set$innerHTML($add($add("<pre>", sb.toString()), "</pre>"));
       response.forEach((function (k, v) {
         dart_core_print(("k=" + k + ",v=" + v));
       })
@@ -7211,6 +9186,109 @@ DartBoardClient.prototype.sendRequest = function(url, data, onSuccess, onError) 
   request.send(json_JSON.stringify(data));
   return request;
 }
+// ********** Code for CodeMirrorImpl **************
+function CodeMirrorImpl() {
+  this.spacingFormat = (17);
+  this._lineHeight = "1.2";
+  this.rootHeight = (400);
+  this.scrollHeight = (400);
+  this._fontSize = "15px";
+  this.rootWidth = (800);
+  this.scrollWidth = (800);
+  this._font = "monospace";
+  var textareaStr = "<textarea id='editorBuffer' class='textarea' spellcheck='false' wrap='off' goog_input_chext='chext' style='color: transparent; background-color: transparent;'></textarea>";
+  var sectionStr = "    <section>\n    <div class=\"container codemirrorsize\" style=\"position: relative;\" >\n    <div id='viewbackground' class='viewbackground' ></div>\n    <div id=\"mirrorbody\" class=\"body codemirrorsize\">\n    <div id='textarea-container' class=\"textarea-container codemirrorsize\">\n    </div>\n    <div id=\"scroll-container\" class=\"scroll-y-container codemirrorsize\" style=\"top:0; position: absolute; z-index:-1;\"> \n    <div class=\"gutter\"></div>\n    <div id=\"editorBufferContainer\" class=\"scroll-x-container\" style=\"codemirrorsize\">\n    </div>\n    </div>\n    </div>\n    </section>\n";
+  var buttonStr = "<button id=\"submitButton\" value=\"Submit\">Submit</button>";
+  var viewStr = "<div id=\"view\" class=\"view\"><div>";
+  this.console = ElementWrappingImplementation.ElementWrappingImplementation$html$factory("<div><p id='console' class='console'></p></div>");
+  this.textarea = ElementWrappingImplementation.ElementWrappingImplementation$html$factory(textareaStr);
+  this.section = ElementWrappingImplementation.ElementWrappingImplementation$html$factory(sectionStr);
+  this.button = ElementWrappingImplementation.ElementWrappingImplementation$html$factory(buttonStr);
+  this.view = ElementWrappingImplementation.ElementWrappingImplementation$html$factory(viewStr);
+  this.root = ElementWrappingImplementation.ElementWrappingImplementation$tag$factory("div");
+  this.root.get$style().set$height(this.rootHeight);
+  this.root.get$style().set$width(this.rootWidth);
+  this.textarea.get$style().set$width(this.rootWidth);
+  this.textarea.get$style().set$height(this.rootHeight);
+  this.textarea.get$on().get$scroll().add$1(this.get$textAreaScrollHandler());
+  this.textarea.get$on().get$keyUp().add(this.get$keyboardHandler(), false);
+  this.bufferContainer = this.section.query("#editorBufferContainer");
+  this.textarea.get$on().get$input().add((function (_) {
+
+  })
+  , false);
+  this.textarea.get$on().get$click().add$1((function (event) {
+
+  })
+  );
+  this.root.get$nodes().add(this.view);
+  this.view.get$nodes().add(this.button);
+  this.view.get$nodes().add(this.section);
+  this.view.get$nodes().add(this.console);
+  this.view.query("#textarea-container").get$nodes().add(this.textarea);
+}
+CodeMirrorImpl.prototype.getMirror = function() {
+  return this.root;
+}
+CodeMirrorImpl.prototype.loadText = function(text) {
+  var $this = this; // closure support
+  if ((typeof(text) == 'string')) {
+    debugPrint("text is String");
+    this.textarea.set$value(text);
+  }
+  this.textarea.get$rect().then((function (rect) {
+    $this.scrollHeight = rect.scroll.get$height();
+    $this.scrollWidth = rect.scroll.get$width();
+    $this.bufferContainer.get$style().set$width($this.scrollWidth);
+    $this.bufferContainer.get$style().set$height($this.scrollHeight);
+    $this.bufferContainer.get$firstElementChild().get$style().set$height($this.scrollHeight);
+    $this.bufferContainer.get$firstElementChild().get$style().set$width($this.scrollWidth);
+  })
+  );
+  var i = (0);
+  var sb = new StringBufferImpl("");
+  var sf = new SourceFile("hi.dart", this.textarea.get$value());
+  var c = classifySource(sf);
+  c.split_("\n").forEach$1((function (s) {
+    sb.add($add($add(("<div style='top:" + i + "px; left:3; position: absolute;overflow:hidden;overflow-x:hidden;overflow-y:hidden;font-family:" + $this._font + ";font-size:" + $this._fontSize + ";line-height:" + $this._lineHeight + ";'><span>"), s), "</span></div>"));
+    i = $add(i, ($this.spacingFormat));
+  })
+  );
+  var codeLine = ElementWrappingImplementation.ElementWrappingImplementation$html$factory($add($add(("<div style='top:0;position: absolute;height:" + this.scrollHeight + ";width:" + this.scrollWidth + ";overflow:scroll;overflow-x: scroll;overflow-y: scroll;  font-family:" + this._font + ";font-size:" + this._fontSize + ";line-height:" + this._lineHeight + ";'>"), sb.toString()), "</div>"));
+  this.section.query("#editorBufferContainer").get$nodes().forEach$1((function (n) {
+    n.remove$0();
+  })
+  );
+  this.section.query("#editorBufferContainer").get$nodes().add(codeLine);
+}
+CodeMirrorImpl.prototype.keyboardHandler = function(event) {
+  this.loadText();
+}
+CodeMirrorImpl.prototype.get$keyboardHandler = function() {
+  return this.keyboardHandler.bind(this);
+}
+CodeMirrorImpl.prototype.viewResizeHandler = function(element) {
+  var $this = this; // closure support
+  element.get$rect().then((function (rect) {
+    $this.root.get$style().set$left("50%");
+    $this.root.get$style().set$right("50%");
+    $this.root.get$style().set$marginLeft($add(((rect.client.get$width() / (2)) - ($this.rootWidth / (2))).toString(), "px"));
+  })
+  );
+}
+CodeMirrorImpl.prototype.textAreaScrollHandler = function(sc) {
+  var $this = this; // closure support
+  if ($ne(sc)) {
+    this.textarea.get$rect().then((function (rect) {
+      $this.section.query("#scroll-container").get$style().set$top(-rect.scroll.get$top());
+      $this.section.query("#scroll-container").get$style().set$left(-rect.scroll.get$left());
+    })
+    );
+  }
+}
+CodeMirrorImpl.prototype.get$textAreaScrollHandler = function() {
+  return this.textAreaScrollHandler.bind(this);
+}
 // ********** Code for top level **************
 function main() {
   new DartBoardClient().run();
@@ -7225,7 +9303,7 @@ function debugPrintMethod(f) {
     f.call$0();
   }
 }
-// 132 dynamic types.
+// 135 dynamic types.
 // 495 types
 // 43 !leaf
 function $dynamicSetMetadata(inputTable) {
@@ -7258,13 +9336,12 @@ function $dynamicSetMetadata(inputTable) {
   var v11/*CSSValueList*/ = 'CSSValueList|WebKitCSSTransformValue';
   var v12/*DOMTokenList*/ = 'DOMTokenList|DOMSettableTokenList';
   var v13/*EntrySync*/ = 'EntrySync|DirectoryEntrySync|FileEntrySync';
-  var v14/*UIEvent*/ = 'UIEvent|CompositionEvent|KeyboardEvent|MouseEvent|SVGZoomEvent|TextEvent|TouchEvent|WheelEvent';
-  var v15/*EventTarget*/ = [v7/*AbstractWorker*/,v8/*Node*/,'EventTarget|DOMApplicationCache|DOMWindow|EventSource|MessagePort|Notification|SVGElementInstance|WebSocket|XMLHttpRequest|XMLHttpRequestUpload'].join('|');
-  var v16/*HTMLCollection*/ = 'HTMLCollection|HTMLOptionsCollection';
-  var v17/*IDBRequest*/ = 'IDBRequest|IDBVersionChangeRequest';
-  var v18/*SVGStylable*/ = 'SVGStylable|SVGFilterPrimitiveStandardAttributes';
-  var v19/*StyleSheet*/ = 'StyleSheet|CSSStyleSheet';
-  var v20/*WorkerContext*/ = 'WorkerContext|DedicatedWorkerContext|SharedWorkerContext';
+  var v14/*EventTarget*/ = [v7/*AbstractWorker*/,v8/*Node*/,'EventTarget|DOMApplicationCache|DOMWindow|EventSource|MessagePort|Notification|SVGElementInstance|WebSocket|XMLHttpRequest|XMLHttpRequestUpload'].join('|');
+  var v15/*HTMLCollection*/ = 'HTMLCollection|HTMLOptionsCollection';
+  var v16/*IDBRequest*/ = 'IDBRequest|IDBVersionChangeRequest';
+  var v17/*SVGStylable*/ = 'SVGStylable|SVGFilterPrimitiveStandardAttributes';
+  var v18/*StyleSheet*/ = 'StyleSheet|CSSStyleSheet';
+  var v19/*WorkerContext*/ = 'WorkerContext|DedicatedWorkerContext|SharedWorkerContext';
   var table = [
     // [dynamic-dispatch-tag, tags of classes implementing dynamic-dispatch-tag]
     ['AbstractWorker', v7/*AbstractWorker*/]
@@ -7280,15 +9357,14 @@ function $dynamicSetMetadata(inputTable) {
     , ['Element', v6/*Element*/]
     , ['EntrySync', v13/*EntrySync*/]
     , ['Node', v8/*Node*/]
-    , ['EventTarget', v15/*EventTarget*/]
-    , ['HTMLCollection', v16/*HTMLCollection*/]
-    , ['IDBRequest', v17/*IDBRequest*/]
-    , ['SVGStylable', v18/*SVGStylable*/]
-    , ['StyleSheet', v19/*StyleSheet*/]
-    , ['UIEvent', v14/*UIEvent*/]
+    , ['EventTarget', v14/*EventTarget*/]
+    , ['HTMLCollection', v15/*HTMLCollection*/]
+    , ['IDBRequest', v16/*IDBRequest*/]
+    , ['SVGStylable', v17/*SVGStylable*/]
+    , ['StyleSheet', v18/*StyleSheet*/]
     , ['Uint8Array', v9/*Uint8Array*/]
-    , ['WorkerContext', v20/*WorkerContext*/]
-    , ['DOMType', [v9/*Uint8Array*/,v10/*AudioParam*/,v11/*CSSValueList*/,v12/*DOMTokenList*/,v13/*EntrySync*/,v14/*UIEvent*/,v15/*EventTarget*/,v16/*HTMLCollection*/,v17/*IDBRequest*/,v18/*SVGStylable*/,v19/*StyleSheet*/,v20/*WorkerContext*/,'DOMType|ArrayBuffer|ArrayBufferView|DataView|Float32Array|Float64Array|Int16Array|Int32Array|Int8Array|Uint16Array|Uint32Array|AudioBuffer|AudioContext|AudioListener|AudioNode|AudioChannelMerger|AudioChannelSplitter|AudioDestinationNode|AudioGainNode|AudioPannerNode|AudioSourceNode|AudioBufferSourceNode|MediaElementAudioSourceNode|BiquadFilterNode|ConvolverNode|DelayNode|DynamicsCompressorNode|HighPass2FilterNode|JavaScriptAudioNode|LowPass2FilterNode|RealtimeAnalyserNode|WaveShaperNode|BarInfo|Blob|File|CSSRule|CSSCharsetRule|CSSFontFaceRule|CSSImportRule|CSSMediaRule|CSSPageRule|CSSStyleRule|CSSUnknownRule|WebKitCSSKeyframeRule|WebKitCSSKeyframesRule|WebKitCSSRegionRule|CSSRuleList|CSSStyleDeclaration|CSSValue|CSSPrimitiveValue|SVGColor|SVGPaint|CanvasGradient|CanvasPattern|CanvasPixelArray|CanvasRenderingContext|CanvasRenderingContext2D|WebGLRenderingContext|ClientRect|ClientRectList|Clipboard|Coordinates|Counter|Crypto|DOMException|DOMFileSystem|DOMFileSystemSync|DOMFormData|DOMImplementation|DOMMimeType|DOMMimeTypeArray|DOMParser|DOMPlugin|DOMPluginArray|DOMSelection|DOMURL|DataTransferItem|DataTransferItemList|Database|DatabaseSync|DirectoryReader|DirectoryReaderSync|ElementTimeControl|ElementTraversal|Entry|DirectoryEntry|FileEntry|EntryArray|EntryArraySync|Event|AudioProcessingEvent|BeforeLoadEvent|CloseEvent|CustomEvent|DeviceMotionEvent|DeviceOrientationEvent|ErrorEvent|HashChangeEvent|IDBVersionChangeEvent|MessageEvent|MutationEvent|OfflineAudioCompletionEvent|OverflowEvent|PageTransitionEvent|PopStateEvent|ProgressEvent|XMLHttpRequestProgressEvent|SpeechInputEvent|StorageEvent|TrackEvent|WebGLContextEvent|WebKitAnimationEvent|WebKitTransitionEvent|EventException|FileError|FileException|FileList|FileReader|FileReaderSync|FileWriter|FileWriterSync|Geolocation|Geoposition|HTMLAllCollection|History|IDBAny|IDBCursor|IDBCursorWithValue|IDBDatabase|IDBDatabaseError|IDBDatabaseException|IDBFactory|IDBIndex|IDBKey|IDBKeyRange|IDBObjectStore|IDBTransaction|ImageData|JavaScriptCallFrame|Location|MediaController|MediaError|MediaList|MediaQueryList|MediaQueryListListener|MemoryInfo|MessageChannel|Metadata|NamedNodeMap|Navigator|NodeFilter|NodeIterator|NodeList|NodeSelector|NotificationCenter|OESStandardDerivatives|OESTextureFloat|OESVertexArrayObject|OperationNotAllowedException|Performance|PerformanceNavigation|PerformanceTiming|PositionError|RGBColor|Range|RangeException|Rect|SQLError|SQLException|SQLResultSet|SQLResultSetRowList|SQLTransaction|SQLTransactionSync|SVGAngle|SVGAnimatedAngle|SVGAnimatedBoolean|SVGAnimatedEnumeration|SVGAnimatedInteger|SVGAnimatedLength|SVGAnimatedLengthList|SVGAnimatedNumber|SVGAnimatedNumberList|SVGAnimatedPreserveAspectRatio|SVGAnimatedRect|SVGAnimatedString|SVGAnimatedTransformList|SVGElementInstanceList|SVGException|SVGExternalResourcesRequired|SVGFitToViewBox|SVGLangSpace|SVGLength|SVGLengthList|SVGLocatable|SVGTransformable|SVGMatrix|SVGNumber|SVGNumberList|SVGPathSeg|SVGPathSegArcAbs|SVGPathSegArcRel|SVGPathSegClosePath|SVGPathSegCurvetoCubicAbs|SVGPathSegCurvetoCubicRel|SVGPathSegCurvetoCubicSmoothAbs|SVGPathSegCurvetoCubicSmoothRel|SVGPathSegCurvetoQuadraticAbs|SVGPathSegCurvetoQuadraticRel|SVGPathSegCurvetoQuadraticSmoothAbs|SVGPathSegCurvetoQuadraticSmoothRel|SVGPathSegLinetoAbs|SVGPathSegLinetoHorizontalAbs|SVGPathSegLinetoHorizontalRel|SVGPathSegLinetoRel|SVGPathSegLinetoVerticalAbs|SVGPathSegLinetoVerticalRel|SVGPathSegMovetoAbs|SVGPathSegMovetoRel|SVGPathSegList|SVGPoint|SVGPointList|SVGPreserveAspectRatio|SVGRect|SVGRenderingIntent|SVGStringList|SVGTests|SVGTransform|SVGTransformList|SVGURIReference|SVGUnitTypes|SVGZoomAndPan|SVGViewSpec|Screen|ScriptProfile|ScriptProfileNode|SpeechInputResult|SpeechInputResultList|Storage|StorageInfo|StyleMedia|StyleSheetList|TextMetrics|TextTrack|TextTrackCue|TextTrackCueList|TextTrackList|TimeRanges|Touch|TouchList|TreeWalker|ValidityState|WebGLActiveInfo|WebGLBuffer|WebGLCompressedTextures|WebGLContextAttributes|WebGLDebugRendererInfo|WebGLDebugShaders|WebGLFramebuffer|WebGLLoseContext|WebGLProgram|WebGLRenderbuffer|WebGLShader|WebGLTexture|WebGLUniformLocation|WebGLVertexArrayObjectOES|WebKitAnimation|WebKitAnimationList|WebKitBlobBuilder|WebKitCSSMatrix|WebKitNamedFlow|WebKitPoint|WorkerLocation|WorkerNavigator|XMLHttpRequestException|XMLSerializer|XPathEvaluator|XPathException|XPathExpression|XPathNSResolver|XPathResult|XSLTProcessor'].join('|')]
+    , ['WorkerContext', v19/*WorkerContext*/]
+    , ['DOMType', [v9/*Uint8Array*/,v10/*AudioParam*/,v11/*CSSValueList*/,v12/*DOMTokenList*/,v13/*EntrySync*/,v14/*EventTarget*/,v15/*HTMLCollection*/,v16/*IDBRequest*/,v17/*SVGStylable*/,v18/*StyleSheet*/,v19/*WorkerContext*/,'DOMType|ArrayBuffer|ArrayBufferView|DataView|Float32Array|Float64Array|Int16Array|Int32Array|Int8Array|Uint16Array|Uint32Array|AudioBuffer|AudioContext|AudioListener|AudioNode|AudioChannelMerger|AudioChannelSplitter|AudioDestinationNode|AudioGainNode|AudioPannerNode|AudioSourceNode|AudioBufferSourceNode|MediaElementAudioSourceNode|BiquadFilterNode|ConvolverNode|DelayNode|DynamicsCompressorNode|HighPass2FilterNode|JavaScriptAudioNode|LowPass2FilterNode|RealtimeAnalyserNode|WaveShaperNode|BarInfo|Blob|File|CSSRule|CSSCharsetRule|CSSFontFaceRule|CSSImportRule|CSSMediaRule|CSSPageRule|CSSStyleRule|CSSUnknownRule|WebKitCSSKeyframeRule|WebKitCSSKeyframesRule|WebKitCSSRegionRule|CSSRuleList|CSSStyleDeclaration|CSSValue|CSSPrimitiveValue|SVGColor|SVGPaint|CanvasGradient|CanvasPattern|CanvasPixelArray|CanvasRenderingContext|CanvasRenderingContext2D|WebGLRenderingContext|ClientRect|ClientRectList|Clipboard|Coordinates|Counter|Crypto|DOMException|DOMFileSystem|DOMFileSystemSync|DOMFormData|DOMImplementation|DOMMimeType|DOMMimeTypeArray|DOMParser|DOMPlugin|DOMPluginArray|DOMSelection|DOMURL|DataTransferItem|DataTransferItemList|Database|DatabaseSync|DirectoryReader|DirectoryReaderSync|ElementTimeControl|ElementTraversal|Entry|DirectoryEntry|FileEntry|EntryArray|EntryArraySync|Event|AudioProcessingEvent|BeforeLoadEvent|CloseEvent|CustomEvent|DeviceMotionEvent|DeviceOrientationEvent|ErrorEvent|HashChangeEvent|IDBVersionChangeEvent|MessageEvent|MutationEvent|OfflineAudioCompletionEvent|OverflowEvent|PageTransitionEvent|PopStateEvent|ProgressEvent|XMLHttpRequestProgressEvent|SpeechInputEvent|StorageEvent|TrackEvent|UIEvent|CompositionEvent|KeyboardEvent|MouseEvent|SVGZoomEvent|TextEvent|TouchEvent|WheelEvent|WebGLContextEvent|WebKitAnimationEvent|WebKitTransitionEvent|EventException|FileError|FileException|FileList|FileReader|FileReaderSync|FileWriter|FileWriterSync|Geolocation|Geoposition|HTMLAllCollection|History|IDBAny|IDBCursor|IDBCursorWithValue|IDBDatabase|IDBDatabaseError|IDBDatabaseException|IDBFactory|IDBIndex|IDBKey|IDBKeyRange|IDBObjectStore|IDBTransaction|ImageData|JavaScriptCallFrame|Location|MediaController|MediaError|MediaList|MediaQueryList|MediaQueryListListener|MemoryInfo|MessageChannel|Metadata|NamedNodeMap|Navigator|NodeFilter|NodeIterator|NodeList|NodeSelector|NotificationCenter|OESStandardDerivatives|OESTextureFloat|OESVertexArrayObject|OperationNotAllowedException|Performance|PerformanceNavigation|PerformanceTiming|PositionError|RGBColor|Range|RangeException|Rect|SQLError|SQLException|SQLResultSet|SQLResultSetRowList|SQLTransaction|SQLTransactionSync|SVGAngle|SVGAnimatedAngle|SVGAnimatedBoolean|SVGAnimatedEnumeration|SVGAnimatedInteger|SVGAnimatedLength|SVGAnimatedLengthList|SVGAnimatedNumber|SVGAnimatedNumberList|SVGAnimatedPreserveAspectRatio|SVGAnimatedRect|SVGAnimatedString|SVGAnimatedTransformList|SVGElementInstanceList|SVGException|SVGExternalResourcesRequired|SVGFitToViewBox|SVGLangSpace|SVGLength|SVGLengthList|SVGLocatable|SVGTransformable|SVGMatrix|SVGNumber|SVGNumberList|SVGPathSeg|SVGPathSegArcAbs|SVGPathSegArcRel|SVGPathSegClosePath|SVGPathSegCurvetoCubicAbs|SVGPathSegCurvetoCubicRel|SVGPathSegCurvetoCubicSmoothAbs|SVGPathSegCurvetoCubicSmoothRel|SVGPathSegCurvetoQuadraticAbs|SVGPathSegCurvetoQuadraticRel|SVGPathSegCurvetoQuadraticSmoothAbs|SVGPathSegCurvetoQuadraticSmoothRel|SVGPathSegLinetoAbs|SVGPathSegLinetoHorizontalAbs|SVGPathSegLinetoHorizontalRel|SVGPathSegLinetoRel|SVGPathSegLinetoVerticalAbs|SVGPathSegLinetoVerticalRel|SVGPathSegMovetoAbs|SVGPathSegMovetoRel|SVGPathSegList|SVGPoint|SVGPointList|SVGPreserveAspectRatio|SVGRect|SVGRenderingIntent|SVGStringList|SVGTests|SVGTransform|SVGTransformList|SVGURIReference|SVGUnitTypes|SVGZoomAndPan|SVGViewSpec|Screen|ScriptProfile|ScriptProfileNode|SpeechInputResult|SpeechInputResultList|Storage|StorageInfo|StyleMedia|StyleSheetList|TextMetrics|TextTrack|TextTrackCue|TextTrackCueList|TextTrackList|TimeRanges|Touch|TouchList|TreeWalker|ValidityState|WebGLActiveInfo|WebGLBuffer|WebGLCompressedTextures|WebGLContextAttributes|WebGLDebugRendererInfo|WebGLDebugShaders|WebGLFramebuffer|WebGLLoseContext|WebGLProgram|WebGLRenderbuffer|WebGLShader|WebGLTexture|WebGLUniformLocation|WebGLVertexArrayObjectOES|WebKitAnimation|WebKitAnimationList|WebKitBlobBuilder|WebKitCSSMatrix|WebKitNamedFlow|WebKitPoint|WorkerLocation|WorkerNavigator|XMLHttpRequestException|XMLSerializer|XPathEvaluator|XPathException|XPathExpression|XPathNSResolver|XPathResult|XSLTProcessor'].join('|')]
   ];
   $dynamicSetMetadata(table);
 })();
@@ -7298,16 +9374,16 @@ function $static_init(){
   $globals._firstMeasurementRequest = true;
   $globals._nextMeasurementFrameScheduled = false;
 }
-var const$0001 = new JSSyntaxRegExp("^(?:([^:/?#.]+):)?(?://(?:([^/?#]*)@)?([\\w\\d\\-\\u0100-\\uffff.%]*)(?::([0-9]+))?)?([^?#]+)?(?:\\?([^#]*))?(?:#(.*))?$");
+var const$0000 = new JSSyntaxRegExp("<(\\w+)");
+var const$0001 = Object.create(EmptyQueueException.prototype, {});
 var const$0002 = Object.create(_DeletedKeySentinel.prototype, {});
-var const$0003 = Object.create(NoMoreElementsException.prototype, {});
-var const$0006 = new JSSyntaxRegExp("<(\\w+)");
-var const$0007 = Object.create(IllegalAccessException.prototype, {});
-var const$0008 = Object.create(EmptyQueueException.prototype, {});
-var const$0009 = _constMap(["body", "html", "head", "html", "caption", "table", "td", "tr", "tbody", "table", "colgroup", "table", "col", "colgroup", "tr", "tbody", "tbody", "table", "tfoot", "table", "thead", "table", "track", "audio"]);
-var const$0010 = Object.create(SimpleClientRect.prototype, {left: {"value": (0), writeable: false}, top: {"value": (0), writeable: false}, width: {"value": (0), writeable: false}, height: {"value": (0), writeable: false}});
-var const$0011 = ImmutableList.ImmutableList$from$factory([]);
-var const$0012 = Object.create(EmptyElementRect.prototype, {client: {"value": const$0010, writeable: false}, scroll: {"value": const$0010, writeable: false}, bounding: {"value": const$0010, writeable: false}, clientRects: {"value": const$0011, writeable: false}, offset: {"value": const$0010, writeable: false}});
+var const$0003 = Object.create(IllegalAccessException.prototype, {});
+var const$0004 = _constMap(["body", "html", "head", "html", "caption", "table", "td", "tr", "tbody", "table", "colgroup", "table", "col", "colgroup", "tr", "tbody", "tbody", "table", "tfoot", "table", "thead", "table", "track", "audio"]);
+var const$0005 = Object.create(NoMoreElementsException.prototype, {});
+var const$0008 = Object.create(SimpleClientRect.prototype, {left: {"value": (0), writeable: false}, top: {"value": (0), writeable: false}, width: {"value": (0), writeable: false}, height: {"value": (0), writeable: false}});
+var const$0009 = ImmutableList.ImmutableList$from$factory([]);
+var const$0010 = Object.create(EmptyElementRect.prototype, {client: {"value": const$0008, writeable: false}, scroll: {"value": const$0008, writeable: false}, bounding: {"value": const$0008, writeable: false}, clientRects: {"value": const$0009, writeable: false}, offset: {"value": const$0008, writeable: false}});
+var const$0012 = new JSSyntaxRegExp("^(?:([^:/?#.]+):)?(?://(?:([^/?#]*)@)?([\\w\\d\\-\\u0100-\\uffff.%]*)(?::([0-9]+))?)?([^?#]+)?(?:\\?([^#]*))?(?:#(.*))?$");
 var $globals = {};
 $static_init();
 main();

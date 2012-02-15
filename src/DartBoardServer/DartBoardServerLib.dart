@@ -33,6 +33,7 @@ class DartBoardServer extends IsolatedServer {
     String DARTBOARDCSSLOCATION="/Users/adam/dart/DartBoard/src/DartBoardClient/dartboard.css";
     String PHOTOLOCATION="/Users/adam/dart/DartBoard/src/DartBoardClient/photo.jpg";
     String STYLELOCATION="/Users/adam/dart/DartBoard/src/DartBoardClient/style.css"; 
+    String HIGHLIGHTLOCATION="/Users/adam/dart/DartBoard/src/DartBoardClient/highlight.css"; 
     
     String DARTBOARDCLIENTHTMLREQUEST="/DartBoardClient.html";
     String DARTBOARDCLIENTDARTREQUEST="/DartBoardClient.dart";
@@ -40,6 +41,7 @@ class DartBoardServer extends IsolatedServer {
     String DARTBOARDCSSREQUEST="/dartboard.css";
     String PHOTOREQUEST="/photo.jpg";
     String STYLEREQUEST="/style.css";
+    String HIGHLIGHTREQUEST="/highlight.css";
     
     Map DARTBOARDCLIENT={};
     DARTBOARDCLIENT[DARTBOARDCLIENTHTMLREQUEST]= DARTBOARDCLIENTHTMLLOCATION;
@@ -48,6 +50,7 @@ class DartBoardServer extends IsolatedServer {
     DARTBOARDCLIENT[DARTBOARDCSSREQUEST]= DARTBOARDCSSLOCATION;
     DARTBOARDCLIENT[PHOTOREQUEST]= PHOTOLOCATION;
     DARTBOARDCLIENT[STYLEREQUEST]= STYLELOCATION;
+    DARTBOARDCLIENT[HIGHLIGHTREQUEST]= HIGHLIGHTLOCATION;
     
 //"DartBoardClient.html":"/Users/adam/dart/DartBoard/src/DartBoardClient/DartBoardClient.html", 
 //"DartBoardClient.dart":"/Users/adam/dart/DartBoard/src/DartBoardClient/DartBoardClient.dart"
@@ -84,6 +87,10 @@ class DartBoardServer extends IsolatedServer {
     addHandler(STYLEREQUEST,
       (HTTPRequest request, HTTPResponse response) =>
           fileHandler(request, response, DARTBOARDCLIENT[STYLEREQUEST]));
+    
+    addHandler(HIGHLIGHTREQUEST,
+      (HTTPRequest request, HTTPResponse response) =>
+          fileHandler(request, response, DARTBOARDCLIENT[HIGHLIGHTREQUEST]));
     
     addHandler("/getCode", (HTTPRequest request, HTTPResponse response) {
       if (request.queryParameters.containsKey('docId')) {

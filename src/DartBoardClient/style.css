@@ -1,12 +1,5 @@
 /* some of this we might want calculated */
-.view {
-	left : 50%;
-	top: 50%;
-	margin-left: 350px;
-	width:701px; 
-	min-height:333px;
-	-webkit-align: center; 
-}
+
 
 .keepcentered {
     position:    absolute;
@@ -44,7 +37,7 @@
 }
 
 body {
-	background: url('photo.jpg') no-repeat; 
+	background: url('photo.jpg') no-repeat;
 	background-size: 100%;
     margin:none;
     padding:none;
@@ -61,30 +54,29 @@ body {
 }
 
 .body {
-	top: 34px; 
-	 
+	
 	position: absolute; 
 	overflow: hidden;
-	height:400;
-	width:400;
-
 
 }
 
 .textarea-container {
 	left: 0px; 
 	position: absolute;
-	background-image: -webkit-gradient(
-  linear, left top, left bottom, from(rgba(50,50,50,0.8)),
-  to(rgba(80,80,80,0.2)), color-stop(.5,#333333)
+	
 );
 }
 
+.codemirrorsize {
+	width:       800px;     /* The fixed width... */
+    height:      400px;      /* ...and height */
+}
+
 .textarea {
-	color: blue; 
+	/* color: blue; */
+	color: transparent; 
 	background-color: transparent; 
-	height:400; 
-	width:400;
+	
 	font-family: monospace;
 	font-size: 15px;
 	line-height: 1.2;
@@ -117,8 +109,7 @@ body {
 	top:0px; 
 	left: 0px; 
 	z-index:-1; 
-	height:10000; 
-	width:400;
+	
 	font-family: monospace; 
 	font-size: 15px;
 	line-height: 1.2;
@@ -139,3 +130,22 @@ body {
 	display: inline-block;
 	text-align: -webkit-auto;
 }
+
+.view {
+      /* background-color: rgb(5, 0, 0) ; opacity: 0.5;  */
+}
+
+.viewbackground {
+    /* background-color: rgb(26, 0, 153) ; opacity: 0.8;  */
+    background-color: rgb(255, 255, 255) ; opacity: 0.8; 
+    z-index:-1;
+    position:absolute;
+	width:       800px;     /* The fixed width... */
+    height:      400px;      /* ...and height */
+
+}
+
+.console {
+    background-color: rgb(26, 0, 153) ; opacity: 0.8;
+}
+
