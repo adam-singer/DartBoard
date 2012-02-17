@@ -5,18 +5,26 @@ function $defProp(obj, prop, value) {
       {value: value, enumerable: false, writable: true, configurable: true});
 }
 $defProp(Object.prototype, '$typeNameOf', function() {
-  if ((typeof(window) != 'undefined' && window.constructor.name == 'DOMWindow')
-      || typeof(process) != 'undefined') { // fast-path for Chrome and Node
-    return this.constructor.name;
+  var constructor = this.constructor;
+  if (typeof(constructor) == 'function') {
+    // The constructor isn't null or undefined at this point. Try
+    // to grab hold of its name.
+    var name = constructor.name;
+    // If the name is a non-empty string, we use that as the type
+    // name of this object. On Firefox, we often get 'Object' as
+    // the constructor name even for more specialized objects so
+    // we have to fall through to the toString() based implementation
+    // below in that case.
+    if (name && typeof(name) == 'string' && name != 'Object') return name;
   }
-  var str = Object.prototype.toString.call(this);
-  str = str.substring(8, str.length - 1);
-  if (str == 'Window') {
-    str = 'DOMWindow';
-  } else if (str == 'Document') {
-    str = 'HTMLDocument';
+  var string = Object.prototype.toString.call(this);
+  var name = string.substring(8, string.length - 1);
+  if (name == 'Window') {
+    name = 'DOMWindow';
+  } else if (name == 'Document') {
+    name = 'HTMLDocument';
   }
-  return str;
+  return name;
 });
 function $throw(e) {
   // If e is not a value, we can use V8's captureStackTrace utility method.
@@ -28,11 +36,7 @@ function $throw(e) {
   throw e;
 }
 $defProp(Object.prototype, '$index', function(i) {
-  var proto = Object.getPrototypeOf(this);
-  if (proto !== Object) {
-    proto.$index = function(i) { return this[i]; }
-  }
-  return this[i];
+  $throw(new NoSuchMethodException(this, "operator []", [i]));
 });
 $defProp(Array.prototype, '$index', function(index) {
   var i = index | 0;
@@ -47,11 +51,7 @@ $defProp(String.prototype, '$index', function(i) {
   return this[i];
 });
 $defProp(Object.prototype, '$setindex', function(i, value) {
-  var proto = Object.getPrototypeOf(this);
-  if (proto !== Object) {
-    proto.$setindex = function(i, value) { return this[i] = value; }
-  }
-  return this[i] = value;
+  $throw(new NoSuchMethodException(this, "operator []=", [i, value]));
 });
 $defProp(Array.prototype, '$setindex', function(index, value) {
   var i = index | 0;
@@ -63,44 +63,78 @@ $defProp(Array.prototype, '$setindex', function(index, value) {
   return this[i] = value;
 });
 function $wrap_call$1(fn) { return fn; }
+function $add$complex(x, y) {
+  if (typeof(x) == 'number') {
+    $throw(new IllegalArgumentException(y));
+  } else if (typeof(x) == 'string') {
+    var str = (y == null) ? 'null' : y.toString();
+    if (typeof(str) != 'string') {
+      throw new Error("calling toString() on right hand operand of operator " +
+      "+ did not return a String");
+    }
+    return x + str;
+  } else if (typeof(x) == 'object') {
+    return x.$add(y);
+  } else {
+    $throw(new NoSuchMethodException(x, "operator +", [y]));
+  }
+}
+
 function $add(x, y) {
-  return ((typeof(x) == 'number' && typeof(y) == 'number') ||
-          (typeof(x) == 'string'))
-    ? x + y : x.$add(y);
+  if (typeof(x) == 'number' && typeof(y) == 'number') return x + y;
+  return $add$complex(x, y);
 }
 function $eq(x, y) {
   if (x == null) return y == null;
-  return (typeof(x) == 'number' && typeof(y) == 'number') ||
-         (typeof(x) == 'boolean' && typeof(y) == 'boolean') ||
-         (typeof(x) == 'string' && typeof(y) == 'string')
-    ? x == y : x.$eq(y);
+  return (typeof(x) != 'object') ? x === y : x.$eq(y);
 }
 // TODO(jimhug): Should this or should it not match equals?
 $defProp(Object.prototype, '$eq', function(other) {
   return this === other;
 });
+function $mul$complex(x, y) {
+  if (typeof(x) == 'number') {
+    $throw(new IllegalArgumentException(y));
+  } else if (typeof(x) == 'object') {
+    return x.$mul(y);
+  } else {
+    $throw(new NoSuchMethodException(x, "operator *", [y]));
+  }
+}
 function $mul(x, y) {
-  return (typeof(x) == 'number' && typeof(y) == 'number')
-    ? x * y : x.$mul(y);
+  if (typeof(x) == 'number' && typeof(y) == 'number') return x * y;
+  return $mul$complex(x, y);
 }
 function $ne(x, y) {
   if (x == null) return y != null;
-  return (typeof(x) == 'number' && typeof(y) == 'number') ||
-         (typeof(x) == 'boolean' && typeof(y) == 'boolean') ||
-         (typeof(x) == 'string' && typeof(y) == 'string')
-    ? x != y : !x.$eq(y);
+  return (typeof(x) != 'object') ? x !== y : !x.$eq(y);
+}
+function $sub$complex(x, y) {
+  if (typeof(x) == 'number') {
+    $throw(new IllegalArgumentException(y));
+  } else if (typeof(x) == 'object') {
+    return x.$sub(y);
+  } else {
+    $throw(new NoSuchMethodException(x, "operator -", [y]));
+  }
 }
 function $sub(x, y) {
-  return (typeof(x) == 'number' && typeof(y) == 'number')
-    ? x - y : x.$sub(y);
+  if (typeof(x) == 'number' && typeof(y) == 'number') return x - y;
+  return $sub$complex(x, y);
 }
 function $truncdiv(x, y) {
-  if (typeof(x) == 'number' && typeof(y) == 'number') {
-    if (y == 0) $throw(new IntegerDivisionByZeroException());
-    var tmp = x / y;
-    return (tmp < 0) ? Math.ceil(tmp) : Math.floor(tmp);
-  } else {
+  if (typeof(x) == 'number') {
+    if (typeof(y) == 'number') {
+      if (y == 0) $throw(new IntegerDivisionByZeroException());
+      var tmp = x / y;
+      return (tmp < 0) ? Math.ceil(tmp) : Math.floor(tmp);
+    } else {
+      $throw(new IllegalArgumentException(y));
+    }
+  } else if (typeof(x) == 'object') {
     return x.$truncdiv(y);
+  } else {
+    $throw(new NoSuchMethodException(x, "operator ~/", [y]));
   }
 }
 $defProp(Object.prototype, "get$typeName", Object.prototype.$typeNameOf);
@@ -205,11 +239,12 @@ IllegalAccessException.prototype.toString = function() {
 }
 // ********** Code for NoSuchMethodException **************
 function NoSuchMethodException(_receiver, _functionName, _arguments, _existingArgumentNames) {
-  this._existingArgumentNames = _existingArgumentNames;
   this._receiver = _receiver;
   this._functionName = _functionName;
   this._arguments = _arguments;
+  this._existingArgumentNames = _existingArgumentNames;
 }
+NoSuchMethodException.prototype.is$NoSuchMethodException = function(){return true};
 NoSuchMethodException.prototype.is$Exception = function(){return true};
 NoSuchMethodException.prototype.toString = function() {
   var sb = new StringBufferImpl("");
@@ -465,16 +500,16 @@ $defProp(ListFactory.prototype, "forEach$1", function($0) {
 // ********** Code for ListIterator **************
 function ListIterator(array) {
   this._array = array;
-  this._dart_coreimpl_pos = (0);
+  this._pos = (0);
 }
 ListIterator.prototype.hasNext = function() {
-  return this._array.get$length() > this._dart_coreimpl_pos;
+  return this._array.get$length() > this._pos;
 }
 ListIterator.prototype.next = function() {
   if (!this.hasNext()) {
     $throw(const$0005);
   }
-  return this._array.$index(this._dart_coreimpl_pos++);
+  return this._array.$index(this._pos++);
 }
 // ********** Code for ImmutableList **************
 /** Implements extends for Dart classes on JavaScript prototypes. */
@@ -584,11 +619,11 @@ JSSyntaxRegExp.prototype.get$_global = function() {
 }
 // ********** Code for MatchImplementation **************
 function MatchImplementation(pattern, str, _start, _end, _groups) {
+  this.pattern = pattern;
   this.str = str;
   this._start = _start;
-  this._groups = _groups;
-  this.pattern = pattern;
   this._end = _end;
+  this._groups = _groups;
 }
 MatchImplementation.prototype.start = function() {
   return this._start;
@@ -615,27 +650,27 @@ _AllMatchesIterable.prototype.iterator = function() {
 }
 // ********** Code for _AllMatchesIterator **************
 function _AllMatchesIterator(re, _str) {
-  this._done = false;
   this._re = re.get$_global();
   this._str = _str;
+  this._done = false;
 }
 _AllMatchesIterator.prototype.next = function() {
   if (!this.hasNext()) {
     $throw(const$0005);
   }
-  var next = this._dart_coreimpl_next;
-  this._dart_coreimpl_next = null;
+  var next = this._next;
+  this._next = null;
   return next;
 }
 _AllMatchesIterator.prototype.hasNext = function() {
   if (this._done) {
     return false;
   }
-  else if (this._dart_coreimpl_next != null) {
+  else if (this._next != null) {
     return true;
   }
-  this._dart_coreimpl_next = this._re.firstMatch(this._str);
-  if (this._dart_coreimpl_next == null) {
+  this._next = this._re.firstMatch(this._str);
+  if (this._next == null) {
     this._done = true;
     return false;
   }
@@ -669,8 +704,8 @@ FutureAlreadyCompleteException.prototype.toString = function() {
 }
 // ********** Code for FutureImpl **************
 function FutureImpl() {
-  this._exceptionHandlers = new Array();
   this._listeners = new Array();
+  this._exceptionHandlers = new Array();
   this._isComplete = false;
   this._exceptionHandled = false;
 }
@@ -998,28 +1033,28 @@ function _DeletedKeySentinel() {
 }
 // ********** Code for KeyValuePair **************
 function KeyValuePair(key, value) {
-  this.value = value;
   this.key = key;
+  this.value = value;
 }
 KeyValuePair.prototype.get$value = function() { return this.value; };
 KeyValuePair.prototype.set$value = function(value) { return this.value = value; };
 // ********** Code for LinkedHashMapImplementation **************
 function LinkedHashMapImplementation() {
-  this._dart_coreimpl_map = new HashMapImplementation_Dynamic$DoubleLinkedQueueEntry_KeyValuePair();
+  this._map = new HashMapImplementation_Dynamic$DoubleLinkedQueueEntry_KeyValuePair();
   this._list = new DoubleLinkedQueue_KeyValuePair();
 }
 LinkedHashMapImplementation.prototype.is$Map_dart_core_String$Dynamic = function(){return true};
 LinkedHashMapImplementation.prototype.$setindex = function(key, value) {
-  if (this._dart_coreimpl_map.containsKey(key)) {
-    this._dart_coreimpl_map.$index(key).get$element().set$value(value);
+  if (this._map.containsKey(key)) {
+    this._map.$index(key).get$element().set$value(value);
   }
   else {
     this._list.addLast(new KeyValuePair(key, value));
-    this._dart_coreimpl_map.$setindex(key, this._list.lastEntry());
+    this._map.$setindex(key, this._list.lastEntry());
   }
 }
 LinkedHashMapImplementation.prototype.$index = function(key) {
-  var entry = this._dart_coreimpl_map.$index(key);
+  var entry = this._map.$index(key);
   if (null == entry) return null;
   return entry.get$element().get$value();
 }
@@ -1038,16 +1073,16 @@ LinkedHashMapImplementation.prototype.forEach = function(f) {
   );
 }
 LinkedHashMapImplementation.prototype.containsKey = function(key) {
-  return this._dart_coreimpl_map.containsKey(key);
+  return this._map.containsKey(key);
 }
 LinkedHashMapImplementation.prototype.get$length = function() {
-  return this._dart_coreimpl_map.get$length();
+  return this._map.get$length();
 }
 LinkedHashMapImplementation.prototype.isEmpty = function() {
   return this.get$length() == (0);
 }
 LinkedHashMapImplementation.prototype.clear = function() {
-  this._dart_coreimpl_map.clear();
+  this._map.clear();
   this._list.clear();
 }
 LinkedHashMapImplementation.prototype.clear$0 = LinkedHashMapImplementation.prototype.clear;
@@ -1134,6 +1169,23 @@ DoubleLinkedQueue.prototype.first = function() {
 DoubleLinkedQueue.prototype.get$first = function() {
   return this.first.bind(this);
 }
+Function.prototype.bind = Function.prototype.bind ||
+  function(thisObj, args) {
+    var func = this;
+    if (typeof args !== 'undefined') {
+      var boundArgs = Array.prototype.slice.call(arguments, 3);
+      return function() {
+        // Prepend the bound arguments to the current arguments.
+        var newArgs = Array.prototype.slice.call(arguments);
+        Array.prototype.unshift.apply(newArgs, boundArgs);
+        return func.apply(thisObj, newArgs);
+      };
+    } else {
+      return function() {
+        return func.apply(thisObj, arguments);
+      };
+    }
+  };
 DoubleLinkedQueue.prototype.lastEntry = function() {
   return this._sentinel.previousEntry();
 }
@@ -1553,7 +1605,7 @@ $dynamic("$setindex").CanvasPixelArray = function(index, value) {
   this[index] = value
 }
 $dynamic("iterator").CanvasPixelArray = function() {
-  return new dom__FixedSizeListIterator_int(this);
+  return new _FixedSizeListIterator_int(this);
 }
 $dynamic("add").CanvasPixelArray = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -1562,10 +1614,10 @@ $dynamic("addAll").CanvasPixelArray = function(collection) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 $dynamic("forEach").CanvasPixelArray = function(f) {
-  return dom__Collections.forEach(this, f);
+  return _Collections.forEach(this, f);
 }
 $dynamic("filter").CanvasPixelArray = function(f) {
-  return dom__Collections.filter(this, [], f);
+  return _Collections.filter(this, [], f);
 }
 $dynamic("isEmpty").CanvasPixelArray = function() {
   return this.length == (0);
@@ -1773,7 +1825,7 @@ $dynamic("$setindex").Float32Array = function(index, value) {
   this[index] = value
 }
 $dynamic("iterator").Float32Array = function() {
-  return new dom__FixedSizeListIterator_num(this);
+  return new _FixedSizeListIterator_num(this);
 }
 $dynamic("add").Float32Array = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -1782,10 +1834,10 @@ $dynamic("addAll").Float32Array = function(collection) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 $dynamic("forEach").Float32Array = function(f) {
-  return dom__Collections.forEach(this, f);
+  return _Collections.forEach(this, f);
 }
 $dynamic("filter").Float32Array = function(f) {
-  return dom__Collections.filter(this, [], f);
+  return _Collections.filter(this, [], f);
 }
 $dynamic("isEmpty").Float32Array = function() {
   return this.length == (0);
@@ -1809,7 +1861,7 @@ $dynamic("$setindex").Float64Array = function(index, value) {
   this[index] = value
 }
 $dynamic("iterator").Float64Array = function() {
-  return new dom__FixedSizeListIterator_num(this);
+  return new _FixedSizeListIterator_num(this);
 }
 $dynamic("add").Float64Array = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -1818,10 +1870,10 @@ $dynamic("addAll").Float64Array = function(collection) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 $dynamic("forEach").Float64Array = function(f) {
-  return dom__Collections.forEach(this, f);
+  return _Collections.forEach(this, f);
 }
 $dynamic("filter").Float64Array = function(f) {
-  return dom__Collections.filter(this, [], f);
+  return _Collections.filter(this, [], f);
 }
 $dynamic("isEmpty").Float64Array = function() {
   return this.length == (0);
@@ -1848,16 +1900,19 @@ $dynamic("get$innerHTML").HTMLElement = function() { return this.innerHTML; };
 $dynamic("set$innerHTML").HTMLElement = function(value) { return this.innerHTML = value; };
 // ********** Code for _HTMLAnchorElementJs **************
 $dynamic("get$href").HTMLAnchorElement = function() { return this.href; };
+$dynamic("set$href").HTMLAnchorElement = function(value) { return this.href = value; };
 $dynamic("get$text").HTMLAnchorElement = function() { return this.text; };
 // ********** Code for _HTMLAppletElementJs **************
 // ********** Code for _HTMLAreaElementJs **************
 $dynamic("get$href").HTMLAreaElement = function() { return this.href; };
+$dynamic("set$href").HTMLAreaElement = function(value) { return this.href = value; };
 // ********** Code for _HTMLMediaElementJs **************
 $dynamic("get$readyState").HTMLMediaElement = function() { return this.readyState; };
 // ********** Code for _HTMLAudioElementJs **************
 // ********** Code for _HTMLBRElementJs **************
 // ********** Code for _HTMLBaseElementJs **************
 $dynamic("get$href").HTMLBaseElement = function() { return this.href; };
+$dynamic("set$href").HTMLBaseElement = function(value) { return this.href = value; };
 // ********** Code for _HTMLBaseFontElementJs **************
 // ********** Code for _HTMLBodyElementJs **************
 $dynamic("get$text").HTMLBodyElement = function() { return this.text; };
@@ -1877,7 +1932,7 @@ $dynamic("$setindex").HTMLCollection = function(index, value) {
   $throw(new UnsupportedOperationException("Cannot assign element of immutable List."));
 }
 $dynamic("iterator").HTMLCollection = function() {
-  return new dom__FixedSizeListIterator_dom_Node(this);
+  return new _FixedSizeListIterator_dom_Node(this);
 }
 $dynamic("add").HTMLCollection = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -1886,10 +1941,10 @@ $dynamic("addAll").HTMLCollection = function(collection) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 $dynamic("forEach").HTMLCollection = function(f) {
-  return dom__Collections.forEach(this, f);
+  return _Collections.forEach(this, f);
 }
 $dynamic("filter").HTMLCollection = function(f) {
-  return dom__Collections.filter(this, [], f);
+  return _Collections.filter(this, [], f);
 }
 $dynamic("isEmpty").HTMLCollection = function() {
   return this.get$length() == (0);
@@ -1906,6 +1961,7 @@ $dynamic("forEach$1").HTMLCollection = function($0) {
 $dynamic("item$1").HTMLCollection = function($0) {
   return this.item($0);
 };
+// ********** Code for _HTMLContentElementJs **************
 // ********** Code for _HTMLDListElementJs **************
 // ********** Code for _HTMLDetailsElementJs **************
 // ********** Code for _HTMLDirectoryElementJs **************
@@ -1944,6 +2000,7 @@ $dynamic("set$value").HTMLLIElement = function(value) { return this.value = valu
 // ********** Code for _HTMLLegendElementJs **************
 // ********** Code for _HTMLLinkElementJs **************
 $dynamic("get$href").HTMLLinkElement = function() { return this.href; };
+$dynamic("set$href").HTMLLinkElement = function(value) { return this.href = value; };
 // ********** Code for _HTMLMapElementJs **************
 // ********** Code for _HTMLMarqueeElementJs **************
 $dynamic("start$0").HTMLMarqueeElement = function() {
@@ -2054,7 +2111,7 @@ $dynamic("$setindex").Int16Array = function(index, value) {
   this[index] = value
 }
 $dynamic("iterator").Int16Array = function() {
-  return new dom__FixedSizeListIterator_int(this);
+  return new _FixedSizeListIterator_int(this);
 }
 $dynamic("add").Int16Array = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -2063,10 +2120,10 @@ $dynamic("addAll").Int16Array = function(collection) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 $dynamic("forEach").Int16Array = function(f) {
-  return dom__Collections.forEach(this, f);
+  return _Collections.forEach(this, f);
 }
 $dynamic("filter").Int16Array = function(f) {
-  return dom__Collections.filter(this, [], f);
+  return _Collections.filter(this, [], f);
 }
 $dynamic("isEmpty").Int16Array = function() {
   return this.length == (0);
@@ -2090,7 +2147,7 @@ $dynamic("$setindex").Int32Array = function(index, value) {
   this[index] = value
 }
 $dynamic("iterator").Int32Array = function() {
-  return new dom__FixedSizeListIterator_int(this);
+  return new _FixedSizeListIterator_int(this);
 }
 $dynamic("add").Int32Array = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -2099,10 +2156,10 @@ $dynamic("addAll").Int32Array = function(collection) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 $dynamic("forEach").Int32Array = function(f) {
-  return dom__Collections.forEach(this, f);
+  return _Collections.forEach(this, f);
 }
 $dynamic("filter").Int32Array = function(f) {
-  return dom__Collections.filter(this, [], f);
+  return _Collections.filter(this, [], f);
 }
 $dynamic("isEmpty").Int32Array = function() {
   return this.length == (0);
@@ -2126,7 +2183,7 @@ $dynamic("$setindex").Int8Array = function(index, value) {
   this[index] = value
 }
 $dynamic("iterator").Int8Array = function() {
-  return new dom__FixedSizeListIterator_int(this);
+  return new _FixedSizeListIterator_int(this);
 }
 $dynamic("add").Int8Array = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -2135,10 +2192,10 @@ $dynamic("addAll").Int8Array = function(collection) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 $dynamic("forEach").Int8Array = function(f) {
-  return dom__Collections.forEach(this, f);
+  return _Collections.forEach(this, f);
 }
 $dynamic("filter").Int8Array = function(f) {
-  return dom__Collections.filter(this, [], f);
+  return _Collections.filter(this, [], f);
 }
 $dynamic("isEmpty").Int8Array = function() {
   return this.length == (0);
@@ -2155,8 +2212,15 @@ $dynamic("forEach$1").Int8Array = function($0) {
 // ********** Code for _JavaScriptAudioNodeJs **************
 // ********** Code for _JavaScriptCallFrameJs **************
 // ********** Code for _KeyboardEventJs **************
+// ********** Code for _MediaStreamJs **************
+$dynamic("get$readyState").MediaStream = function() { return this.readyState; };
+$dynamic("addEventListener$3").MediaStream = function($0, $1, $2) {
+  return this.addEventListener($0, $wrap_call$1(to$call$1($1)), $2);
+};
+// ********** Code for _LocalMediaStreamJs **************
 // ********** Code for _LocationJs **************
 $dynamic("get$href").Location = function() { return this.href; };
+$dynamic("set$href").Location = function(value) { return this.href = value; };
 // ********** Code for _LowPass2FilterNodeJs **************
 // ********** Code for _MediaControllerJs **************
 $dynamic("addEventListener$3").MediaController = function($0, $1, $2) {
@@ -2173,7 +2237,7 @@ $dynamic("$setindex").MediaList = function(index, value) {
   $throw(new UnsupportedOperationException("Cannot assign element of immutable List."));
 }
 $dynamic("iterator").MediaList = function() {
-  return new dom__FixedSizeListIterator_dart_core_String(this);
+  return new _FixedSizeListIterator_dart_core_String(this);
 }
 $dynamic("add").MediaList = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -2182,10 +2246,10 @@ $dynamic("addAll").MediaList = function(collection) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 $dynamic("forEach").MediaList = function(f) {
-  return dom__Collections.forEach(this, f);
+  return _Collections.forEach(this, f);
 }
 $dynamic("filter").MediaList = function(f) {
-  return dom__Collections.filter(this, [], f);
+  return _Collections.filter(this, [], f);
 }
 $dynamic("isEmpty").MediaList = function() {
   return this.length == (0);
@@ -2204,6 +2268,19 @@ $dynamic("item$1").MediaList = function($0) {
 };
 // ********** Code for _MediaQueryListJs **************
 // ********** Code for _MediaQueryListListenerJs **************
+// ********** Code for _MediaStreamEventJs **************
+// ********** Code for _MediaStreamListJs **************
+$dynamic("get$length").MediaStreamList = function() { return this.length; };
+$dynamic("item$1").MediaStreamList = function($0) {
+  return this.item($0);
+};
+// ********** Code for _MediaStreamTrackJs **************
+$dynamic("get$kind").MediaStreamTrack = function() { return this.kind; };
+// ********** Code for _MediaStreamTrackListJs **************
+$dynamic("get$length").MediaStreamTrackList = function() { return this.length; };
+$dynamic("item$1").MediaStreamTrackList = function($0) {
+  return this.item($0);
+};
 // ********** Code for _MemoryInfoJs **************
 // ********** Code for _MessageChannelJs **************
 // ********** Code for _MessageEventJs **************
@@ -2232,7 +2309,7 @@ $dynamic("$setindex").NamedNodeMap = function(index, value) {
   $throw(new UnsupportedOperationException("Cannot assign element of immutable List."));
 }
 $dynamic("iterator").NamedNodeMap = function() {
-  return new dom__FixedSizeListIterator_dom_Node(this);
+  return new _FixedSizeListIterator_dom_Node(this);
 }
 $dynamic("add").NamedNodeMap = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -2241,10 +2318,10 @@ $dynamic("addAll").NamedNodeMap = function(collection) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 $dynamic("forEach").NamedNodeMap = function(f) {
-  return dom__Collections.forEach(this, f);
+  return _Collections.forEach(this, f);
 }
 $dynamic("filter").NamedNodeMap = function(f) {
-  return dom__Collections.filter(this, [], f);
+  return _Collections.filter(this, [], f);
 }
 $dynamic("isEmpty").NamedNodeMap = function() {
   return this.length == (0);
@@ -2262,6 +2339,7 @@ $dynamic("item$1").NamedNodeMap = function($0) {
   return this.item($0);
 };
 // ********** Code for _NavigatorJs **************
+// ********** Code for _NavigatorUserMediaErrorJs **************
 // ********** Code for _NodeFilterJs **************
 // ********** Code for _NodeIteratorJs **************
 // ********** Code for _NodeListJs **************
@@ -2273,7 +2351,7 @@ $dynamic("$setindex").NodeList = function(index, value) {
   $throw(new UnsupportedOperationException("Cannot assign element of immutable List."));
 }
 $dynamic("iterator").NodeList = function() {
-  return new dom__FixedSizeListIterator_dom_Node(this);
+  return new _FixedSizeListIterator_dom_Node(this);
 }
 $dynamic("add").NodeList = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -2282,10 +2360,10 @@ $dynamic("addAll").NodeList = function(collection) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 $dynamic("forEach").NodeList = function(f) {
-  return dom__Collections.forEach(this, f);
+  return _Collections.forEach(this, f);
 }
 $dynamic("filter").NodeList = function(f) {
-  return dom__Collections.filter(this, [], f);
+  return _Collections.filter(this, [], f);
 }
 $dynamic("isEmpty").NodeList = function() {
   return this.length == (0);
@@ -2316,6 +2394,14 @@ $dynamic("addEventListener$3").Notification = function($0, $1, $2) {
 // ********** Code for _OperationNotAllowedExceptionJs **************
 // ********** Code for _OverflowEventJs **************
 // ********** Code for _PageTransitionEventJs **************
+// ********** Code for _PeerConnectionJs **************
+$dynamic("get$readyState").PeerConnection = function() { return this.readyState; };
+$dynamic("addEventListener$3").PeerConnection = function($0, $1, $2) {
+  return this.addEventListener($0, $wrap_call$1(to$call$1($1)), $2);
+};
+$dynamic("send$1").PeerConnection = function($0) {
+  return this.send($0);
+};
 // ********** Code for _PerformanceJs **************
 // ********** Code for _PerformanceNavigationJs **************
 // ********** Code for _PerformanceTimingJs **************
@@ -2544,6 +2630,7 @@ $dynamic("get$href").SVGUseElement = function() { return this.href; };
 // ********** Code for _ScriptProfileJs **************
 // ********** Code for _ScriptProfileNodeJs **************
 $dynamic("get$children").ScriptProfileNode = function() { return this.children; };
+// ********** Code for _ShadowRootJs **************
 // ********** Code for _SharedWorkerJs **************
 // ********** Code for _SharedWorkerContextJs **************
 // ********** Code for _SpeechInputEventJs **************
@@ -2586,7 +2673,7 @@ $dynamic("$setindex").StyleSheetList = function(index, value) {
   $throw(new UnsupportedOperationException("Cannot assign element of immutable List."));
 }
 $dynamic("iterator").StyleSheetList = function() {
-  return new dom__FixedSizeListIterator_dom_StyleSheet(this);
+  return new _FixedSizeListIterator_dom_StyleSheet(this);
 }
 $dynamic("add").StyleSheetList = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -2595,10 +2682,10 @@ $dynamic("addAll").StyleSheetList = function(collection) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 $dynamic("forEach").StyleSheetList = function(f) {
-  return dom__Collections.forEach(this, f);
+  return _Collections.forEach(this, f);
 }
 $dynamic("filter").StyleSheetList = function(f) {
-  return dom__Collections.filter(this, [], f);
+  return _Collections.filter(this, [], f);
 }
 $dynamic("isEmpty").StyleSheetList = function() {
   return this.length == (0);
@@ -2653,7 +2740,7 @@ $dynamic("$setindex").TouchList = function(index, value) {
   $throw(new UnsupportedOperationException("Cannot assign element of immutable List."));
 }
 $dynamic("iterator").TouchList = function() {
-  return new dom__FixedSizeListIterator_dom_Touch(this);
+  return new _FixedSizeListIterator_dom_Touch(this);
 }
 $dynamic("add").TouchList = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -2662,10 +2749,10 @@ $dynamic("addAll").TouchList = function(collection) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 $dynamic("forEach").TouchList = function(f) {
-  return dom__Collections.forEach(this, f);
+  return _Collections.forEach(this, f);
 }
 $dynamic("filter").TouchList = function(f) {
-  return dom__Collections.filter(this, [], f);
+  return _Collections.filter(this, [], f);
 }
 $dynamic("isEmpty").TouchList = function() {
   return this.length == (0);
@@ -2700,7 +2787,7 @@ $dynamic("$setindex").Uint16Array = function(index, value) {
   this[index] = value
 }
 $dynamic("iterator").Uint16Array = function() {
-  return new dom__FixedSizeListIterator_int(this);
+  return new _FixedSizeListIterator_int(this);
 }
 $dynamic("add").Uint16Array = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -2709,10 +2796,10 @@ $dynamic("addAll").Uint16Array = function(collection) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 $dynamic("forEach").Uint16Array = function(f) {
-  return dom__Collections.forEach(this, f);
+  return _Collections.forEach(this, f);
 }
 $dynamic("filter").Uint16Array = function(f) {
-  return dom__Collections.filter(this, [], f);
+  return _Collections.filter(this, [], f);
 }
 $dynamic("isEmpty").Uint16Array = function() {
   return this.length == (0);
@@ -2736,7 +2823,7 @@ $dynamic("$setindex").Uint32Array = function(index, value) {
   this[index] = value
 }
 $dynamic("iterator").Uint32Array = function() {
-  return new dom__FixedSizeListIterator_int(this);
+  return new _FixedSizeListIterator_int(this);
 }
 $dynamic("add").Uint32Array = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -2745,10 +2832,10 @@ $dynamic("addAll").Uint32Array = function(collection) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 $dynamic("forEach").Uint32Array = function(f) {
-  return dom__Collections.forEach(this, f);
+  return _Collections.forEach(this, f);
 }
 $dynamic("filter").Uint32Array = function(f) {
-  return dom__Collections.filter(this, [], f);
+  return _Collections.filter(this, [], f);
 }
 $dynamic("isEmpty").Uint32Array = function() {
   return this.length == (0);
@@ -2772,7 +2859,7 @@ $dynamic("$setindex").Uint8Array = function(index, value) {
   this[index] = value
 }
 $dynamic("iterator").Uint8Array = function() {
-  return new dom__FixedSizeListIterator_int(this);
+  return new _FixedSizeListIterator_int(this);
 }
 $dynamic("add").Uint8Array = function(value) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
@@ -2781,10 +2868,10 @@ $dynamic("addAll").Uint8Array = function(collection) {
   $throw(new UnsupportedOperationException("Cannot add to immutable List."));
 }
 $dynamic("forEach").Uint8Array = function(f) {
-  return dom__Collections.forEach(this, f);
+  return _Collections.forEach(this, f);
 }
 $dynamic("filter").Uint8Array = function(f) {
-  return dom__Collections.filter(this, [], f);
+  return _Collections.filter(this, [], f);
 }
 $dynamic("isEmpty").Uint8Array = function() {
   return this.length == (0);
@@ -2892,15 +2979,15 @@ $dynamic("addEventListener$3").XMLHttpRequestUpload = function($0, $1, $2) {
 // ********** Code for _XPathNSResolverJs **************
 // ********** Code for _XPathResultJs **************
 // ********** Code for _XSLTProcessorJs **************
-// ********** Code for dom__Collections **************
-function dom__Collections() {}
-dom__Collections.forEach = function(iterable, f) {
+// ********** Code for _Collections **************
+function _Collections() {}
+_Collections.forEach = function(iterable, f) {
   for (var $$i = iterable.iterator(); $$i.hasNext(); ) {
     var e = $$i.next();
     f(e);
   }
 }
-dom__Collections.filter = function(source, destination, f) {
+_Collections.filter = function(source, destination, f) {
   for (var $$i = source.iterator(); $$i.hasNext(); ) {
     var e = $$i.next();
     if (f(e)) destination.add(e);
@@ -2928,94 +3015,94 @@ _XMLHttpRequestFactoryProvider.XMLHttpRequest$factory = function() {
 }
 // ********** Code for _XSLTProcessorFactoryProvider **************
 function _XSLTProcessorFactoryProvider() {}
-// ********** Code for dom__VariableSizeListIterator **************
-function dom__VariableSizeListIterator() {}
-dom__VariableSizeListIterator.prototype.hasNext = function() {
+// ********** Code for _VariableSizeListIterator **************
+function _VariableSizeListIterator() {}
+_VariableSizeListIterator.prototype.hasNext = function() {
   return this._dom_array.get$length() > this._dom_pos;
 }
-dom__VariableSizeListIterator.prototype.next = function() {
+_VariableSizeListIterator.prototype.next = function() {
   if (!this.hasNext()) {
     $throw(const$0005);
   }
   return this._dom_array.$index(this._dom_pos++);
 }
-// ********** Code for dom__FixedSizeListIterator **************
-$inherits(dom__FixedSizeListIterator, dom__VariableSizeListIterator);
-function dom__FixedSizeListIterator() {}
-dom__FixedSizeListIterator.prototype.hasNext = function() {
+// ********** Code for _FixedSizeListIterator **************
+$inherits(_FixedSizeListIterator, _VariableSizeListIterator);
+function _FixedSizeListIterator() {}
+_FixedSizeListIterator.prototype.hasNext = function() {
   return this._dom_length > this._dom_pos;
 }
-// ********** Code for dom__VariableSizeListIterator_dart_core_String **************
-$inherits(dom__VariableSizeListIterator_dart_core_String, dom__VariableSizeListIterator);
-function dom__VariableSizeListIterator_dart_core_String(array) {
+// ********** Code for _VariableSizeListIterator_dart_core_String **************
+$inherits(_VariableSizeListIterator_dart_core_String, _VariableSizeListIterator);
+function _VariableSizeListIterator_dart_core_String(array) {
   this._dom_array = array;
   this._dom_pos = (0);
 }
-// ********** Code for dom__FixedSizeListIterator_dart_core_String **************
-$inherits(dom__FixedSizeListIterator_dart_core_String, dom__FixedSizeListIterator);
-function dom__FixedSizeListIterator_dart_core_String(array) {
+// ********** Code for _FixedSizeListIterator_dart_core_String **************
+$inherits(_FixedSizeListIterator_dart_core_String, _FixedSizeListIterator);
+function _FixedSizeListIterator_dart_core_String(array) {
   this._dom_length = array.get$length();
-  dom__VariableSizeListIterator_dart_core_String.call(this, array);
+  _VariableSizeListIterator_dart_core_String.call(this, array);
 }
-// ********** Code for dom__VariableSizeListIterator_int **************
-$inherits(dom__VariableSizeListIterator_int, dom__VariableSizeListIterator);
-function dom__VariableSizeListIterator_int(array) {
+// ********** Code for _VariableSizeListIterator_int **************
+$inherits(_VariableSizeListIterator_int, _VariableSizeListIterator);
+function _VariableSizeListIterator_int(array) {
   this._dom_array = array;
   this._dom_pos = (0);
 }
-// ********** Code for dom__FixedSizeListIterator_int **************
-$inherits(dom__FixedSizeListIterator_int, dom__FixedSizeListIterator);
-function dom__FixedSizeListIterator_int(array) {
+// ********** Code for _FixedSizeListIterator_int **************
+$inherits(_FixedSizeListIterator_int, _FixedSizeListIterator);
+function _FixedSizeListIterator_int(array) {
   this._dom_length = array.get$length();
-  dom__VariableSizeListIterator_int.call(this, array);
+  _VariableSizeListIterator_int.call(this, array);
 }
-// ********** Code for dom__VariableSizeListIterator_num **************
-$inherits(dom__VariableSizeListIterator_num, dom__VariableSizeListIterator);
-function dom__VariableSizeListIterator_num(array) {
+// ********** Code for _VariableSizeListIterator_num **************
+$inherits(_VariableSizeListIterator_num, _VariableSizeListIterator);
+function _VariableSizeListIterator_num(array) {
   this._dom_array = array;
   this._dom_pos = (0);
 }
-// ********** Code for dom__FixedSizeListIterator_num **************
-$inherits(dom__FixedSizeListIterator_num, dom__FixedSizeListIterator);
-function dom__FixedSizeListIterator_num(array) {
+// ********** Code for _FixedSizeListIterator_num **************
+$inherits(_FixedSizeListIterator_num, _FixedSizeListIterator);
+function _FixedSizeListIterator_num(array) {
   this._dom_length = array.get$length();
-  dom__VariableSizeListIterator_num.call(this, array);
+  _VariableSizeListIterator_num.call(this, array);
 }
-// ********** Code for dom__VariableSizeListIterator_dom_Node **************
-$inherits(dom__VariableSizeListIterator_dom_Node, dom__VariableSizeListIterator);
-function dom__VariableSizeListIterator_dom_Node(array) {
+// ********** Code for _VariableSizeListIterator_dom_Node **************
+$inherits(_VariableSizeListIterator_dom_Node, _VariableSizeListIterator);
+function _VariableSizeListIterator_dom_Node(array) {
   this._dom_array = array;
   this._dom_pos = (0);
 }
-// ********** Code for dom__FixedSizeListIterator_dom_Node **************
-$inherits(dom__FixedSizeListIterator_dom_Node, dom__FixedSizeListIterator);
-function dom__FixedSizeListIterator_dom_Node(array) {
+// ********** Code for _FixedSizeListIterator_dom_Node **************
+$inherits(_FixedSizeListIterator_dom_Node, _FixedSizeListIterator);
+function _FixedSizeListIterator_dom_Node(array) {
   this._dom_length = array.get$length();
-  dom__VariableSizeListIterator_dom_Node.call(this, array);
+  _VariableSizeListIterator_dom_Node.call(this, array);
 }
-// ********** Code for dom__VariableSizeListIterator_dom_StyleSheet **************
-$inherits(dom__VariableSizeListIterator_dom_StyleSheet, dom__VariableSizeListIterator);
-function dom__VariableSizeListIterator_dom_StyleSheet(array) {
+// ********** Code for _VariableSizeListIterator_dom_StyleSheet **************
+$inherits(_VariableSizeListIterator_dom_StyleSheet, _VariableSizeListIterator);
+function _VariableSizeListIterator_dom_StyleSheet(array) {
   this._dom_array = array;
   this._dom_pos = (0);
 }
-// ********** Code for dom__FixedSizeListIterator_dom_StyleSheet **************
-$inherits(dom__FixedSizeListIterator_dom_StyleSheet, dom__FixedSizeListIterator);
-function dom__FixedSizeListIterator_dom_StyleSheet(array) {
+// ********** Code for _FixedSizeListIterator_dom_StyleSheet **************
+$inherits(_FixedSizeListIterator_dom_StyleSheet, _FixedSizeListIterator);
+function _FixedSizeListIterator_dom_StyleSheet(array) {
   this._dom_length = array.get$length();
-  dom__VariableSizeListIterator_dom_StyleSheet.call(this, array);
+  _VariableSizeListIterator_dom_StyleSheet.call(this, array);
 }
-// ********** Code for dom__VariableSizeListIterator_dom_Touch **************
-$inherits(dom__VariableSizeListIterator_dom_Touch, dom__VariableSizeListIterator);
-function dom__VariableSizeListIterator_dom_Touch(array) {
+// ********** Code for _VariableSizeListIterator_dom_Touch **************
+$inherits(_VariableSizeListIterator_dom_Touch, _VariableSizeListIterator);
+function _VariableSizeListIterator_dom_Touch(array) {
   this._dom_array = array;
   this._dom_pos = (0);
 }
-// ********** Code for dom__FixedSizeListIterator_dom_Touch **************
-$inherits(dom__FixedSizeListIterator_dom_Touch, dom__FixedSizeListIterator);
-function dom__FixedSizeListIterator_dom_Touch(array) {
+// ********** Code for _FixedSizeListIterator_dom_Touch **************
+$inherits(_FixedSizeListIterator_dom_Touch, _FixedSizeListIterator);
+function _FixedSizeListIterator_dom_Touch(array) {
   this._dom_length = array.get$length();
-  dom__VariableSizeListIterator_dom_Touch.call(this, array);
+  _VariableSizeListIterator_dom_Touch.call(this, array);
 }
 // ********** Code for _Lists **************
 function _Lists() {}
@@ -3161,6 +3248,9 @@ AnchorElementWrappingImplementation.prototype.is$html_Element = function(){retur
 AnchorElementWrappingImplementation.prototype.get$href = function() {
   return this._ptr.get$href();
 }
+AnchorElementWrappingImplementation.prototype.set$href = function(value) {
+  this._ptr.set$href(value);
+}
 AnchorElementWrappingImplementation.prototype.get$text = function() {
   return this._ptr.get$text();
 }
@@ -3177,6 +3267,9 @@ function AreaElementWrappingImplementation() {}
 AreaElementWrappingImplementation.prototype.is$html_Element = function(){return true};
 AreaElementWrappingImplementation.prototype.get$href = function() {
   return this._ptr.get$href();
+}
+AreaElementWrappingImplementation.prototype.set$href = function(value) {
+  this._ptr.set$href(value);
 }
 // ********** Code for MediaElementWrappingImplementation **************
 $inherits(MediaElementWrappingImplementation, ElementWrappingImplementation);
@@ -3229,6 +3322,9 @@ function BaseElementWrappingImplementation() {}
 BaseElementWrappingImplementation.prototype.is$html_Element = function(){return true};
 BaseElementWrappingImplementation.prototype.get$href = function() {
   return this._ptr.get$href();
+}
+BaseElementWrappingImplementation.prototype.set$href = function(value) {
+  this._ptr.set$href(value);
 }
 // ********** Code for ButtonElementWrappingImplementation **************
 $inherits(ButtonElementWrappingImplementation, ElementWrappingImplementation);
@@ -3488,6 +3584,9 @@ LinkElementWrappingImplementation.prototype.is$html_Element = function(){return 
 LinkElementWrappingImplementation.prototype.get$href = function() {
   return this._ptr.get$href();
 }
+LinkElementWrappingImplementation.prototype.set$href = function(value) {
+  this._ptr.set$href(value);
+}
 // ********** Code for LocationWrappingImplementation **************
 $inherits(LocationWrappingImplementation, DOMWrapperBase);
 LocationWrappingImplementation._wrap$ctor = function(ptr) {
@@ -3497,6 +3596,9 @@ LocationWrappingImplementation._wrap$ctor.prototype = LocationWrappingImplementa
 function LocationWrappingImplementation() {}
 LocationWrappingImplementation.prototype.get$href = function() {
   return this._ptr.get$href();
+}
+LocationWrappingImplementation.prototype.set$href = function(value) {
+  this._ptr.set$href(value);
 }
 LocationWrappingImplementation.prototype.toString = function() {
   return this._ptr.toString();
@@ -3518,7 +3620,7 @@ MarqueeElementWrappingImplementation._wrap$ctor.prototype = MarqueeElementWrappi
 function MarqueeElementWrappingImplementation() {}
 MarqueeElementWrappingImplementation.prototype.is$html_Element = function(){return true};
 MarqueeElementWrappingImplementation.prototype.start = function() {
-  this._ptr.start();
+  this._ptr.start$0();
   return;
 }
 MarqueeElementWrappingImplementation.prototype.start$0 = MarqueeElementWrappingImplementation.prototype.start;
@@ -6191,9 +6293,9 @@ EventsImplementation._wrap$ctor.prototype = EventsImplementation.prototype;
 function EventsImplementation() {}
 EventsImplementation.prototype.get$_ptr = function() { return this._ptr; };
 EventsImplementation.prototype.$index = function(type) {
-  return this._htmlimpl_get(type.toLowerCase());
+  return this._get(type.toLowerCase());
 }
-EventsImplementation.prototype._htmlimpl_get = function(type) {
+EventsImplementation.prototype._get = function(type) {
   var $this = this; // closure support
   return this._listenerMap.putIfAbsent(type, (function () {
     return new EventListenerListImplementation($this._ptr, type);
@@ -6208,16 +6310,13 @@ ElementEventsImplementation._wrap$ctor = function(_ptr) {
 ElementEventsImplementation._wrap$ctor.prototype = ElementEventsImplementation.prototype;
 function ElementEventsImplementation() {}
 ElementEventsImplementation.prototype.get$click = function() {
-  return this._htmlimpl_get("click");
-}
-ElementEventsImplementation.prototype.get$input = function() {
-  return this._htmlimpl_get("input");
+  return this._get("click");
 }
 ElementEventsImplementation.prototype.get$keyUp = function() {
-  return this._htmlimpl_get("keyup");
+  return this._get("keyup");
 }
 ElementEventsImplementation.prototype.get$scroll = function() {
-  return this._htmlimpl_get("scroll");
+  return this._get("scroll");
 }
 // ********** Code for BodyElementEventsImplementation **************
 $inherits(BodyElementEventsImplementation, ElementEventsImplementation);
@@ -6386,10 +6485,10 @@ EmptyStyleDeclaration.prototype.setProperty = function(propertyName, value, prio
 // ********** Code for EmptyElementRect **************
 function EmptyElementRect() {
   this.client = const$0008;
+  this.offset = const$0008;
   this.scroll = const$0008;
   this.bounding = const$0008;
   this.clientRects = const$0009;
-  this.offset = const$0008;
 }
 EmptyElementRect.prototype.get$scroll = function() { return this.scroll; };
 // ********** Code for DocumentFragmentWrappingImplementation **************
@@ -6477,8 +6576,8 @@ DocumentWrappingImplementation.prototype.get$on = function() {
 }
 // ********** Code for _ChildrenElementList **************
 _ChildrenElementList._wrap$ctor = function(element) {
-  this._childElements = element.get$children();
   this._element = element;
+  this._childElements = element.get$children();
 }
 _ChildrenElementList._wrap$ctor.prototype = _ChildrenElementList.prototype;
 function _ChildrenElementList() {}
@@ -6622,10 +6721,10 @@ SimpleClientRect.prototype.toString = function() {
 // ********** Code for ElementRectWrappingImplementation **************
 function ElementRectWrappingImplementation(element) {
   this.client = new SimpleClientRect(element.clientLeft, element.clientTop, element.clientWidth, element.clientHeight);
-  this.scroll = new SimpleClientRect(element.scrollLeft, element.scrollTop, element.scrollWidth, element.scrollHeight);
-  this._clientRects = element.getClientRects();
   this.offset = new SimpleClientRect(element.offsetLeft, element.offsetTop, element.offsetWidth, element.offsetHeight);
+  this.scroll = new SimpleClientRect(element.scrollLeft, element.scrollTop, element.scrollWidth, element.scrollHeight);
   this._boundingClientRect = element.getBoundingClientRect();
+  this._clientRects = element.getClientRects();
 }
 ElementRectWrappingImplementation.prototype.get$scroll = function() { return this.scroll; };
 // ********** Code for ErrorEventWrappingImplementation **************
@@ -6637,9 +6736,9 @@ ErrorEventWrappingImplementation._wrap$ctor.prototype = ErrorEventWrappingImplem
 function ErrorEventWrappingImplementation() {}
 // ********** Code for _EventListenerWrapper **************
 function _EventListenerWrapper(raw, wrapped, useCapture) {
+  this.raw = raw;
   this.wrapped = wrapped;
   this.useCapture = useCapture;
-  this.raw = raw;
 }
 // ********** Code for EventListenerListImplementation **************
 function EventListenerListImplementation(_ptr, _type) {
@@ -6696,8 +6795,8 @@ function KeyboardEventWrappingImplementation() {}
 // ********** Code for _MeasurementRequest **************
 function _MeasurementRequest(computeValue, completer) {
   this.computeValue = computeValue;
-  this.exception = false;
   this.completer = completer;
+  this.exception = false;
 }
 _MeasurementRequest.prototype.get$value = function() { return this.value; };
 _MeasurementRequest.prototype.set$value = function(value) { return this.value = value; };
@@ -6905,22 +7004,19 @@ WindowEventsImplementation._wrap$ctor = function(_ptr) {
 WindowEventsImplementation._wrap$ctor.prototype = WindowEventsImplementation.prototype;
 function WindowEventsImplementation() {}
 WindowEventsImplementation.prototype.get$click = function() {
-  return this._htmlimpl_get("click");
-}
-WindowEventsImplementation.prototype.get$input = function() {
-  return this._htmlimpl_get("input");
+  return this._get("click");
 }
 WindowEventsImplementation.prototype.get$keyUp = function() {
-  return this._htmlimpl_get("keyup");
+  return this._get("keyup");
 }
 WindowEventsImplementation.prototype.get$message = function() {
-  return this._htmlimpl_get("message");
+  return this._get("message");
 }
 WindowEventsImplementation.prototype.get$resize = function() {
-  return this._htmlimpl_get("resize");
+  return this._get("resize");
 }
 WindowEventsImplementation.prototype.get$scroll = function() {
-  return this._htmlimpl_get("scroll");
+  return this._get("scroll");
 }
 // ********** Code for WindowWrappingImplementation **************
 $inherits(WindowWrappingImplementation, EventTargetWrappingImplementation);
@@ -6996,7 +7092,7 @@ XMLHttpRequestEventsImplementation._wrap$ctor = function(_ptr) {
 XMLHttpRequestEventsImplementation._wrap$ctor.prototype = XMLHttpRequestEventsImplementation.prototype;
 function XMLHttpRequestEventsImplementation() {}
 XMLHttpRequestEventsImplementation.prototype.get$readyStateChange = function() {
-  return this._htmlimpl_get("readystatechange");
+  return this._get("readystatechange");
 }
 // ********** Code for XMLHttpRequestWrappingImplementation **************
 $inherits(XMLHttpRequestWrappingImplementation, EventTargetWrappingImplementation);
@@ -7209,13 +7305,13 @@ Uri._fromMatch$ctor = function(m) {
 }
 Uri._fromMatch$ctor.prototype = Uri.prototype;
 function Uri(scheme, userInfo, domain, port, path, query, fragment) {
-  this.fragment = fragment;
   this.scheme = scheme;
-  this.domain = domain;
-  this.path = path;
-  this.port = port;
   this.userInfo = userInfo;
+  this.domain = domain;
+  this.port = port;
+  this.path = path;
   this.query = query;
+  this.fragment = fragment;
 }
 Uri._emptyIfNull = function(val) {
   return val != null ? val : "";
@@ -7260,10 +7356,10 @@ Uri._addIfNonEmpty = function(sb, test, first, second) {
 //  ********** Library lang **************
 // ********** Code for Token **************
 function Token(kind, source, start, end) {
-  this.end = end;
   this.kind = kind;
-  this.start = start;
   this.source = source;
+  this.end = end;
+  this.start = start;
 }
 Token.prototype.get$kind = function() { return this.kind; };
 Token.prototype.get$text = function() {
@@ -7298,18 +7394,18 @@ function ErrorToken(kind, source, start, end, message) {
 }
 // ********** Code for SourceFile **************
 function SourceFile(filename, _text) {
-  this._text = _text;
   this.filename = filename;
+  this._text = _text;
 }
 SourceFile.prototype.get$text = function() {
   return this._text;
 }
 // ********** Code for InterpStack **************
 function InterpStack(previous, quote, isMultiline) {
+  this.previous = previous;
   this.quote = quote;
   this.isMultiline = isMultiline;
   this.depth = (-1);
-  this.previous = previous;
 }
 InterpStack.prototype.set$previous = function(value) { return this.previous = value; };
 InterpStack.prototype.get$quote = function() { return this.quote; };
@@ -7341,9 +7437,9 @@ TokenizerHelpers.isInterpIdentifierPart = function(c) {
 // ********** Code for TokenizerBase **************
 $inherits(TokenizerBase, TokenizerHelpers);
 function TokenizerBase(_source, _skipWhitespace, index) {
-  this._lang_index = index;
-  this._skipWhitespace = _skipWhitespace;
   this._source = _source;
+  this._skipWhitespace = _skipWhitespace;
+  this._lang_index = index;
   TokenizerHelpers.call(this);
   this._text = this._source.get$text();
 }
@@ -8824,37 +8920,37 @@ function CopyOnWriteMap() {}
 CopyOnWriteMap.prototype.is$Map_dart_core_String$Dynamic = function(){return true};
 CopyOnWriteMap.prototype._ensureWritable = function() {
   var $0;
-  if (this._map.shared > (0)) {
-    ($0 = this._map).shared = $0.shared - (1);
-    this._map = _SharedBackingMap._SharedBackingMap$from$factory(this._map);
+  if (this._lang_map.shared > (0)) {
+    ($0 = this._lang_map).shared = $0.shared - (1);
+    this._lang_map = _SharedBackingMap._SharedBackingMap$from$factory(this._lang_map);
   }
 }
 CopyOnWriteMap.prototype.$setindex = function(key, value) {
   this._ensureWritable();
-  this._map.$setindex(key, value);
+  this._lang_map.$setindex(key, value);
 }
 CopyOnWriteMap.prototype.putIfAbsent = function(key, ifAbsent) {
   this._ensureWritable();
-  return this._map.putIfAbsent(key, ifAbsent);
+  return this._lang_map.putIfAbsent(key, ifAbsent);
 }
 CopyOnWriteMap.prototype.clear = function() {
   this._ensureWritable();
-  this._map.clear();
+  this._lang_map.clear();
 }
 CopyOnWriteMap.prototype.$index = function(key) {
-  return this._map.$index(key);
+  return this._lang_map.$index(key);
 }
 CopyOnWriteMap.prototype.isEmpty = function() {
-  return this._map.isEmpty();
+  return this._lang_map.isEmpty();
 }
 CopyOnWriteMap.prototype.get$length = function() {
-  return this._map.get$length();
+  return this._lang_map.get$length();
 }
 CopyOnWriteMap.prototype.forEach = function(f) {
-  return this._map.forEach(f);
+  return this._lang_map.forEach(f);
 }
 CopyOnWriteMap.prototype.containsKey = function(key) {
-  return this._map.containsKey(key);
+  return this._lang_map.containsKey(key);
 }
 CopyOnWriteMap.prototype.clear$0 = CopyOnWriteMap.prototype.clear;
 CopyOnWriteMap.prototype.forEach$1 = function($0) {
@@ -9144,7 +9240,7 @@ DartBoardClient.prototype.run = function() {
     dart_core_print("click submit button");
     var messageRequest = _map(["code", $this.codeMirror.textarea.get$value()]);
     $this.sendRequest("/dartExec", messageRequest, (function (response) {
-      dart_core_print(response.$index("console"));
+      debugPrint(response.$index("console"));
       var p = html_get$document().query("#console");
       var sb = new StringBufferImpl("");
       response.$index("console").split_("\n").forEach$1((function (cs) {
@@ -9158,8 +9254,7 @@ DartBoardClient.prototype.run = function() {
       );
       p.set$innerHTML($add(p.get$innerHTML(), "<br/>"));
       var codeUri = $add($add(uri.path, "?docId="), json_JSON.parse(response.$index("url")).$index("id"));
-      var a = ElementWrappingImplementation.ElementWrappingImplementation$html$factory(("<a href=\"" + codeUri + "\">Code</a>"));
-      p.get$nodes().add(a);
+      $this.codeMirror.updateCodeLink(codeUri);
     })
     , (function () {
       debugPrint("message failed");
@@ -9188,18 +9283,20 @@ DartBoardClient.prototype.sendRequest = function(url, data, onSuccess, onError) 
 }
 // ********** Code for CodeMirrorImpl **************
 function CodeMirrorImpl() {
-  this.spacingFormat = (17);
-  this._lineHeight = "1.2";
   this.rootHeight = (400);
-  this.scrollHeight = (400);
-  this._fontSize = "15px";
   this.rootWidth = (800);
+  this.spacingFormat = (17);
+  this.scrollHeight = (400);
   this.scrollWidth = (800);
   this._font = "monospace";
+  this._fontSize = "15px";
+  this._lineHeight = "1.2";
   var textareaStr = "<textarea id='editorBuffer' class='textarea' spellcheck='false' wrap='off' goog_input_chext='chext' style='color: transparent; background-color: transparent;'></textarea>";
   var sectionStr = "    <section>\n    <div class=\"container codemirrorsize\" style=\"position: relative;\" >\n    <div id='viewbackground' class='viewbackground' ></div>\n    <div id=\"mirrorbody\" class=\"body codemirrorsize\">\n    <div id='textarea-container' class=\"textarea-container codemirrorsize\">\n    </div>\n    <div id=\"scroll-container\" class=\"scroll-y-container codemirrorsize\" style=\"top:0; position: absolute; z-index:-1;\"> \n    <div class=\"gutter\"></div>\n    <div id=\"editorBufferContainer\" class=\"scroll-x-container\" style=\"codemirrorsize\">\n    </div>\n    </div>\n    </div>\n    </section>\n";
   var buttonStr = "<button id=\"submitButton\" value=\"Submit\">Submit</button>";
   var viewStr = "<div id=\"view\" class=\"view\"><div>";
+  var buttonContainer = ElementWrappingImplementation.ElementWrappingImplementation$html$factory("<div></div>");
+  var codeLink = ElementWrappingImplementation.ElementWrappingImplementation$html$factory("<a id='codeLink' href=''></a>");
   this.console = ElementWrappingImplementation.ElementWrappingImplementation$html$factory("<div><p id='console' class='console'></p></div>");
   this.textarea = ElementWrappingImplementation.ElementWrappingImplementation$html$factory(textareaStr);
   this.section = ElementWrappingImplementation.ElementWrappingImplementation$html$factory(sectionStr);
@@ -9213,16 +9310,14 @@ function CodeMirrorImpl() {
   this.textarea.get$on().get$scroll().add$1(this.get$textAreaScrollHandler());
   this.textarea.get$on().get$keyUp().add(this.get$keyboardHandler(), false);
   this.bufferContainer = this.section.query("#editorBufferContainer");
-  this.textarea.get$on().get$input().add((function (_) {
-
-  })
-  , false);
   this.textarea.get$on().get$click().add$1((function (event) {
 
   })
   );
   this.root.get$nodes().add(this.view);
-  this.view.get$nodes().add(this.button);
+  buttonContainer.get$nodes().add$1(this.button);
+  buttonContainer.get$nodes().add$1(codeLink);
+  this.view.get$nodes().add(buttonContainer);
   this.view.get$nodes().add(this.section);
   this.view.get$nodes().add(this.console);
   this.view.query("#textarea-container").get$nodes().add(this.textarea);
@@ -9267,6 +9362,10 @@ CodeMirrorImpl.prototype.keyboardHandler = function(event) {
 CodeMirrorImpl.prototype.get$keyboardHandler = function() {
   return this.keyboardHandler.bind(this);
 }
+CodeMirrorImpl.prototype.updateCodeLink = function(codeLink) {
+  html_get$document().query("#codeLink").set$href(codeLink);
+  html_get$document().query("#codeLink").set$innerHTML(codeLink);
+}
 CodeMirrorImpl.prototype.viewResizeHandler = function(element) {
   var $this = this; // closure support
   element.get$rect().then((function (rect) {
@@ -9303,9 +9402,9 @@ function debugPrintMethod(f) {
     f.call$0();
   }
 }
-// 135 dynamic types.
-// 495 types
-// 43 !leaf
+// 140 dynamic types.
+// 505 types
+// 44 !leaf
 function $dynamicSetMetadata(inputTable) {
   // TODO: Deal with light isolates.
   var table = [];
@@ -9324,13 +9423,13 @@ function $dynamicSetMetadata(inputTable) {
 (function(){
   var v0/*HTMLInputElement*/ = 'HTMLInputElement|HTMLIsIndexElement';
   var v1/*HTMLMediaElement*/ = 'HTMLMediaElement|HTMLAudioElement|HTMLVideoElement';
-  var v2/*HTMLElement*/ = [v0/*HTMLInputElement*/,v1/*HTMLMediaElement*/,'HTMLElement|HTMLAnchorElement|HTMLAppletElement|HTMLAreaElement|HTMLBRElement|HTMLBaseElement|HTMLBaseFontElement|HTMLBodyElement|HTMLButtonElement|HTMLCanvasElement|HTMLDListElement|HTMLDetailsElement|HTMLDirectoryElement|HTMLDivElement|HTMLEmbedElement|HTMLFieldSetElement|HTMLFontElement|HTMLFormElement|HTMLFrameElement|HTMLFrameSetElement|HTMLHRElement|HTMLHeadElement|HTMLHeadingElement|HTMLHtmlElement|HTMLIFrameElement|HTMLImageElement|HTMLKeygenElement|HTMLLIElement|HTMLLabelElement|HTMLLegendElement|HTMLLinkElement|HTMLMapElement|HTMLMarqueeElement|HTMLMenuElement|HTMLMetaElement|HTMLMeterElement|HTMLModElement|HTMLOListElement|HTMLObjectElement|HTMLOptGroupElement|HTMLOptionElement|HTMLOutputElement|HTMLParagraphElement|HTMLParamElement|HTMLPreElement|HTMLProgressElement|HTMLQuoteElement|HTMLScriptElement|HTMLSelectElement|HTMLSourceElement|HTMLSpanElement|HTMLStyleElement|HTMLTableCaptionElement|HTMLTableCellElement|HTMLTableColElement|HTMLTableElement|HTMLTableRowElement|HTMLTableSectionElement|HTMLTextAreaElement|HTMLTitleElement|HTMLTrackElement|HTMLUListElement|HTMLUnknownElement'].join('|');
+  var v2/*HTMLElement*/ = [v0/*HTMLInputElement*/,v1/*HTMLMediaElement*/,'HTMLElement|HTMLAnchorElement|HTMLAppletElement|HTMLAreaElement|HTMLBRElement|HTMLBaseElement|HTMLBaseFontElement|HTMLBodyElement|HTMLButtonElement|HTMLCanvasElement|HTMLContentElement|HTMLDListElement|HTMLDetailsElement|HTMLDirectoryElement|HTMLDivElement|HTMLEmbedElement|HTMLFieldSetElement|HTMLFontElement|HTMLFormElement|HTMLFrameElement|HTMLFrameSetElement|HTMLHRElement|HTMLHeadElement|HTMLHeadingElement|HTMLHtmlElement|HTMLIFrameElement|HTMLImageElement|HTMLKeygenElement|HTMLLIElement|HTMLLabelElement|HTMLLegendElement|HTMLLinkElement|HTMLMapElement|HTMLMarqueeElement|HTMLMenuElement|HTMLMetaElement|HTMLMeterElement|HTMLModElement|HTMLOListElement|HTMLObjectElement|HTMLOptGroupElement|HTMLOptionElement|HTMLOutputElement|HTMLParagraphElement|HTMLParamElement|HTMLPreElement|HTMLProgressElement|HTMLQuoteElement|HTMLScriptElement|HTMLSelectElement|HTMLSourceElement|HTMLSpanElement|HTMLStyleElement|HTMLTableCaptionElement|HTMLTableCellElement|HTMLTableColElement|HTMLTableElement|HTMLTableRowElement|HTMLTableSectionElement|HTMLTextAreaElement|HTMLTitleElement|HTMLTrackElement|HTMLUListElement|HTMLUnknownElement'].join('|');
   var v3/*SVGGradientElement*/ = 'SVGGradientElement|SVGLinearGradientElement|SVGRadialGradientElement';
   var v4/*CharacterData*/ = 'CharacterData|Comment|Text|CDATASection';
   var v5/*Document*/ = 'Document|HTMLDocument|SVGDocument';
   var v6/*Element*/ = [v2/*HTMLElement*/,v3/*SVGGradientElement*/,'Element|SVGElement|SVGAElement|SVGAltGlyphDefElement|SVGAltGlyphItemElement|SVGAnimationElement|SVGAnimateColorElement|SVGAnimateElement|SVGAnimateMotionElement|SVGAnimateTransformElement|SVGSetElement|SVGCircleElement|SVGClipPathElement|SVGComponentTransferFunctionElement|SVGFEFuncAElement|SVGFEFuncBElement|SVGFEFuncGElement|SVGFEFuncRElement|SVGCursorElement|SVGDefsElement|SVGDescElement|SVGEllipseElement|SVGFEBlendElement|SVGFEColorMatrixElement|SVGFEComponentTransferElement|SVGFECompositeElement|SVGFEConvolveMatrixElement|SVGFEDiffuseLightingElement|SVGFEDisplacementMapElement|SVGFEDistantLightElement|SVGFEDropShadowElement|SVGFEFloodElement|SVGFEGaussianBlurElement|SVGFEImageElement|SVGFEMergeElement|SVGFEMergeNodeElement|SVGFEMorphologyElement|SVGFEOffsetElement|SVGFEPointLightElement|SVGFESpecularLightingElement|SVGFESpotLightElement|SVGFETileElement|SVGFETurbulenceElement|SVGFilterElement|SVGFontElement|SVGFontFaceElement|SVGFontFaceFormatElement|SVGFontFaceNameElement|SVGFontFaceSrcElement|SVGFontFaceUriElement|SVGForeignObjectElement|SVGGElement|SVGGlyphElement|SVGGlyphRefElement|SVGHKernElement|SVGImageElement|SVGLineElement|SVGMPathElement|SVGMarkerElement|SVGMaskElement|SVGMetadataElement|SVGMissingGlyphElement|SVGPathElement|SVGPatternElement|SVGPolygonElement|SVGPolylineElement|SVGRectElement|SVGSVGElement|SVGScriptElement|SVGStopElement|SVGStyleElement|SVGSwitchElement|SVGSymbolElement|SVGTextContentElement|SVGTextPathElement|SVGTextPositioningElement|SVGAltGlyphElement|SVGTRefElement|SVGTSpanElement|SVGTextElement|SVGTitleElement|SVGUseElement|SVGVKernElement|SVGViewElement'].join('|');
   var v7/*AbstractWorker*/ = 'AbstractWorker|SharedWorker|Worker';
-  var v8/*Node*/ = [v4/*CharacterData*/,v5/*Document*/,v6/*Element*/,'Node|Attr|DocumentFragment|DocumentType|Entity|EntityReference|Notation|ProcessingInstruction'].join('|');
+  var v8/*Node*/ = [v4/*CharacterData*/,v5/*Document*/,v6/*Element*/,'Node|Attr|DocumentFragment|DocumentType|Entity|EntityReference|Notation|ProcessingInstruction|ShadowRoot'].join('|');
   var v9/*Uint8Array*/ = 'Uint8Array|Uint8ClampedArray';
   var v10/*AudioParam*/ = 'AudioParam|AudioGain';
   var v11/*CSSValueList*/ = 'CSSValueList|WebKitCSSTransformValue';
@@ -9339,9 +9438,10 @@ function $dynamicSetMetadata(inputTable) {
   var v14/*EventTarget*/ = [v7/*AbstractWorker*/,v8/*Node*/,'EventTarget|DOMApplicationCache|DOMWindow|EventSource|MessagePort|Notification|SVGElementInstance|WebSocket|XMLHttpRequest|XMLHttpRequestUpload'].join('|');
   var v15/*HTMLCollection*/ = 'HTMLCollection|HTMLOptionsCollection';
   var v16/*IDBRequest*/ = 'IDBRequest|IDBVersionChangeRequest';
-  var v17/*SVGStylable*/ = 'SVGStylable|SVGFilterPrimitiveStandardAttributes';
-  var v18/*StyleSheet*/ = 'StyleSheet|CSSStyleSheet';
-  var v19/*WorkerContext*/ = 'WorkerContext|DedicatedWorkerContext|SharedWorkerContext';
+  var v17/*MediaStream*/ = 'MediaStream|LocalMediaStream';
+  var v18/*SVGStylable*/ = 'SVGStylable|SVGFilterPrimitiveStandardAttributes';
+  var v19/*StyleSheet*/ = 'StyleSheet|CSSStyleSheet';
+  var v20/*WorkerContext*/ = 'WorkerContext|DedicatedWorkerContext|SharedWorkerContext';
   var table = [
     // [dynamic-dispatch-tag, tags of classes implementing dynamic-dispatch-tag]
     ['AbstractWorker', v7/*AbstractWorker*/]
@@ -9360,11 +9460,12 @@ function $dynamicSetMetadata(inputTable) {
     , ['EventTarget', v14/*EventTarget*/]
     , ['HTMLCollection', v15/*HTMLCollection*/]
     , ['IDBRequest', v16/*IDBRequest*/]
-    , ['SVGStylable', v17/*SVGStylable*/]
-    , ['StyleSheet', v18/*StyleSheet*/]
+    , ['MediaStream', v17/*MediaStream*/]
+    , ['SVGStylable', v18/*SVGStylable*/]
+    , ['StyleSheet', v19/*StyleSheet*/]
     , ['Uint8Array', v9/*Uint8Array*/]
-    , ['WorkerContext', v19/*WorkerContext*/]
-    , ['DOMType', [v9/*Uint8Array*/,v10/*AudioParam*/,v11/*CSSValueList*/,v12/*DOMTokenList*/,v13/*EntrySync*/,v14/*EventTarget*/,v15/*HTMLCollection*/,v16/*IDBRequest*/,v17/*SVGStylable*/,v18/*StyleSheet*/,v19/*WorkerContext*/,'DOMType|ArrayBuffer|ArrayBufferView|DataView|Float32Array|Float64Array|Int16Array|Int32Array|Int8Array|Uint16Array|Uint32Array|AudioBuffer|AudioContext|AudioListener|AudioNode|AudioChannelMerger|AudioChannelSplitter|AudioDestinationNode|AudioGainNode|AudioPannerNode|AudioSourceNode|AudioBufferSourceNode|MediaElementAudioSourceNode|BiquadFilterNode|ConvolverNode|DelayNode|DynamicsCompressorNode|HighPass2FilterNode|JavaScriptAudioNode|LowPass2FilterNode|RealtimeAnalyserNode|WaveShaperNode|BarInfo|Blob|File|CSSRule|CSSCharsetRule|CSSFontFaceRule|CSSImportRule|CSSMediaRule|CSSPageRule|CSSStyleRule|CSSUnknownRule|WebKitCSSKeyframeRule|WebKitCSSKeyframesRule|WebKitCSSRegionRule|CSSRuleList|CSSStyleDeclaration|CSSValue|CSSPrimitiveValue|SVGColor|SVGPaint|CanvasGradient|CanvasPattern|CanvasPixelArray|CanvasRenderingContext|CanvasRenderingContext2D|WebGLRenderingContext|ClientRect|ClientRectList|Clipboard|Coordinates|Counter|Crypto|DOMException|DOMFileSystem|DOMFileSystemSync|DOMFormData|DOMImplementation|DOMMimeType|DOMMimeTypeArray|DOMParser|DOMPlugin|DOMPluginArray|DOMSelection|DOMURL|DataTransferItem|DataTransferItemList|Database|DatabaseSync|DirectoryReader|DirectoryReaderSync|ElementTimeControl|ElementTraversal|Entry|DirectoryEntry|FileEntry|EntryArray|EntryArraySync|Event|AudioProcessingEvent|BeforeLoadEvent|CloseEvent|CustomEvent|DeviceMotionEvent|DeviceOrientationEvent|ErrorEvent|HashChangeEvent|IDBVersionChangeEvent|MessageEvent|MutationEvent|OfflineAudioCompletionEvent|OverflowEvent|PageTransitionEvent|PopStateEvent|ProgressEvent|XMLHttpRequestProgressEvent|SpeechInputEvent|StorageEvent|TrackEvent|UIEvent|CompositionEvent|KeyboardEvent|MouseEvent|SVGZoomEvent|TextEvent|TouchEvent|WheelEvent|WebGLContextEvent|WebKitAnimationEvent|WebKitTransitionEvent|EventException|FileError|FileException|FileList|FileReader|FileReaderSync|FileWriter|FileWriterSync|Geolocation|Geoposition|HTMLAllCollection|History|IDBAny|IDBCursor|IDBCursorWithValue|IDBDatabase|IDBDatabaseError|IDBDatabaseException|IDBFactory|IDBIndex|IDBKey|IDBKeyRange|IDBObjectStore|IDBTransaction|ImageData|JavaScriptCallFrame|Location|MediaController|MediaError|MediaList|MediaQueryList|MediaQueryListListener|MemoryInfo|MessageChannel|Metadata|NamedNodeMap|Navigator|NodeFilter|NodeIterator|NodeList|NodeSelector|NotificationCenter|OESStandardDerivatives|OESTextureFloat|OESVertexArrayObject|OperationNotAllowedException|Performance|PerformanceNavigation|PerformanceTiming|PositionError|RGBColor|Range|RangeException|Rect|SQLError|SQLException|SQLResultSet|SQLResultSetRowList|SQLTransaction|SQLTransactionSync|SVGAngle|SVGAnimatedAngle|SVGAnimatedBoolean|SVGAnimatedEnumeration|SVGAnimatedInteger|SVGAnimatedLength|SVGAnimatedLengthList|SVGAnimatedNumber|SVGAnimatedNumberList|SVGAnimatedPreserveAspectRatio|SVGAnimatedRect|SVGAnimatedString|SVGAnimatedTransformList|SVGElementInstanceList|SVGException|SVGExternalResourcesRequired|SVGFitToViewBox|SVGLangSpace|SVGLength|SVGLengthList|SVGLocatable|SVGTransformable|SVGMatrix|SVGNumber|SVGNumberList|SVGPathSeg|SVGPathSegArcAbs|SVGPathSegArcRel|SVGPathSegClosePath|SVGPathSegCurvetoCubicAbs|SVGPathSegCurvetoCubicRel|SVGPathSegCurvetoCubicSmoothAbs|SVGPathSegCurvetoCubicSmoothRel|SVGPathSegCurvetoQuadraticAbs|SVGPathSegCurvetoQuadraticRel|SVGPathSegCurvetoQuadraticSmoothAbs|SVGPathSegCurvetoQuadraticSmoothRel|SVGPathSegLinetoAbs|SVGPathSegLinetoHorizontalAbs|SVGPathSegLinetoHorizontalRel|SVGPathSegLinetoRel|SVGPathSegLinetoVerticalAbs|SVGPathSegLinetoVerticalRel|SVGPathSegMovetoAbs|SVGPathSegMovetoRel|SVGPathSegList|SVGPoint|SVGPointList|SVGPreserveAspectRatio|SVGRect|SVGRenderingIntent|SVGStringList|SVGTests|SVGTransform|SVGTransformList|SVGURIReference|SVGUnitTypes|SVGZoomAndPan|SVGViewSpec|Screen|ScriptProfile|ScriptProfileNode|SpeechInputResult|SpeechInputResultList|Storage|StorageInfo|StyleMedia|StyleSheetList|TextMetrics|TextTrack|TextTrackCue|TextTrackCueList|TextTrackList|TimeRanges|Touch|TouchList|TreeWalker|ValidityState|WebGLActiveInfo|WebGLBuffer|WebGLCompressedTextures|WebGLContextAttributes|WebGLDebugRendererInfo|WebGLDebugShaders|WebGLFramebuffer|WebGLLoseContext|WebGLProgram|WebGLRenderbuffer|WebGLShader|WebGLTexture|WebGLUniformLocation|WebGLVertexArrayObjectOES|WebKitAnimation|WebKitAnimationList|WebKitBlobBuilder|WebKitCSSMatrix|WebKitNamedFlow|WebKitPoint|WorkerLocation|WorkerNavigator|XMLHttpRequestException|XMLSerializer|XPathEvaluator|XPathException|XPathExpression|XPathNSResolver|XPathResult|XSLTProcessor'].join('|')]
+    , ['WorkerContext', v20/*WorkerContext*/]
+    , ['DOMType', [v9/*Uint8Array*/,v10/*AudioParam*/,v11/*CSSValueList*/,v12/*DOMTokenList*/,v13/*EntrySync*/,v14/*EventTarget*/,v15/*HTMLCollection*/,v16/*IDBRequest*/,v17/*MediaStream*/,v18/*SVGStylable*/,v19/*StyleSheet*/,v20/*WorkerContext*/,'DOMType|ArrayBuffer|ArrayBufferView|DataView|Float32Array|Float64Array|Int16Array|Int32Array|Int8Array|Uint16Array|Uint32Array|AudioBuffer|AudioContext|AudioListener|AudioNode|AudioChannelMerger|AudioChannelSplitter|AudioDestinationNode|AudioGainNode|AudioPannerNode|AudioSourceNode|AudioBufferSourceNode|MediaElementAudioSourceNode|BiquadFilterNode|ConvolverNode|DelayNode|DynamicsCompressorNode|HighPass2FilterNode|JavaScriptAudioNode|LowPass2FilterNode|RealtimeAnalyserNode|WaveShaperNode|BarInfo|Blob|File|CSSRule|CSSCharsetRule|CSSFontFaceRule|CSSImportRule|CSSMediaRule|CSSPageRule|CSSStyleRule|CSSUnknownRule|WebKitCSSKeyframeRule|WebKitCSSKeyframesRule|WebKitCSSRegionRule|CSSRuleList|CSSStyleDeclaration|CSSValue|CSSPrimitiveValue|SVGColor|SVGPaint|CanvasGradient|CanvasPattern|CanvasPixelArray|CanvasRenderingContext|CanvasRenderingContext2D|WebGLRenderingContext|ClientRect|ClientRectList|Clipboard|Coordinates|Counter|Crypto|DOMException|DOMFileSystem|DOMFileSystemSync|DOMFormData|DOMImplementation|DOMMimeType|DOMMimeTypeArray|DOMParser|DOMPlugin|DOMPluginArray|DOMSelection|DOMURL|DataTransferItem|DataTransferItemList|Database|DatabaseSync|DirectoryReader|DirectoryReaderSync|ElementTimeControl|ElementTraversal|Entry|DirectoryEntry|FileEntry|EntryArray|EntryArraySync|Event|AudioProcessingEvent|BeforeLoadEvent|CloseEvent|CustomEvent|DeviceMotionEvent|DeviceOrientationEvent|ErrorEvent|HashChangeEvent|IDBVersionChangeEvent|MediaStreamEvent|MessageEvent|MutationEvent|OfflineAudioCompletionEvent|OverflowEvent|PageTransitionEvent|PopStateEvent|ProgressEvent|XMLHttpRequestProgressEvent|SpeechInputEvent|StorageEvent|TrackEvent|UIEvent|CompositionEvent|KeyboardEvent|MouseEvent|SVGZoomEvent|TextEvent|TouchEvent|WheelEvent|WebGLContextEvent|WebKitAnimationEvent|WebKitTransitionEvent|EventException|FileError|FileException|FileList|FileReader|FileReaderSync|FileWriter|FileWriterSync|Geolocation|Geoposition|HTMLAllCollection|History|IDBAny|IDBCursor|IDBCursorWithValue|IDBDatabase|IDBDatabaseError|IDBDatabaseException|IDBFactory|IDBIndex|IDBKey|IDBKeyRange|IDBObjectStore|IDBTransaction|ImageData|JavaScriptCallFrame|Location|MediaController|MediaError|MediaList|MediaQueryList|MediaQueryListListener|MediaStreamList|MediaStreamTrack|MediaStreamTrackList|MemoryInfo|MessageChannel|Metadata|NamedNodeMap|Navigator|NavigatorUserMediaError|NodeFilter|NodeIterator|NodeList|NodeSelector|NotificationCenter|OESStandardDerivatives|OESTextureFloat|OESVertexArrayObject|OperationNotAllowedException|PeerConnection|Performance|PerformanceNavigation|PerformanceTiming|PositionError|RGBColor|Range|RangeException|Rect|SQLError|SQLException|SQLResultSet|SQLResultSetRowList|SQLTransaction|SQLTransactionSync|SVGAngle|SVGAnimatedAngle|SVGAnimatedBoolean|SVGAnimatedEnumeration|SVGAnimatedInteger|SVGAnimatedLength|SVGAnimatedLengthList|SVGAnimatedNumber|SVGAnimatedNumberList|SVGAnimatedPreserveAspectRatio|SVGAnimatedRect|SVGAnimatedString|SVGAnimatedTransformList|SVGElementInstanceList|SVGException|SVGExternalResourcesRequired|SVGFitToViewBox|SVGLangSpace|SVGLength|SVGLengthList|SVGLocatable|SVGTransformable|SVGMatrix|SVGNumber|SVGNumberList|SVGPathSeg|SVGPathSegArcAbs|SVGPathSegArcRel|SVGPathSegClosePath|SVGPathSegCurvetoCubicAbs|SVGPathSegCurvetoCubicRel|SVGPathSegCurvetoCubicSmoothAbs|SVGPathSegCurvetoCubicSmoothRel|SVGPathSegCurvetoQuadraticAbs|SVGPathSegCurvetoQuadraticRel|SVGPathSegCurvetoQuadraticSmoothAbs|SVGPathSegCurvetoQuadraticSmoothRel|SVGPathSegLinetoAbs|SVGPathSegLinetoHorizontalAbs|SVGPathSegLinetoHorizontalRel|SVGPathSegLinetoRel|SVGPathSegLinetoVerticalAbs|SVGPathSegLinetoVerticalRel|SVGPathSegMovetoAbs|SVGPathSegMovetoRel|SVGPathSegList|SVGPoint|SVGPointList|SVGPreserveAspectRatio|SVGRect|SVGRenderingIntent|SVGStringList|SVGTests|SVGTransform|SVGTransformList|SVGURIReference|SVGUnitTypes|SVGZoomAndPan|SVGViewSpec|Screen|ScriptProfile|ScriptProfileNode|SpeechInputResult|SpeechInputResultList|Storage|StorageInfo|StyleMedia|StyleSheetList|TextMetrics|TextTrack|TextTrackCue|TextTrackCueList|TextTrackList|TimeRanges|Touch|TouchList|TreeWalker|ValidityState|WebGLActiveInfo|WebGLBuffer|WebGLCompressedTextures|WebGLContextAttributes|WebGLDebugRendererInfo|WebGLDebugShaders|WebGLFramebuffer|WebGLLoseContext|WebGLProgram|WebGLRenderbuffer|WebGLShader|WebGLTexture|WebGLUniformLocation|WebGLVertexArrayObjectOES|WebKitAnimation|WebKitAnimationList|WebKitBlobBuilder|WebKitCSSMatrix|WebKitNamedFlow|WebKitPoint|WorkerLocation|WorkerNavigator|XMLHttpRequestException|XMLSerializer|XPathEvaluator|XPathException|XPathExpression|XPathNSResolver|XPathResult|XSLTProcessor'].join('|')]
   ];
   $dynamicSetMetadata(table);
 })();
@@ -9382,7 +9483,7 @@ var const$0004 = _constMap(["body", "html", "head", "html", "caption", "table", 
 var const$0005 = Object.create(NoMoreElementsException.prototype, {});
 var const$0008 = Object.create(SimpleClientRect.prototype, {left: {"value": (0), writeable: false}, top: {"value": (0), writeable: false}, width: {"value": (0), writeable: false}, height: {"value": (0), writeable: false}});
 var const$0009 = ImmutableList.ImmutableList$from$factory([]);
-var const$0010 = Object.create(EmptyElementRect.prototype, {client: {"value": const$0008, writeable: false}, scroll: {"value": const$0008, writeable: false}, bounding: {"value": const$0008, writeable: false}, clientRects: {"value": const$0009, writeable: false}, offset: {"value": const$0008, writeable: false}});
+var const$0010 = Object.create(EmptyElementRect.prototype, {client: {"value": const$0008, writeable: false}, offset: {"value": const$0008, writeable: false}, scroll: {"value": const$0008, writeable: false}, bounding: {"value": const$0008, writeable: false}, clientRects: {"value": const$0009, writeable: false}});
 var const$0012 = new JSSyntaxRegExp("^(?:([^:/?#.]+):)?(?://(?:([^/?#]*)@)?([\\w\\d\\-\\u0100-\\uffff.%]*)(?::([0-9]+))?)?([^?#]+)?(?:\\?([^#]*))?(?:#(.*))?$");
 var $globals = {};
 $static_init();

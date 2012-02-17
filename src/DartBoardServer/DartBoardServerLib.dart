@@ -179,14 +179,9 @@ class DartBoardServer extends IsolatedServer {
       };
       
       request.dataEnd = dataEndHandler;
-    });
-   
-    
-
-    
+    });  
   }
-  
-  
+    
   InitDb() {
     debugPrint("calling InitDb");
     final receiveCouchPort = new ReceivePort();

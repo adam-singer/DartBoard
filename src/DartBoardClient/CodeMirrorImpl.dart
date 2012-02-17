@@ -38,7 +38,8 @@ class CodeMirrorImpl {
 """;
     String buttonStr = """<button id="submitButton" value="Submit">Submit</button>""";
     String viewStr = """<div id="view" class="view"><div>""";
-    
+    var buttonContainer = new Element.html("<div></div>");
+    var codeLink = new Element.html("<a id='codeLink' href=''></a>");
     console = new Element.html("<div><p id='console' class='console'></p></div>");
     textarea = new Element.html(textareaStr);       
     section = new Element.html(sectionStr);
@@ -56,22 +57,9 @@ class CodeMirrorImpl {
     
     textarea.on.scroll.add(textAreaScrollHandler);
     textarea.on.keyUp.add(keyboardHandler);
-    
-    /*
-    textarea.on.input.add((var e) {
-      // TODO: create caret on input events by selected end.
-      print("on.input=>textarea.selectionEnd="+textarea.selectionEnd);
-    });
-    textarea.on.mouseDown.add((var e) {
-      print("on.mouseDown=>textarea.selectionEnd="+textarea.selectionEnd);
-    });
-    */
-    
-    
+        
     bufferContainer = section.query('#editorBufferContainer');
-    textarea.on.input.add((_) {
-      
-    });
+
     textarea.on.click.add((MouseEvent event) {
       /*
       int t=event.offsetY;
@@ -86,7 +74,10 @@ class CodeMirrorImpl {
     
     //root.nodes.add(viewBackground);
     root.nodes.add(view);
-    view.nodes.add(button);
+
+    buttonContainer.nodes.add(button);
+    buttonContainer.nodes.add(codeLink);
+    view.nodes.add(buttonContainer);
     view.nodes.add(section);
     view.nodes.add(console);
     view.query('#textarea-container').nodes.add(textarea);
@@ -139,42 +130,12 @@ class CodeMirrorImpl {
   }
   
   keyboardHandler(KeyboardEvent event) {
-    loadText();
-//    
-//    textarea.rect.then((ElementRect rect) {
-//      scrollHeight = rect.scroll.height;
-//      scrollWidth = rect.scroll.width; 
-//      bufferContainer.style.width = scrollWidth;
-//      bufferContainer.style.height = scrollHeight;
-//      bufferContainer.firstElementChild.style.height = scrollHeight;
-//      bufferContainer.firstElementChild.style.width = scrollWidth;
-//    });
-//    
-//    // This is where we would parse out a colored version of the string. 
-//    var i = 0;
-//    StringBuffer sb = new StringBuffer();
-//    
-//    classify.SourceFile sf = new classify.SourceFile("hi.dart", textarea.value);
-//    String c = classify.classifySource(sf);
-//    
-//    //textarea.value.split('\n').forEach((s){
-//    c.split('\n').forEach((s){
-//      // TODO: remove the position stuff and place that in later. 
-//      sb.add("<div style='top:${i}px; left:3; position: absolute;overflow:hidden;overflow-x:hidden;overflow-y:hidden;font-family:${_font};font-size:${_fontSize};line-height:${_lineHeight};'><span>" 
-//      + s+ "</span></div>");
-//      
-//      i+=(spacingFormat);
-//     
-//    });
-//    
-//    var codeLine = new Element.html("<div style='top:0;position: absolute;height:${scrollHeight};width:${scrollWidth};overflow:scroll;overflow-x: scroll;overflow-y: scroll;  font-family:${_font};font-size:${_fontSize};line-height:${_lineHeight};'>" 
-//    + sb.toString() +"</div>");
-//    section.query('#editorBufferContainer').nodes.forEach((var n){
-//      n.remove();
-//    });
-//    
-//    section.query('#editorBufferContainer').nodes.add(codeLine);
-    
+    loadText();    
+  }
+  
+  updateCodeLink(String codeLink) {
+    document.query('#codeLink').href=codeLink;
+    document.query('#codeLink').innerHTML=codeLink;
   }
   
   submitButtonHandler(var event) {

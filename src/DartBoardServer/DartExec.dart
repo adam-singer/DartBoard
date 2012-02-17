@@ -1,43 +1,4 @@
 
-/*
-main() {
-  var p = [
-           """
-main() {
-  print('hello world');
-}
-""",
-
-"""
-main() {
-  print('good bye world');
-}
-""",
-
-"""
-main() {
-  print('Error world')
-}
-"""
-];
-  
-  final receivePort = new ReceivePort();
-  receivePort.receive((var message, SendPort notUsedHere) {
-    print("Received message:");
-    print("console = ${message['console']}");
-    print("error = ${message['error']}");
-    //receivePort.close();
-  });
-
-
-  p.forEach((var c) {
-    new ExeIsolate().spawn().then((SendPort sendPort) {
-      sendPort.send(c, receivePort.toSendPort());
-    });
-  });
-}
-*/
-
 class ExeIsolate extends Isolate {
   ExeIsolate() : super.heavy() {
     
