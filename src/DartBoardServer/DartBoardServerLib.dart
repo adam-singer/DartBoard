@@ -92,6 +92,44 @@ class DartBoardServer extends IsolatedServer {
       (HTTPRequest request, HTTPResponse response) =>
           fileHandler(request, response, DARTBOARDCLIENT[HIGHLIGHTREQUEST]));
     
+    addHandler("/getCodeViewer", (HTTPRequest request, HTTPResponse response) {
+      request.dataEnd = (String data) {
+      
+        final receiveCouchPort = new ReceivePort();
+        receiveCouchPort.receive((var message, SendPort notUsedHere) {
+          debugPrint("/getCodeViewer receiveCouchPort.message = ${message}");
+          receiveCouchPort.close();
+          
+          List codeViewerDocuments = [];
+          final receiveDocCouchPort = new ReceivePort();
+          receiveDocCouchPort.receive((var mm, SendPort _) {
+            debugPrint("/getCode receiveCouchPort.message = ${mm}");
+            
+            codeViewerDocuments.add(mm);
+       
+            if (JSON.parse(message)["rows"].length == codeViewerDocuments.length) {
+              receiveDocCouchPort.close();
+              _sendJSONResponse(response,{'documents':codeViewerDocuments});
+            }
+          });
+
+          new CouchIsolate().spawn().then((SendPort sp) {
+            JSON.parse(message)["rows"].forEach((var doc) {
+              Map m = {'command':'getCode', 'dbName':'codedb' ,'docId':doc["id"]};
+              sp.send(m, receiveDocCouchPort.toSendPort());     
+            });
+          });  
+        });
+        
+        // Call our couch isolate
+        new CouchIsolate().spawn().then((SendPort sp) {
+          Map m = {'command':'getCodeViewer', 'dbName':'codedb'};
+          sp.send(m, receiveCouchPort.toSendPort());
+        }); 
+        
+      };
+    });
+    
     addHandler("/getCode", (HTTPRequest request, HTTPResponse response) {
       if (request.queryParameters.containsKey('docId')) {
         String docId = request.queryParameters['docId'];
@@ -172,7 +210,8 @@ class DartBoardServer extends IsolatedServer {
         });
         
         new CouchIsolate().spawn().then((SendPort sp) {
-          Map m = {'command':'saveCode', 'dbName':'codedb' ,'code':requestData["code"]};
+          var d = new Date.now();
+          Map m = {'command':'saveCode', 'dbName':'codedb' ,'code':requestData["code"], 'date':d.toString()};
           sp.send(m, receiveCouchPort.toSendPort());
         });
         

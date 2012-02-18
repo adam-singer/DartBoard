@@ -1,7 +1,3 @@
-//#library('CouchDB');
-//#import("dart:io");
-//#import("../../third_party/HttpServer/http.dart");
-//#import('dart:html');
 // Use HTTPClient from http server lib
 
 // CouchIsolate is neat, blog this/add to presentation. 
@@ -25,6 +21,10 @@ class CouchIsolate extends Isolate {
         couch.openDoc(message['dbName'], message['docId']);
       } else if (message['command']=='getCodeList') {
         
+      } else if (message['command']=='getCodeViewer') {
+        couch.listDoc(message['dbName']);
+      } else if (message['command']=='closePort') {
+        replyTo.send('closePort');
       }
       
       /*
@@ -86,6 +86,7 @@ class CouchDBWrapperImpl {
   
   // document operations 
   listDoc(var dbName) {
+    _print('listdoc() = ${baseUri}/${dbName}/_all_docs');
     var s = getHttp('${baseUri}/${dbName}/_all_docs');
     _print(s);
     return s;
@@ -123,11 +124,14 @@ class CouchDBWrapperImpl {
     h.openHandler = (HTTPClientRequest request) {
       request.setHeader('Accept', 'application/json');
       request.responseReceived = (HTTPClientResponse response) {
-        response.dataReceived = (List<int> data) {
-          String s = new String.fromCharCodes(data);          
-          replyTo.send(s);
+        // When all the data is received respond back to the isolate.         
+        response.dataEnd =  (String r) {
+          _print('response.dataEnd = ${r}');
+          replyTo.send(r);
+          h.shutdown();
         };
       };
+      
       request.writeDone();
     };
   }
@@ -139,9 +143,10 @@ class CouchDBWrapperImpl {
       request.setHeader('Content-type', 'application/json');
       
       request.responseReceived = (HTTPClientResponse response) {
-        response.dataReceived = (List<int> data) {
-          String s = new String.fromCharCodes(data);          
-          replyTo.send(s);
+        response.dataEnd =  (String r) {
+          _print('response.dataEnd = ${r}');
+          replyTo.send(r);
+          h.shutdown();
         };
       };
       
@@ -157,9 +162,10 @@ class CouchDBWrapperImpl {
       request.setHeader('Content-type', 'application/json');
       
       request.responseReceived = (HTTPClientResponse response) {
-        response.dataReceived = (List<int> data) {
-          String s = new String.fromCharCodes(data);          
-          replyTo.send(s);
+        response.dataEnd =  (String r) {
+          _print('response.dataEnd = ${r}');
+          replyTo.send(r);
+          h.shutdown();
         };
       };
       
@@ -176,9 +182,10 @@ class CouchDBWrapperImpl {
     h.open('DELETE', host, port, uri);
     h.openHandler = (HTTPClientRequest request) {
       request.responseReceived = (HTTPClientResponse response) {
-        response.dataReceived = (List<int> data) {
-          String s = new String.fromCharCodes(data);          
-          replyTo.send(s);
+        response.dataEnd =  (String r) {
+          _print('response.dataEnd = ${r}');
+          replyTo.send(r);
+          h.shutdown();
         };
       };
       request.writeDone();
