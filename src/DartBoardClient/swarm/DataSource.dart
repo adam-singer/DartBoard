@@ -64,11 +64,14 @@ class Sections implements Collection<Section> {
                       {'id':'someid','date':'somedate','code':'somecode'},
                       {'id':'someid','date':'somedate','code':'somecode'}
                       ];
-    initializeFromData(d, callback);
+    //initializeFromData(d, callback);
     
-    //new XMLHttpRequest.getTEMPNAME('/getCodeViewer', EventBatch.wrap((request) { 
-    //  print(request.responseText);
-    //}));
+    new XMLHttpRequest.getTEMPNAME('/getCodeViewer', EventBatch.wrap((request) { 
+      print(request.responseText);
+      Map r = JSON.parse(request.responseText);
+      //List l = r['documents'];
+      initializeFromData(r, callback);
+    }));
     //if (Sections.runningFromFile) {
     //  initializeFromData(CannedData.data['user.data'], callback);
     //} else {
@@ -163,15 +166,19 @@ class Feed {
       error = new ObservableValue<bool>(false);
 
   static Feed decode(List c) {
-    final sourceId = "feed.sourceId ";//decoder.readString();
-    final sourceTitle = "feed.sourceTitle ";//decoder.readString();
-    final sourceIcon = "feed.sourceIcon ";//decoder.readString();
+    final sourceId = "";//decoder.readString();
+    final sourceTitle = "Code Feeds ";//decoder.readString();
+    final sourceIcon = "";//decoder.readString();
     final feed = new Feed(sourceId, sourceTitle, sourceIcon);
     final nItems = 10;//"feed.nItems ";//decoder.readInt();
 
     for (int i=0; i < nItems; i++) {
       if (!c.isEmpty()) {
-        Map a = c.removeLast();
+        Map a = JSON.parse(c.removeLast());
+        //print("a="+a);
+        //print('id'+a["_id"]);
+        //print('code'+a["code"]);
+        //print(a is String);
         feed.articles.add(Article.decodeHeader(feed, a));
       }
     }
@@ -212,8 +219,8 @@ class Article {
   }
 
   String get dataUri() {
-    return Uri.encodeComponent(id).replaceAll(
-          ',', '%2C').replaceAll('%2F', '/');
+    return  id; // Uri.encodeComponent(id).replaceAll(
+            // ',', '%2C').replaceAll('%2F', '/');
   }
 
   String get thumbUrl() {
@@ -239,10 +246,16 @@ class Article {
 
     var name = '$dataUri.html';
     
+    print(id);
+    
     final req = new XMLHttpRequest();
-    req.open('GET', '/getCode?docId=', false);
+    req.open('GET', '/getCode?docId=${id}', false);
     req.send();
-    _htmlBody = req.responseText;
+    String code = JSON.parse(req.responseText)["code"];
+    classify.SourceFile sf = new classify.SourceFile("hi.dart", code);
+    String classifiedCode = classify.classifySource(sf);
+    _htmlBody = "<div><pre><source>" + classifiedCode + "</pre></source></div>";
+    
     
     /*
     if (Sections.runningFromFile) {
@@ -258,15 +271,20 @@ class Article {
   }
 
   static Article decodeHeader(Feed source, Map code) {
-    final id = code['id'];//decoder.readString();
-    final title = "title";//decoder.readString();
-    final srcUrl = "srcUrl";//decoder.readString();
-    final hasThumbnail = "hasThumbnail";//decoder.readBool();
-    final author = "author";//decoder.readString();
-    final dateInSeconds = "dateInSeconds";//decoder.readInt();
-    final snippet = code['code'];//decoder.readString();
-   
-    final date = new Date.now();
+    final id = code['_id'];//decoder.readString();
+    final title = code['_id'];//decoder.readString();
+    final srcUrl = "/DartBoardClient.html?docId=" + code['_id'];//decoder.readString();
+    final hasThumbnail = false;//decoder.readBool();
+    final author = "adam";//decoder.readString();
+    final dateInSeconds = "dateInSeconds";//decoder.readInt();    
+    final snippet = "...."; 
+    Date date; 
+    if (code.containsKey('date')) { 
+      date = new Date.fromString(code['date']);
+    } else {
+      date = new Date.now();
+    }
+    
     return new Article(source, id, date, title, author, srcUrl, hasThumbnail,
         snippet);
   }

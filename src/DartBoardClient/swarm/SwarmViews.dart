@@ -354,7 +354,7 @@ class HeaderView extends CompositeView {
 
   HeaderView(this.swarm) : super('header-view') {
     _backButton = addChild(new SwarmBackButton(swarm));
-    _title = addChild(View.div('app-title', 'Swarm'));
+    _title = addChild(View.div('app-title', 'CodeSwarm'));
     _configButton = addChild(View.div('config button'));
     _refreshButton = addChild(View.div('refresh button'));
     _infoButton = addChild(View.div('info-button button'));
@@ -852,13 +852,17 @@ class StoryContentView extends View {
 
   Element render() {
     final storyContent = new Element.html(
-        '<div class="story-content">${item.htmlBody}</div>');
+        '<div style="height:1000px;" class="story-content">${item.htmlBody}</div>');
     for (Element element in storyContent.queryAll(
         "iframe, script, style, object, embed, frameset, frame")) {
       element.remove();
     }
-    _pagedStory = new PagedContentView(new View.fromNode(storyContent));
-
+    //_pagedStory = new PagedContentView(new View.fromNode(storyContent));
+    _pagedStory = new CompositeView("paged-content",true, true, true, true);
+    _pagedStory.customStyle["top"]="100px";
+    _pagedStory.customStyle["left"]="5px";
+    _pagedStory.addChild(new View.fromNode(storyContent));
+    
     // Modify all links to open in new windows....
     // TODO(jacobr): would it be better to add an event listener on click that
     // intercepts these instead?
@@ -883,8 +887,11 @@ class StoryContentView extends View {
         </div>
       </div>''');
 
+    
     container.query('.paged-story').replaceWith(_pagedStory.node);
-
+    container.query('.paged-content').style.top="100px";
+    container.query('.paged-content').style.left="5px";
+    
     return container;
   }
 }

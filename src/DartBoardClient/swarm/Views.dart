@@ -619,6 +619,8 @@ class FixedSizeListViewLayout<D> implements ListViewLayout<D> {
   }
 
   int get _itemLength() {
+    print("itemViewFactory.height=${itemViewFactory.height}");
+    print("itemViewFactory.width=${itemViewFactory.width}");
     return _vertical ? itemViewFactory.height : itemViewFactory.width;
   }
 
@@ -669,8 +671,19 @@ class FixedSizeListViewLayout<D> implements ListViewLayout<D> {
   }
 
   int getPageLength(int viewLength) {
+    print("viewLength = ${viewLength}");
+    print("_itemLength = ${_itemLength}");
+    
     final itemsPerPage = (viewLength / _itemLength).floor();
-    return (Math.max(1, itemsPerPage) * _itemLength).toInt();
+    try {
+      print("itemsPerPage = ${itemsPerPage}");
+      print("_itemLength = ${_itemLength}");
+      return (Math.max(1, itemsPerPage) * _itemLength).toInt();
+      //return viewLength;
+    } catch (var _) {
+      print("exception " + _);
+      return 0;
+    }
   }
 
   int getPage(int index, int viewLength) {

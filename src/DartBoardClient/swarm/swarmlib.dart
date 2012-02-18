@@ -9,6 +9,7 @@
 #import('dart:html');
 // #import('dart:uri');
 #import('../../../third_party/uri/uri.dart', prefix:'uri');
+#import("../../../third_party/utils/dartdoc/classify.dart", prefix:"classify");
 #import('../ui_lib/base/base.dart');
 #import('../ui_lib/view/view.dart');
 #import('../ui_lib/observable/observable.dart');

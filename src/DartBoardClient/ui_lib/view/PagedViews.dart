@@ -112,7 +112,7 @@ class PagedColumnView extends View {
     // TODO(jacobr): use named arguments when available.
     scroller = new Scroller(
         _container,
-        false /* verticalScrollEnabled */,
+        true /* verticalScrollEnabled */,
         true /* horizontalScrollEnabled */,
         true /* momementumEnabled */,
         () {
@@ -120,6 +120,7 @@ class PagedColumnView extends View {
           _container.rect.then((ElementRect rect) {
             // Only view width matters.
             completer.complete(new Size(_getViewLength(rect), 1));
+            //completer.complete(new Size(_getViewLength(rect), 1));
           });
           return completer.future;
         },
@@ -186,7 +187,9 @@ class PagedColumnView extends View {
     // flow to the right correctly. So we copy our own height and set the height
     // of the content.
     node.rect.then((ElementRect rect) {
-      contentView.node.style.height = '${rect.offset.height}px';
+      //contentView.node.style.height = '${rect.offset.height}px';
+      contentView.node.style.height = '800px';
+      
     });
     _updatePageCount(null);
   }
