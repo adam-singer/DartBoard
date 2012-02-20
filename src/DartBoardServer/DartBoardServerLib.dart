@@ -146,84 +146,24 @@ class DartBoardServer extends IsolatedServer {
      "/ui_lib/view/SliderMenu.dart":BASE+"/ui_lib/view/SliderMenu.dart",
      "/ui_lib/view/view.dart":BASE+"/ui_lib/view/view.dart"
     };
-    //TODO: not the right place to put this
-    String DARTBOARDCLIENTHTMLLOCATION="/Users/adam/dart/DartBoard/src/DartBoardClient/DartBoardClient.html";
-    String DARTBOARDCLIENTDARTLOCATION="/Users/adam/dart/DartBoard/src/DartBoardClient/DartBoardClient.dart";
-    String DARTBOARDCLIENTDARTJSLOCATION="/Users/adam/dart/DartBoard/src/DartBoardClient/DartBoardClient.dart.js";
-    String DARTBOARDCSSLOCATION="/Users/adam/dart/DartBoard/src/DartBoardClient/dartboard.css";
-    String PHOTOLOCATION="/Users/adam/dart/DartBoard/src/DartBoardClient/photo.jpg";
-    String STYLELOCATION="/Users/adam/dart/DartBoard/src/DartBoardClient/style.css"; 
-    String HIGHLIGHTLOCATION="/Users/adam/dart/DartBoard/src/DartBoardClient/highlight.css"; 
     
     String DARTBOARDCLIENTHTMLREQUEST="/DartBoardClient.html";
-    String DARTBOARDCLIENTDARTREQUEST="/DartBoardClient.dart";
-    String DARTBOARDCLIENTDARTJSREQUEST="/DartBoardClient.dart.js";
-    String DARTBOARDCSSREQUEST="/dartboard.css";
-    String PHOTOREQUEST="/photo.jpg";
-    String STYLEREQUEST="/style.css";
-    String HIGHLIGHTREQUEST="/highlight.css";
-    
-    Map DARTBOARDCLIENT={};
-    DARTBOARDCLIENT[DARTBOARDCLIENTHTMLREQUEST]= DARTBOARDCLIENTHTMLLOCATION;
-    DARTBOARDCLIENT[DARTBOARDCLIENTDARTREQUEST]= DARTBOARDCLIENTDARTLOCATION;
-    DARTBOARDCLIENT[DARTBOARDCLIENTDARTJSREQUEST]= DARTBOARDCLIENTDARTJSLOCATION;
-    DARTBOARDCLIENT[DARTBOARDCSSREQUEST]= DARTBOARDCSSLOCATION;
-    DARTBOARDCLIENT[PHOTOREQUEST]= PHOTOLOCATION;
-    DARTBOARDCLIENT[STYLEREQUEST]= STYLELOCATION;
-    DARTBOARDCLIENT[HIGHLIGHTREQUEST]= HIGHLIGHTLOCATION;
-    
-//"DartBoardClient.html":"/Users/adam/dart/DartBoard/src/DartBoardClient/DartBoardClient.html", 
-//"DartBoardClient.dart":"/Users/adam/dart/DartBoard/src/DartBoardClient/DartBoardClient.dart"
-    
-
+       
     InitDb();
     
+    // Redirect
     addHandler("/",
       (HTTPRequest request, HTTPResponse response) =>
           redirectPageHandler(
               request, response, DARTBOARDCLIENTHTMLREQUEST.substring(1)));
     
+    // add uri map handlers
     uriMapping.forEach((var k, var v) {
       addHandler(k,
         (HTTPRequest request, HTTPResponse response) =>
             fileHandler(request, response, v));
     });
     
-    /*
-    addHandler("/",
-      (HTTPRequest request, HTTPResponse response) =>
-          redirectPageHandler(
-              request, response, DARTBOARDCLIENTHTMLREQUEST.substring(1)));
-    
-// Roll this into a loop
-    addHandler(DARTBOARDCLIENTHTMLREQUEST,
-      (HTTPRequest request, HTTPResponse response) =>
-          fileHandler(request, response, DARTBOARDCLIENT[DARTBOARDCLIENTHTMLREQUEST]));
-    
-    addHandler(DARTBOARDCLIENTDARTREQUEST,
-      (HTTPRequest request, HTTPResponse response) =>
-          fileHandler(request, response, DARTBOARDCLIENT[DARTBOARDCLIENTDARTREQUEST]));
-    
-    addHandler(DARTBOARDCLIENTDARTJSREQUEST,
-      (HTTPRequest request, HTTPResponse response) =>
-          fileHandler(request, response, DARTBOARDCLIENT[DARTBOARDCLIENTDARTJSREQUEST]));
-    
-    addHandler(DARTBOARDCSSREQUEST,
-      (HTTPRequest request, HTTPResponse response) =>
-          fileHandler(request, response, DARTBOARDCLIENT[DARTBOARDCSSREQUEST]));
-    
-    addHandler(PHOTOREQUEST,
-      (HTTPRequest request, HTTPResponse response) =>
-          fileHandler(request, response, DARTBOARDCLIENT[PHOTOREQUEST]));
-    
-    addHandler(STYLEREQUEST,
-      (HTTPRequest request, HTTPResponse response) =>
-          fileHandler(request, response, DARTBOARDCLIENT[STYLEREQUEST]));
-    
-    addHandler(HIGHLIGHTREQUEST,
-      (HTTPRequest request, HTTPResponse response) =>
-          fileHandler(request, response, DARTBOARDCLIENT[HIGHLIGHTREQUEST]));
-    */
     addHandler("/getCodeViewer", (HTTPRequest request, HTTPResponse response) {
       request.dataEnd = (String data) {
       

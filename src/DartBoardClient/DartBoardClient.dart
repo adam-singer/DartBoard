@@ -10,8 +10,6 @@ class DartBoardClient {
   DartBoardClient() {
   }
 
-  //int scrollWidth=400;
-  //int scrollHeight=400;
   void run() {
     codeMirror = new CodeMirrorImpl();
     document.window.on.resize.add((_) => codeMirror.viewResizeHandler(document));
@@ -33,7 +31,6 @@ class DartBoardClient {
         }
       });
       
-      
       debugPrintMethod( () {
         queryArguments.forEach((var k, var v) {
           print('k=${k},v=${v}');
@@ -53,21 +50,15 @@ class DartBoardClient {
           });
         });
         
-        //codeMirror.textarea.value = response['code'];
-        //codeMirror.keyboardHandler(null);
         codeMirror.loadText(response['code']);
       }, ()=>debugPrint("message failed"));
     }
     
     codeMirror.button.on.click.add((var event) {
-      print("click submit button");
-      
-      //print("editorBuffer = ${t.value}");
       // Send over xml request
       var messageRequest = {"code":codeMirror.textarea.value};
       sendRequest("/dartExec", messageRequest,
-        (Map response) {
-         //print("on success");   
+        (Map response) {   
          debugPrint(response["console"]);
          ParagraphElement p = document.query('#console');
          
@@ -75,7 +66,6 @@ class DartBoardClient {
          response["console"].split('\n').forEach((var cs){ 
            sb.add(cs + '<br>');
          });
-         //p.innerHTML = response["console"];
          p.innerHTML = '<pre>' + sb.toString() + '</pre>';
          
          // print debug 
@@ -85,9 +75,6 @@ class DartBoardClient {
          p.innerHTML = p.innerHTML + '<br/>'; 
          String codeUri = uri.path + "?docId=" + JSON.parse(response['url'])['id'];
          codeMirror.updateCodeLink(codeUri);
-         //var a = new Element.html('<a href="${codeUri}">Code</a>');
-         //p.nodes.add(a);
-         //+ uri.path + "?docId=" + JSON.parse(response['url'])['id'];
         }, 
         () {
           debugPrint("message failed");
@@ -111,9 +98,7 @@ class DartBoardClient {
     debugPrint('sendRequest '+ url+ " " + JSON.stringify(data));
     request.send(JSON.stringify(data));   
     return request;
-  }
-  
-  
+  } 
 }
 
 void main() {
