@@ -70,7 +70,7 @@ CreateDartFile(var source, var directory) {
   debugPrint("len = ${len}");
   debugPrint("source.length = ${source.length}");
   if (len != source.length) {
-    throw new Exception("create file failed: len != source.length");
+    //throw new Exception("create file failed: len != source.length");
   }
   
   return f;

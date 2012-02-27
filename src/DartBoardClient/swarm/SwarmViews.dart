@@ -852,7 +852,7 @@ class StoryContentView extends View {
 
   Element render() {
     final storyContent = new Element.html(
-        '<div style="height:1000px;" class="story-content">${item.htmlBody}</div>');
+        '<div style="height:5000px;" class="story-content">${item.htmlBody}</div>');
     for (Element element in storyContent.queryAll(
         "iframe, script, style, object, embed, frameset, frame")) {
       element.remove();

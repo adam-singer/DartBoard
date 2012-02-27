@@ -36,10 +36,10 @@ class CodeMirrorImpl {
     </div>
     </section>
 """;
-    String buttonStr = """<button id="submitButton" value="Submit">Submit</button>""";
+    String buttonStr = """<button id="submitButton" class="submitButton" value="Submit">Submit</button>""";
     String viewStr = """<div id="view" class="view"><div>""";
     var buttonContainer = new Element.html("<div></div>");
-    var codeLink = new Element.html("<a id='codeLink' href=''></a>");
+    var codeLink = new Element.html("<a id='codeLink' class='codeLink' href='' target='_blank'></a>");
     console = new Element.html("<div><p id='console' class='console'></p></div>");
     textarea = new Element.html(textareaStr);       
     section = new Element.html(sectionStr);

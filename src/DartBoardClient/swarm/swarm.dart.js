@@ -36,11 +36,7 @@ function $throw(e) {
   throw e;
 }
 $defProp(Object.prototype, '$index', function(i) {
-  var proto = Object.getPrototypeOf(this);
-  if (proto !== Object) {
-    proto.$index = function(i) { return this[i]; }
-  }
-  return this[i];
+  $throw(new NoSuchMethodException(this, "operator []", [i]));
 });
 $defProp(Array.prototype, '$index', function(index) {
   var i = index | 0;
@@ -55,11 +51,7 @@ $defProp(String.prototype, '$index', function(i) {
   return this[i];
 });
 $defProp(Object.prototype, '$setindex', function(i, value) {
-  var proto = Object.getPrototypeOf(this);
-  if (proto !== Object) {
-    proto.$setindex = function(i, value) { return this[i] = value; }
-  }
-  return this[i] = value;
+  $throw(new NoSuchMethodException(this, "operator []=", [i, value]));
 });
 $defProp(Array.prototype, '$setindex', function(index, value) {
   var i = index | 0;
@@ -72,73 +64,140 @@ $defProp(Array.prototype, '$setindex', function(index, value) {
 });
 function $wrap_call$0(fn) { return fn; }
 function $wrap_call$1(fn) { return fn; }
-function $add(x, y) {
-  return ((typeof(x) == 'number' && typeof(y) == 'number') ||
-          (typeof(x) == 'string'))
-    ? x + y : x.$add(y);
+function $$add$complex(x, y) {
+  if (typeof(x) == 'number') {
+    $throw(new IllegalArgumentException(y));
+  } else if (typeof(x) == 'string') {
+    var str = (y == null) ? 'null' : y.toString();
+    if (typeof(str) != 'string') {
+      throw new Error("calling toString() on right hand operand of operator " +
+      "+ did not return a String");
+    }
+    return x + str;
+  } else if (typeof(x) == 'object') {
+    return x.$add(y);
+  } else {
+    $throw(new NoSuchMethodException(x, "operator +", [y]));
+  }
 }
-function $eq(x, y) {
+
+function $$add(x, y) {
+  if (typeof(x) == 'number' && typeof(y) == 'number') return x + y;
+  return $$add$complex(x, y);
+}
+function $$eq(x, y) {
   if (x == null) return y == null;
-  return (typeof(x) == 'number' && typeof(y) == 'number') ||
-         (typeof(x) == 'boolean' && typeof(y) == 'boolean') ||
-         (typeof(x) == 'string' && typeof(y) == 'string')
-    ? x == y : x.$eq(y);
+  return (typeof(x) != 'object') ? x === y : x.$eq(y);
 }
 // TODO(jimhug): Should this or should it not match equals?
 $defProp(Object.prototype, '$eq', function(other) {
   return this === other;
 });
-function $gt(x, y) {
-  return (typeof(x) == 'number' && typeof(y) == 'number')
-    ? x > y : x.$gt(y);
-}
-function $gte(x, y) {
-  return (typeof(x) == 'number' && typeof(y) == 'number')
-    ? x >= y : x.$gte(y);
-}
-function $lt(x, y) {
-  return (typeof(x) == 'number' && typeof(y) == 'number')
-    ? x < y : x.$lt(y);
-}
-function $mod(x, y) {
-  if (typeof(x) == 'number' && typeof(y) == 'number') {
-    var result = x % y;
-    if (result == 0) {
-      return 0;  // Make sure we don't return -0.0.
-    } else if (result < 0) {
-      if (y < 0) {
-        return result - y;
-      } else {
-        return result + y;
-      }
-    }
-    return result;
+function $$gt$complex(x, y) {
+  if (typeof(x) == 'number') {
+    $throw(new IllegalArgumentException(y));
+  } else if (typeof(x) == 'object') {
+    return x.$gt(y);
   } else {
-    return x.$mod(y);
+    $throw(new NoSuchMethodException(x, "operator >", [y]));
   }
 }
-function $mul(x, y) {
-  return (typeof(x) == 'number' && typeof(y) == 'number')
-    ? x * y : x.$mul(y);
+function $$gt(x, y) {
+  if (typeof(x) == 'number' && typeof(y) == 'number') return x > y;
+  return $$gt$complex(x, y);
 }
-function $ne(x, y) {
-  if (x == null) return y != null;
-  return (typeof(x) == 'number' && typeof(y) == 'number') ||
-         (typeof(x) == 'boolean' && typeof(y) == 'boolean') ||
-         (typeof(x) == 'string' && typeof(y) == 'string')
-    ? x != y : !x.$eq(y);
-}
-function $sub(x, y) {
-  return (typeof(x) == 'number' && typeof(y) == 'number')
-    ? x - y : x.$sub(y);
-}
-function $truncdiv(x, y) {
-  if (typeof(x) == 'number' && typeof(y) == 'number') {
-    if (y == 0) $throw(new IntegerDivisionByZeroException());
-    var tmp = x / y;
-    return (tmp < 0) ? Math.ceil(tmp) : Math.floor(tmp);
+function $$gte$complex(x, y) {
+  if (typeof(x) == 'number') {
+    $throw(new IllegalArgumentException(y));
+  } else if (typeof(x) == 'object') {
+    return x.$gte(y);
   } else {
+    $throw(new NoSuchMethodException(x, "operator >=", [y]));
+  }
+}
+function $$gte(x, y) {
+  if (typeof(x) == 'number' && typeof(y) == 'number') return x >= y;
+  return $$gte$complex(x, y);
+}
+function $$lt$complex(x, y) {
+  if (typeof(x) == 'number') {
+    $throw(new IllegalArgumentException(y));
+  } else if (typeof(x) == 'object') {
+    return x.$lt(y);
+  } else {
+    $throw(new NoSuchMethodException(x, "operator <", [y]));
+  }
+}
+function $$lt(x, y) {
+  if (typeof(x) == 'number' && typeof(y) == 'number') return x < y;
+  return $$lt$complex(x, y);
+}
+function $$mod(x, y) {
+  if (typeof(x) == 'number') {
+    if (typeof(y) == 'number') {
+      var result = x % y;
+      if (result == 0) {
+        return 0;  // Make sure we don't return -0.0.
+      } else if (result < 0) {
+        if (y < 0) {
+          return result - y;
+        } else {
+          return result + y;
+        }
+      }
+      return result;
+    } else {
+      $throw(new IllegalArgumentException(y));
+    }
+  } else if (typeof(x) == 'object') {
+    return x.$mod(y);
+  } else {
+    $throw(new NoSuchMethodException(x, "operator %", [y]));
+  }
+}
+function $$mul$complex(x, y) {
+  if (typeof(x) == 'number') {
+    $throw(new IllegalArgumentException(y));
+  } else if (typeof(x) == 'object') {
+    return x.$mul(y);
+  } else {
+    $throw(new NoSuchMethodException(x, "operator *", [y]));
+  }
+}
+function $$mul(x, y) {
+  if (typeof(x) == 'number' && typeof(y) == 'number') return x * y;
+  return $$mul$complex(x, y);
+}
+function $$ne(x, y) {
+  if (x == null) return y != null;
+  return (typeof(x) != 'object') ? x !== y : !x.$eq(y);
+}
+function $$sub$complex(x, y) {
+  if (typeof(x) == 'number') {
+    $throw(new IllegalArgumentException(y));
+  } else if (typeof(x) == 'object') {
+    return x.$sub(y);
+  } else {
+    $throw(new NoSuchMethodException(x, "operator -", [y]));
+  }
+}
+function $$sub(x, y) {
+  if (typeof(x) == 'number' && typeof(y) == 'number') return x - y;
+  return $$sub$complex(x, y);
+}
+function $$truncdiv(x, y) {
+  if (typeof(x) == 'number') {
+    if (typeof(y) == 'number') {
+      if (y == 0) $throw(new IntegerDivisionByZeroException());
+      var tmp = x / y;
+      return (tmp < 0) ? Math.ceil(tmp) : Math.floor(tmp);
+    } else {
+      $throw(new IllegalArgumentException(y));
+    }
+  } else if (typeof(x) == 'object') {
     return x.$truncdiv(y);
+  } else {
+    $throw(new NoSuchMethodException(x, "operator ~/", [y]));
   }
 }
 $defProp(Object.prototype, "get$typeName", Object.prototype.$typeNameOf);
@@ -191,6 +250,9 @@ $defProp(Object.prototype, "group$1", function($0) {
 $defProp(Object.prototype, "is$BodyElement", function() {
   return false;
 });
+$defProp(Object.prototype, "is$Collection", function() {
+  return false;
+});
 $defProp(Object.prototype, "is$DivElement", function() {
   return false;
 });
@@ -198,6 +260,9 @@ $defProp(Object.prototype, "is$Duration", function() {
   return false;
 });
 $defProp(Object.prototype, "is$List", function() {
+  return false;
+});
+$defProp(Object.prototype, "is$Map", function() {
   return false;
 });
 $defProp(Object.prototype, "is$Map_dart_core_String$Dynamic", function() {
@@ -312,6 +377,7 @@ function NoSuchMethodException(_receiver, _functionName, _arguments, _existingAr
   this._functionName = _functionName;
   this._arguments = _arguments;
 }
+NoSuchMethodException.prototype.is$NoSuchMethodException = function(){return true};
 NoSuchMethodException.prototype.toString = function() {
   var sb = new StringBufferImpl("");
   for (var i = (0);
@@ -322,7 +388,7 @@ NoSuchMethodException.prototype.toString = function() {
     sb.add(this._arguments.$index(i));
   }
   if (null == this._existingArgumentNames) {
-    return $add($add(("NoSuchMethodException : method not found: '" + this._functionName + "'\n"), ("Receiver: " + this._receiver + "\n")), ("Arguments: [" + sb + "]"));
+    return $$add($$add(("NoSuchMethodException : method not found: '" + this._functionName + "'\n"), ("Receiver: " + this._receiver + "\n")), ("Arguments: [" + sb + "]"));
   }
   else {
     var actualParameters = sb.toString();
@@ -335,7 +401,7 @@ NoSuchMethodException.prototype.toString = function() {
       sb.add(this._existingArgumentNames.$index(i));
     }
     var formalParameters = sb.toString();
-    return $add($add($add("NoSuchMethodException: incorrect number of arguments passed to ", ("method named '" + this._functionName + "'\nReceiver: " + this._receiver + "\n")), ("Tried calling: " + this._functionName + "(" + actualParameters + ")\n")), ("Found: " + this._functionName + "(" + formalParameters + ")"));
+    return $$add($$add($$add("NoSuchMethodException: incorrect number of arguments passed to ", ("method named '" + this._functionName + "'\nReceiver: " + this._receiver + "\n")), ("Tried calling: " + this._functionName + "(" + actualParameters + ")\n")), ("Found: " + this._functionName + "(" + formalParameters + ")"));
   }
 }
 // ********** Code for ClosureArgumentMismatchException **************
@@ -554,6 +620,7 @@ function _toDartException(e) {
 // ********** Code for ListFactory **************
 ListFactory = Array;
 $defProp(ListFactory.prototype, "is$List", function(){return true});
+$defProp(ListFactory.prototype, "is$Collection", function(){return true});
 ListFactory.ListFactory$from$factory = function(other) {
   var list = [];
   for (var $$i = other.iterator(); $$i.hasNext(); ) {
@@ -595,6 +662,9 @@ $defProp(ListFactory.prototype, "isEmpty", function() {
 });
 $defProp(ListFactory.prototype, "iterator", function() {
   return new ListIterator(this);
+});
+$defProp(ListFactory.prototype, "toString", function() {
+  return Collections.collectionToString(this);
 });
 $defProp(ListFactory.prototype, "add$1", ListFactory.prototype.add);
 $defProp(ListFactory.prototype, "clear$0", ListFactory.prototype.clear);
@@ -647,28 +717,28 @@ ImmutableList.prototype.get$length = function() {
   return this.length;
 }
 ImmutableList.prototype.set$length = function(length) {
-  $throw(const$0003);
+  $throw(const$0004);
 }
 ImmutableList.prototype.$setindex = function(index, value) {
-  $throw(const$0003);
+  $throw(const$0004);
 }
 ImmutableList.prototype.sort = function(compare) {
-  $throw(const$0003);
+  $throw(const$0004);
 }
 ImmutableList.prototype.add = function(element) {
-  $throw(const$0003);
+  $throw(const$0004);
 }
 ImmutableList.prototype.addAll = function(elements) {
-  $throw(const$0003);
+  $throw(const$0004);
 }
 ImmutableList.prototype.clear = function() {
-  $throw(const$0003);
+  $throw(const$0004);
 }
 ImmutableList.prototype.removeLast = function() {
-  $throw(const$0003);
+  $throw(const$0004);
 }
 ImmutableList.prototype.toString = function() {
-  return ListFactory.ListFactory$from$factory(this).toString();
+  return Collections.collectionToString(this);
 }
 ImmutableList.prototype.add$1 = ImmutableList.prototype.add;
 ImmutableList.prototype.clear$0 = ImmutableList.prototype.clear;
@@ -679,6 +749,7 @@ ImmutableList.prototype.sort$1 = function($0) {
 function ImmutableMap(keyValuePairs) {
   this._dart_coreimpl_internal = _map(keyValuePairs);
 }
+ImmutableMap.prototype.is$Map = function(){return true};
 ImmutableMap.prototype.is$Map_dart_core_String$Dynamic = function(){return true};
 ImmutableMap.prototype.$index = function(key) {
   return this._dart_coreimpl_internal.$index(key);
@@ -696,13 +767,16 @@ ImmutableMap.prototype.containsKey = function(key) {
   return this._dart_coreimpl_internal.containsKey(key);
 }
 ImmutableMap.prototype.$setindex = function(key, value) {
-  $throw(const$0003);
+  $throw(const$0004);
 }
 ImmutableMap.prototype.putIfAbsent = function(key, ifAbsent) {
-  $throw(const$0003);
+  $throw(const$0004);
 }
 ImmutableMap.prototype.clear = function() {
-  $throw(const$0003);
+  $throw(const$0004);
+}
+ImmutableMap.prototype.toString = function() {
+  return Maps.mapToString(this);
 }
 ImmutableMap.prototype.clear$0 = ImmutableMap.prototype.clear;
 ImmutableMap.prototype.forEach$1 = function($0) {
@@ -710,7 +784,7 @@ ImmutableMap.prototype.forEach$1 = function($0) {
 };
 // ********** Code for JSSyntaxRegExp **************
 function JSSyntaxRegExp(pattern, multiLine, ignoreCase) {
-  JSSyntaxRegExp._create$ctor.call(this, pattern, $add(($eq(multiLine, true) ? "m" : ""), ($eq(ignoreCase, true) ? "i" : "")));
+  JSSyntaxRegExp._create$ctor.call(this, pattern, $$add(($$eq(multiLine, true) ? "m" : ""), ($$eq(ignoreCase, true) ? "i" : "")));
 }
 JSSyntaxRegExp._create$ctor = function(pattern, flags) {
   this.re = new RegExp(pattern, flags);
@@ -740,7 +814,7 @@ JSSyntaxRegExp.prototype.allMatches = function(str) {
   return new _AllMatchesIterable(this, str);
 }
 JSSyntaxRegExp.prototype.get$_global = function() {
-  return new JSSyntaxRegExp._create$ctor(this.pattern, $add($add("g", (this.multiLine ? "m" : "")), (this.ignoreCase ? "i" : "")));
+  return new JSSyntaxRegExp._create$ctor(this.pattern, $$add($$add("g", (this.multiLine ? "m" : "")), (this.ignoreCase ? "i" : "")));
 }
 // ********** Code for MatchImplementation **************
 function MatchImplementation(pattern, str, _start, _end, _groups) {
@@ -757,10 +831,10 @@ MatchImplementation.prototype.get$start = function() {
   return this.start.bind(this);
 }
 Function.prototype.bind = Function.prototype.bind ||
-  function(thisObj, args) {
+  function(thisObj) {
     var func = this;
-    if (typeof args !== 'undefined') {
-      var boundArgs = Array.prototype.slice.call(arguments, 3);
+    if (arguments.length > 1) {
+      var boundArgs = Array.prototype.slice.call(arguments, 1);
       return function() {
         // Prepend the bound arguments to the current arguments.
         var newArgs = Array.prototype.slice.call(arguments);
@@ -869,16 +943,16 @@ function DurationImplementation(days, hours, minutes, seconds, milliseconds) {
 DurationImplementation.prototype.is$Duration = function(){return true};
 DurationImplementation.prototype.get$inMilliseconds = function() { return this.inMilliseconds; };
 DurationImplementation.prototype.get$inDays = function() {
-  return $truncdiv(this.inMilliseconds, (86400000));
+  return $$truncdiv(this.inMilliseconds, (86400000));
 }
 DurationImplementation.prototype.get$inHours = function() {
-  return $truncdiv(this.inMilliseconds, (3600000));
+  return $$truncdiv(this.inMilliseconds, (3600000));
 }
 DurationImplementation.prototype.get$inMinutes = function() {
-  return $truncdiv(this.inMilliseconds, (60000));
+  return $$truncdiv(this.inMilliseconds, (60000));
 }
 DurationImplementation.prototype.get$inSeconds = function() {
-  return $truncdiv(this.inMilliseconds, (1000));
+  return $$truncdiv(this.inMilliseconds, (1000));
 }
 DurationImplementation.prototype.$eq = function(other) {
   if (!(other && other.is$Duration())) return false;
@@ -905,6 +979,77 @@ DurationImplementation.prototype.toString = function() {
   var twoDigitSeconds = twoDigits(this.get$inSeconds().remainder((60)));
   var threeDigitMs = threeDigits(this.inMilliseconds.remainder((1000)));
   return ("" + this.get$inHours() + ":" + twoDigitMinutes + ":" + twoDigitSeconds + "." + threeDigitMs);
+}
+// ********** Code for Collections **************
+function Collections() {}
+Collections.forEach = function(iterable, f) {
+  for (var $$i = iterable.iterator(); $$i.hasNext(); ) {
+    var e = $$i.next();
+    f(e);
+  }
+}
+Collections.some = function(iterable, f) {
+  for (var $$i = iterable.iterator(); $$i.hasNext(); ) {
+    var e = $$i.next();
+    if (f(e)) return true;
+  }
+  return false;
+}
+Collections.filter = function(source, destination, f) {
+  for (var $$i = source.iterator(); $$i.hasNext(); ) {
+    var e = $$i.next();
+    if (f(e)) destination.add(e);
+  }
+  return destination;
+}
+Collections.collectionToString = function(c) {
+  var result = new StringBufferImpl("");
+  Collections._emitCollection(c, result, new Array());
+  return result.toString();
+}
+Collections._emitCollection = function(c, result, visiting) {
+  visiting.add(c);
+  var isList = !!(c && c.is$List());
+  result.add(isList ? "[" : "{");
+  var first = true;
+  for (var $$i = c.iterator(); $$i.hasNext(); ) {
+    var e = $$i.next();
+    if (!first) {
+      result.add(", ");
+    }
+    first = false;
+    Collections._emitObject(e, result, visiting);
+  }
+  result.add(isList ? "]" : "}");
+  visiting.removeLast();
+}
+Collections._emitObject = function(o, result, visiting) {
+  if (!!(o && o.is$Collection())) {
+    if (Collections._containsRef(visiting, o)) {
+      result.add(!!(o && o.is$List()) ? "[...]" : "{...}");
+    }
+    else {
+      Collections._emitCollection(o, result, visiting);
+    }
+  }
+  else if (!!(o && o.is$Map())) {
+    if (Collections._containsRef(visiting, o)) {
+      result.add("{...}");
+    }
+    else {
+      Maps._emitMap(o, result, visiting);
+    }
+  }
+  else {
+    result.add($$eq(o) ? "null" : o);
+  }
+}
+Collections._containsRef = function(c, ref) {
+  for (var $$i = c.iterator(); $$i.hasNext(); ) {
+    var e = $$i.next();
+    if ((null == e ? null == (ref) : e === ref)) return true;
+  }
+  return false;
 }
 // ********** Code for FutureNotCompleteException **************
 function FutureNotCompleteException() {
@@ -1039,9 +1184,10 @@ function HashMapImplementation() {
   this._keys = new Array((8));
   this._values = new Array((8));
 }
+HashMapImplementation.prototype.is$Map = function(){return true};
 HashMapImplementation.prototype.is$Map_dart_core_String$Dynamic = function(){return true};
 HashMapImplementation._computeLoadLimit = function(capacity) {
-  return $truncdiv((capacity * (3)), (4));
+  return $$truncdiv((capacity * (3)), (4));
 }
 HashMapImplementation._firstProbe = function(hashCode, length) {
   return hashCode & (length - (1));
@@ -1060,7 +1206,7 @@ HashMapImplementation.prototype._probeForAdding = function(key) {
       if (insertionIndex < (0)) return hash;
       return insertionIndex;
     }
-    else if ($eq(existingKey, key)) {
+    else if ($$eq(existingKey, key)) {
       return hash;
     }
     else if ((insertionIndex < (0)) && ((null == const$0000 ? null == (existingKey) : const$0000 === existingKey))) {
@@ -1076,7 +1222,7 @@ HashMapImplementation.prototype._probeForLookup = function(key) {
   while (true) {
     var existingKey = this._keys.$index(hash);
     if (null == existingKey) return (-1);
-    if ($eq(existingKey, key)) return hash;
+    if ($$eq(existingKey, key)) return hash;
     hash = HashMapImplementation._nextProbe(hash, numberOfProbes++, this._keys.get$length());
   }
 }
@@ -1197,6 +1343,9 @@ HashMapImplementation.prototype.getValues = function() {
 HashMapImplementation.prototype.containsKey = function(key) {
   return (this._probeForLookup(key) != (-1));
 }
+HashMapImplementation.prototype.toString = function() {
+  return Maps.mapToString(this);
+}
 HashMapImplementation.prototype.clear$0 = HashMapImplementation.prototype.clear;
 HashMapImplementation.prototype.forEach$1 = function($0) {
   return this.forEach(to$call$2($0));
@@ -1210,6 +1359,7 @@ function HashMapImplementation_Dynamic$DoubleLinkedQueueEntry_KeyValuePair() {
   this._keys = new Array((8));
   this._values = new Array((8));
 }
+HashMapImplementation_Dynamic$DoubleLinkedQueueEntry_KeyValuePair.prototype.is$Map = function(){return true};
 HashMapImplementation_Dynamic$DoubleLinkedQueueEntry_KeyValuePair.prototype.is$Map_dart_core_String$Dynamic = function(){return true};
 HashMapImplementation_Dynamic$DoubleLinkedQueueEntry_KeyValuePair.prototype.clear$0 = HashMapImplementation_Dynamic$DoubleLinkedQueueEntry_KeyValuePair.prototype.clear;
 HashMapImplementation_Dynamic$DoubleLinkedQueueEntry_KeyValuePair.prototype.forEach$1 = function($0) {
@@ -1224,6 +1374,7 @@ function HashMapImplementation_String$String() {
   this._keys = new Array((8));
   this._values = new Array((8));
 }
+HashMapImplementation_String$String.prototype.is$Map = function(){return true};
 HashMapImplementation_String$String.prototype.is$Map_dart_core_String$Dynamic = function(){return true};
 HashMapImplementation_String$String.prototype.clear$0 = HashMapImplementation_String$String.prototype.clear;
 HashMapImplementation_String$String.prototype.forEach$1 = function($0) {
@@ -1238,6 +1389,7 @@ function HashMapImplementation_String$int() {
   this._keys = new Array((8));
   this._values = new Array((8));
 }
+HashMapImplementation_String$int.prototype.is$Map = function(){return true};
 HashMapImplementation_String$int.prototype.is$Map_dart_core_String$Dynamic = function(){return true};
 HashMapImplementation_String$int.prototype.clear$0 = HashMapImplementation_String$int.prototype.clear;
 HashMapImplementation_String$int.prototype.forEach$1 = function($0) {
@@ -1252,6 +1404,7 @@ function HashMapImplementation_String$num() {
   this._keys = new Array((8));
   this._values = new Array((8));
 }
+HashMapImplementation_String$num.prototype.is$Map = function(){return true};
 HashMapImplementation_String$num.prototype.is$Map_dart_core_String$Dynamic = function(){return true};
 HashMapImplementation_String$num.prototype.clear$0 = HashMapImplementation_String$num.prototype.clear;
 HashMapImplementation_String$num.prototype.forEach$1 = function($0) {
@@ -1266,6 +1419,7 @@ function HashMapImplementation_int$_GridTemplateRect() {
   this._keys = new Array((8));
   this._values = new Array((8));
 }
+HashMapImplementation_int$_GridTemplateRect.prototype.is$Map = function(){return true};
 HashMapImplementation_int$_GridTemplateRect.prototype.is$Map_dart_core_String$Dynamic = function(){return false};
 HashMapImplementation_int$_GridTemplateRect.prototype.clear$0 = HashMapImplementation_int$_GridTemplateRect.prototype.clear;
 HashMapImplementation_int$_GridTemplateRect.prototype.forEach$1 = function($0) {
@@ -1280,6 +1434,7 @@ function HashMapImplementation_int$EventSummary() {
   this._keys = new Array((8));
   this._values = new Array((8));
 }
+HashMapImplementation_int$EventSummary.prototype.is$Map = function(){return true};
 HashMapImplementation_int$EventSummary.prototype.is$Map_dart_core_String$Dynamic = function(){return false};
 HashMapImplementation_int$EventSummary.prototype.clear$0 = HashMapImplementation_int$EventSummary.prototype.clear;
 HashMapImplementation_int$EventSummary.prototype.forEach$1 = function($0) {
@@ -1294,6 +1449,7 @@ function HashMapImplementation_int$View() {
   this._keys = new Array((8));
   this._values = new Array((8));
 }
+HashMapImplementation_int$View.prototype.is$Map = function(){return true};
 HashMapImplementation_int$View.prototype.is$Map_dart_core_String$Dynamic = function(){return false};
 HashMapImplementation_int$View.prototype.clear$0 = HashMapImplementation_int$View.prototype.clear;
 HashMapImplementation_int$View.prototype.forEach$1 = function($0) {
@@ -1303,6 +1459,7 @@ HashMapImplementation_int$View.prototype.forEach$1 = function($0) {
 function HashSetImplementation() {
   this._backingMap = new HashMapImplementation();
 }
+HashSetImplementation.prototype.is$Collection = function(){return true};
 HashSetImplementation.HashSetImplementation$from$factory = function(other) {
   var set = new HashSetImplementation();
   for (var $$i = other.iterator(); $$i.hasNext(); ) {
@@ -1359,6 +1516,9 @@ HashSetImplementation.prototype.get$length = function() {
 HashSetImplementation.prototype.iterator = function() {
   return new HashSetIterator(this);
 }
+HashSetImplementation.prototype.toString = function() {
+  return Collections.collectionToString(this);
+}
 HashSetImplementation.prototype.add$1 = HashSetImplementation.prototype.add;
 HashSetImplementation.prototype.clear$0 = HashSetImplementation.prototype.clear;
 HashSetImplementation.prototype.contains$1 = HashSetImplementation.prototype.contains;
@@ -1376,6 +1536,7 @@ $inherits(HashSetImplementation_String, HashSetImplementation);
 function HashSetImplementation_String() {
   this._backingMap = new HashMapImplementation_String$String();
 }
+HashSetImplementation_String.prototype.is$Collection = function(){return true};
 HashSetImplementation_String.prototype.contains$1 = HashSetImplementation_String.prototype.contains;
 HashSetImplementation_String.prototype.filter$1 = function($0) {
   return this.filter(to$call$1($0));
@@ -1434,6 +1595,7 @@ function LinkedHashMapImplementation() {
   this._map = new HashMapImplementation_Dynamic$DoubleLinkedQueueEntry_KeyValuePair();
   this._list = new DoubleLinkedQueue_KeyValuePair();
 }
+LinkedHashMapImplementation.prototype.is$Map = function(){return true};
 LinkedHashMapImplementation.prototype.is$Map_dart_core_String$Dynamic = function(){return true};
 LinkedHashMapImplementation.prototype.$setindex = function(key, value) {
   if (this._map.containsKey(key)) {
@@ -1482,10 +1644,37 @@ LinkedHashMapImplementation.prototype.clear = function() {
   this._map.clear();
   this._list.clear();
 }
+LinkedHashMapImplementation.prototype.toString = function() {
+  return Maps.mapToString(this);
+}
 LinkedHashMapImplementation.prototype.clear$0 = LinkedHashMapImplementation.prototype.clear;
 LinkedHashMapImplementation.prototype.forEach$1 = function($0) {
   return this.forEach(to$call$2($0));
 };
+// ********** Code for Maps **************
+function Maps() {}
+Maps.mapToString = function(m) {
+  var result = new StringBufferImpl("");
+  Maps._emitMap(m, result, new Array());
+  return result.toString();
+}
+Maps._emitMap = function(m, result, visiting) {
+  visiting.add(m);
+  result.add("{");
+  var first = true;
+  m.forEach((function (k, v) {
+    if (!first) {
+      result.add(", ");
+    }
+    first = false;
+    Collections._emitObject(k, result, visiting);
+    result.add(": ");
+    Collections._emitObject(v, result, visiting);
+  })
+  );
+  result.add("}");
+  visiting.removeLast();
+}
 // ********** Code for DoubleLinkedQueueEntry **************
 function DoubleLinkedQueueEntry(e) {
   this._dart_coreimpl_element = e;
@@ -1542,13 +1731,13 @@ function _DoubleLinkedQueueEntrySentinel() {
   this._link(this, this);
 }
 _DoubleLinkedQueueEntrySentinel.prototype.remove = function() {
-  $throw(const$0004);
+  $throw(const$0002);
 }
 _DoubleLinkedQueueEntrySentinel.prototype._asNonSentinelEntry = function() {
   return null;
 }
 _DoubleLinkedQueueEntrySentinel.prototype.get$element = function() {
-  $throw(const$0004);
+  $throw(const$0002);
 }
 _DoubleLinkedQueueEntrySentinel.prototype.remove$0 = _DoubleLinkedQueueEntrySentinel.prototype.remove;
 // ********** Code for _DoubleLinkedQueueEntrySentinel_num **************
@@ -1573,6 +1762,7 @@ function _DoubleLinkedQueueEntrySentinel__Move() {
 function DoubleLinkedQueue() {
   this._sentinel = new _DoubleLinkedQueueEntrySentinel();
 }
+DoubleLinkedQueue.prototype.is$Collection = function(){return true};
 DoubleLinkedQueue.prototype.addLast = function(value) {
   this._sentinel.prepend(value);
 }
@@ -1649,6 +1839,9 @@ DoubleLinkedQueue.prototype.filter = function(f) {
 DoubleLinkedQueue.prototype.iterator = function() {
   return new _DoubleLinkedQueueIterator(this._sentinel);
 }
+DoubleLinkedQueue.prototype.toString = function() {
+  return Collections.collectionToString(this);
+}
 DoubleLinkedQueue.prototype.add$1 = DoubleLinkedQueue.prototype.add;
 DoubleLinkedQueue.prototype.clear$0 = DoubleLinkedQueue.prototype.clear;
 DoubleLinkedQueue.prototype.filter$1 = function($0) {
@@ -1665,20 +1858,13 @@ $inherits(DoubleLinkedQueue_num, DoubleLinkedQueue);
 function DoubleLinkedQueue_num() {
   this._sentinel = new _DoubleLinkedQueueEntrySentinel_num();
 }
-DoubleLinkedQueue_num.prototype.filter$1 = function($0) {
-  return this.filter(to$call$1($0));
-};
-DoubleLinkedQueue_num.prototype.forEach$1 = function($0) {
-  return this.forEach(to$call$1($0));
-};
-DoubleLinkedQueue_num.prototype.some$1 = function($0) {
-  return this.some(to$call$1($0));
-};
+DoubleLinkedQueue_num.prototype.is$Collection = function(){return true};
 // ********** Code for DoubleLinkedQueue_KeyValuePair **************
 $inherits(DoubleLinkedQueue_KeyValuePair, DoubleLinkedQueue);
 function DoubleLinkedQueue_KeyValuePair() {
   this._sentinel = new _DoubleLinkedQueueEntrySentinel_KeyValuePair();
 }
+DoubleLinkedQueue_KeyValuePair.prototype.is$Collection = function(){return true};
 DoubleLinkedQueue_KeyValuePair.prototype.clear$0 = DoubleLinkedQueue_KeyValuePair.prototype.clear;
 DoubleLinkedQueue_KeyValuePair.prototype.filter$1 = function($0) {
   return this.filter(to$call$1($0));
@@ -1694,6 +1880,7 @@ $inherits(DoubleLinkedQueue__Move, DoubleLinkedQueue);
 function DoubleLinkedQueue__Move() {
   this._sentinel = new _DoubleLinkedQueueEntrySentinel__Move();
 }
+DoubleLinkedQueue__Move.prototype.is$Collection = function(){return true};
 DoubleLinkedQueue__Move.prototype.filter$1 = function($0) {
   return this.filter(to$call$1($0));
 };
@@ -1769,7 +1956,7 @@ StringBase.join = function(strings, separator) {
   var s = strings.$index((0));
   for (var i = (1);
    i < strings.get$length(); i++) {
-    s = $add($add(s, separator), strings.$index(i));
+    s = $$add($$add(s, separator), strings.$index(i));
   }
   return s;
 }
@@ -1807,7 +1994,7 @@ StringImplementation.prototype.replaceFirst = function(from, to) {
   var $$list = from.allMatches(this);
   for (var $$i = $$list.iterator(); $$i.hasNext(); ) {
     var match = $$i.next();
-    return $add($add(this.substring((0), match.start$0()), to), this.substring(match.end$0()));
+    return $$add($$add(this.substring((0), match.start$0()), to), this.substring(match.end$0()));
   }
 }
 StringImplementation.prototype._replaceAll = function(from, to) {
@@ -1855,28 +2042,6 @@ StringImplementation.prototype.hashCode = function() {
       return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
 }
 StringImplementation.prototype.contains$1 = StringImplementation.prototype.contains;
-// ********** Code for Collections **************
-function Collections() {}
-Collections.forEach = function(iterable, f) {
-  for (var $$i = iterable.iterator(); $$i.hasNext(); ) {
-    var e = $$i.next();
-    f(e);
-  }
-}
-Collections.some = function(iterable, f) {
-  for (var $$i = iterable.iterator(); $$i.hasNext(); ) {
-    var e = $$i.next();
-    if (f(e)) return true;
-  }
-  return false;
-}
-Collections.filter = function(source, destination, f) {
-  for (var $$i = source.iterator(); $$i.hasNext(); ) {
-    var e = $$i.next();
-    if (f(e)) destination.add(e);
-  }
-  return destination;
-}
 // ********** Code for DateImplementation **************
 DateImplementation.fromString$ctor = function(formattedString) {
   this.timeZone = new TimeZoneImplementation.local$ctor();
@@ -1909,7 +2074,7 @@ DateImplementation.prototype.get$value = function() { return this.value; };
 DateImplementation.prototype.get$timeZone = function() { return this.timeZone; };
 DateImplementation.prototype.$eq = function(other) {
   if (!((other instanceof DateImplementation))) return false;
-  return (this.value == other.get$value()) && ($eq(this.timeZone, other.get$timeZone()));
+  return (this.value == other.get$value()) && ($$eq(this.timeZone, other.get$timeZone()));
 }
 DateImplementation.prototype.get$year = function() {
   return this.isUtc ? this._asJs().getUTCFullYear() :
@@ -2003,7 +2168,7 @@ TimeZoneImplementation.local$ctor.prototype = TimeZoneImplementation.prototype;
 function TimeZoneImplementation() {}
 TimeZoneImplementation.prototype.$eq = function(other) {
   if (!((other instanceof TimeZoneImplementation))) return false;
-  return $eq(this.isUtc, other.get$isUtc());
+  return $$eq(this.isUtc, other.get$isUtc());
 }
 TimeZoneImplementation.prototype.toString = function() {
   if (this.isUtc) return "TimeZone (UTC)";
@@ -2153,7 +2318,7 @@ function json_JSON() {}
 json_JSON.parse = function(str) {
   return _JSON.parse(str, (function (_, obj) {
     var keys = _jsKeys(obj);
-    if ($eq(keys)) return obj;
+    if ($$eq(keys)) return obj;
     var map = new HashMapImplementation();
     for (var $$i = keys.iterator(); $$i.hasNext(); ) {
       var key = $$i.next();
@@ -2312,6 +2477,7 @@ $dynamic("item$1").CSSValueList = function($0) {
 // ********** Code for _CanvasPatternJs **************
 // ********** Code for _CanvasPixelArrayJs **************
 $dynamic("is$List").CanvasPixelArray = function(){return true};
+$dynamic("is$Collection").CanvasPixelArray = function(){return true};
 $dynamic("get$length").CanvasPixelArray = function() { return this.length; };
 $dynamic("$index").CanvasPixelArray = function(index) {
   return this[index];
@@ -2633,6 +2799,7 @@ $dynamic("get$length").FileWriterSync = function() { return this.length; };
 // ********** Code for _Float32ArrayJs **************
 var _Float32ArrayJs = {};
 $dynamic("is$List").Float32Array = function(){return true};
+$dynamic("is$Collection").Float32Array = function(){return true};
 $dynamic("get$length").Float32Array = function() { return this.length; };
 $dynamic("$index").Float32Array = function(index) {
   return this[index];
@@ -2691,6 +2858,7 @@ $dynamic("sort$1").Float32Array = function($0) {
 // ********** Code for _Float64ArrayJs **************
 var _Float64ArrayJs = {};
 $dynamic("is$List").Float64Array = function(){return true};
+$dynamic("is$Collection").Float64Array = function(){return true};
 $dynamic("get$length").Float64Array = function() { return this.length; };
 $dynamic("$index").Float64Array = function(index) {
   return this[index];
@@ -2808,6 +2976,7 @@ $dynamic("get$width").HTMLCanvasElement = function() { return this.width; };
 $dynamic("set$width").HTMLCanvasElement = function(value) { return this.width = value; };
 // ********** Code for _HTMLCollectionJs **************
 $dynamic("is$List").HTMLCollection = function(){return true};
+$dynamic("is$Collection").HTMLCollection = function(){return true};
 $dynamic("get$length").HTMLCollection = function() { return this.length; };
 $dynamic("$index").HTMLCollection = function(index) {
   return this[index];
@@ -2974,6 +3143,7 @@ $dynamic("get$value").HTMLOptionElement = function() { return this.value; };
 $dynamic("set$value").HTMLOptionElement = function(value) { return this.value = value; };
 // ********** Code for _HTMLOptionsCollectionJs **************
 $dynamic("is$List").HTMLOptionsCollection = function(){return true};
+$dynamic("is$Collection").HTMLOptionsCollection = function(){return true};
 $dynamic("get$length").HTMLOptionsCollection = function() {
   return this.length;
 }
@@ -3120,6 +3290,7 @@ $dynamic("get$width").ImageData = function() { return this.width; };
 // ********** Code for _Int16ArrayJs **************
 var _Int16ArrayJs = {};
 $dynamic("is$List").Int16Array = function(){return true};
+$dynamic("is$Collection").Int16Array = function(){return true};
 $dynamic("get$length").Int16Array = function() { return this.length; };
 $dynamic("$index").Int16Array = function(index) {
   return this[index];
@@ -3178,6 +3349,7 @@ $dynamic("sort$1").Int16Array = function($0) {
 // ********** Code for _Int32ArrayJs **************
 var _Int32ArrayJs = {};
 $dynamic("is$List").Int32Array = function(){return true};
+$dynamic("is$Collection").Int32Array = function(){return true};
 $dynamic("get$length").Int32Array = function() { return this.length; };
 $dynamic("$index").Int32Array = function(index) {
   return this[index];
@@ -3236,6 +3408,7 @@ $dynamic("sort$1").Int32Array = function($0) {
 // ********** Code for _Int8ArrayJs **************
 var _Int8ArrayJs = {};
 $dynamic("is$List").Int8Array = function(){return true};
+$dynamic("is$Collection").Int8Array = function(){return true};
 $dynamic("get$length").Int8Array = function() { return this.length; };
 $dynamic("$index").Int8Array = function(index) {
   return this[index];
@@ -3321,6 +3494,7 @@ $dynamic("removeEventListener$3").MediaController = function($0, $1, $2) {
 // ********** Code for _MediaErrorJs **************
 // ********** Code for _MediaListJs **************
 $dynamic("is$List").MediaList = function(){return true};
+$dynamic("is$Collection").MediaList = function(){return true};
 $dynamic("get$length").MediaList = function() { return this.length; };
 $dynamic("$index").MediaList = function(index) {
   return this[index];
@@ -3426,6 +3600,7 @@ $dynamic("get$y").MouseEvent = function() { return this.y; };
 // ********** Code for _MutationEventJs **************
 // ********** Code for _NamedNodeMapJs **************
 $dynamic("is$List").NamedNodeMap = function(){return true};
+$dynamic("is$Collection").NamedNodeMap = function(){return true};
 $dynamic("get$length").NamedNodeMap = function() { return this.length; };
 $dynamic("$index").NamedNodeMap = function(index) {
   return this[index];
@@ -3491,6 +3666,7 @@ $dynamic("get$userAgent").Navigator = function() { return this.userAgent; };
 // ********** Code for _NodeIteratorJs **************
 // ********** Code for _NodeListJs **************
 $dynamic("is$List").NodeList = function(){return true};
+$dynamic("is$Collection").NodeList = function(){return true};
 $dynamic("get$length").NodeList = function() { return this.length; };
 $dynamic("$index").NodeList = function(index) {
   return this[index];
@@ -4068,6 +4244,7 @@ $dynamic("clear$0").Storage = function() {
 $dynamic("get$type").StyleMedia = function() { return this.type; };
 // ********** Code for _StyleSheetListJs **************
 $dynamic("is$List").StyleSheetList = function(){return true};
+$dynamic("is$Collection").StyleSheetList = function(){return true};
 $dynamic("get$length").StyleSheetList = function() { return this.length; };
 $dynamic("$index").StyleSheetList = function(index) {
   return this[index];
@@ -4182,6 +4359,7 @@ $dynamic("get$changedTouches").TouchEvent = function() { return this.changedTouc
 $dynamic("get$touches").TouchEvent = function() { return this.touches; };
 // ********** Code for _TouchListJs **************
 $dynamic("is$List").TouchList = function(){return true};
+$dynamic("is$Collection").TouchList = function(){return true};
 $dynamic("get$length").TouchList = function() { return this.length; };
 $dynamic("$index").TouchList = function(index) {
   return this[index];
@@ -4254,6 +4432,7 @@ $dynamic("get$parentNode").TreeWalker = function() {
 // ********** Code for _Uint16ArrayJs **************
 var _Uint16ArrayJs = {};
 $dynamic("is$List").Uint16Array = function(){return true};
+$dynamic("is$Collection").Uint16Array = function(){return true};
 $dynamic("get$length").Uint16Array = function() { return this.length; };
 $dynamic("$index").Uint16Array = function(index) {
   return this[index];
@@ -4312,6 +4491,7 @@ $dynamic("sort$1").Uint16Array = function($0) {
 // ********** Code for _Uint32ArrayJs **************
 var _Uint32ArrayJs = {};
 $dynamic("is$List").Uint32Array = function(){return true};
+$dynamic("is$Collection").Uint32Array = function(){return true};
 $dynamic("get$length").Uint32Array = function() { return this.length; };
 $dynamic("$index").Uint32Array = function(index) {
   return this[index];
@@ -4370,6 +4550,7 @@ $dynamic("sort$1").Uint32Array = function($0) {
 // ********** Code for _Uint8ArrayJs **************
 var _Uint8ArrayJs = {};
 $dynamic("is$List").Uint8Array = function(){return true};
+$dynamic("is$Collection").Uint8Array = function(){return true};
 $dynamic("get$length").Uint8Array = function() { return this.length; };
 $dynamic("$index").Uint8Array = function(index) {
   return this[index];
@@ -4428,6 +4609,7 @@ $dynamic("sort$1").Uint8Array = function($0) {
 // ********** Code for _Uint8ClampedArrayJs **************
 var _Uint8ClampedArrayJs = {};
 $dynamic("is$List").Uint8ClampedArray = function(){return true};
+$dynamic("is$Collection").Uint8ClampedArray = function(){return true};
 // ********** Code for _ValidityStateJs **************
 // ********** Code for _WaveShaperNodeJs **************
 // ********** Code for _WebGLActiveInfoJs **************
@@ -4548,6 +4730,51 @@ $dynamic("get$name").XPathException = function() { return this.name; };
 // ********** Code for _XPathNSResolverJs **************
 // ********** Code for _XPathResultJs **************
 // ********** Code for _XSLTProcessorJs **************
+// ********** Code for _DOMParserFactoryProvider **************
+function _DOMParserFactoryProvider() {}
+// ********** Code for _DOMURLFactoryProvider **************
+function _DOMURLFactoryProvider() {}
+// ********** Code for _EventSourceFactoryProvider **************
+function _EventSourceFactoryProvider() {}
+// ********** Code for _FileReaderFactoryProvider **************
+function _FileReaderFactoryProvider() {}
+// ********** Code for _FileReaderSyncFactoryProvider **************
+function _FileReaderSyncFactoryProvider() {}
+// ********** Code for _HTMLAudioElementFactoryProvider **************
+function _HTMLAudioElementFactoryProvider() {}
+// ********** Code for _HTMLOptionElementFactoryProvider **************
+function _HTMLOptionElementFactoryProvider() {}
+// ********** Code for _MediaControllerFactoryProvider **************
+function _MediaControllerFactoryProvider() {}
+// ********** Code for _MediaStreamFactoryProvider **************
+function _MediaStreamFactoryProvider() {}
+// ********** Code for _MessageChannelFactoryProvider **************
+function _MessageChannelFactoryProvider() {}
+// ********** Code for _PeerConnectionFactoryProvider **************
+function _PeerConnectionFactoryProvider() {}
+// ********** Code for _ShadowRootFactoryProvider **************
+function _ShadowRootFactoryProvider() {}
+// ********** Code for _SharedWorkerFactoryProvider **************
+function _SharedWorkerFactoryProvider() {}
+// ********** Code for _TextTrackCueFactoryProvider **************
+function _TextTrackCueFactoryProvider() {}
+// ********** Code for _WebKitBlobBuilderFactoryProvider **************
+function _WebKitBlobBuilderFactoryProvider() {}
+// ********** Code for _WebKitCSSMatrixFactoryProvider **************
+function _WebKitCSSMatrixFactoryProvider() {}
+// ********** Code for _WorkerFactoryProvider **************
+function _WorkerFactoryProvider() {}
+// ********** Code for _XMLHttpRequestFactoryProvider **************
+function _XMLHttpRequestFactoryProvider() {}
+_XMLHttpRequestFactoryProvider.XMLHttpRequest$factory = function() {
+  return new XMLHttpRequest();
+}
+// ********** Code for _XMLSerializerFactoryProvider **************
+function _XMLSerializerFactoryProvider() {}
+// ********** Code for _XPathEvaluatorFactoryProvider **************
+function _XPathEvaluatorFactoryProvider() {}
+// ********** Code for _XSLTProcessorFactoryProvider **************
+function _XSLTProcessorFactoryProvider() {}
 // ********** Code for dom__Collections **************
 function dom__Collections() {}
 dom__Collections.forEach = function(iterable, f) {
@@ -4572,14 +4799,8 @@ dom__Collections.filter = function(source, destination, f) {
 }
 // ********** Code for _AudioContextFactoryProvider **************
 function _AudioContextFactoryProvider() {}
-// ********** Code for _DOMParserFactoryProvider **************
-function _DOMParserFactoryProvider() {}
-// ********** Code for _FileReaderFactoryProvider **************
-function _FileReaderFactoryProvider() {}
 // ********** Code for _TypedArrayFactoryProvider **************
 function _TypedArrayFactoryProvider() {}
-// ********** Code for _WebKitCSSMatrixFactoryProvider **************
-function _WebKitCSSMatrixFactoryProvider() {}
 // ********** Code for _WebKitPointFactoryProvider **************
 function _WebKitPointFactoryProvider() {}
 _WebKitPointFactoryProvider.WebKitPoint$factory = function(x, y) {
@@ -4587,13 +4808,6 @@ _WebKitPointFactoryProvider.WebKitPoint$factory = function(x, y) {
 }
 // ********** Code for _WebSocketFactoryProvider **************
 function _WebSocketFactoryProvider() {}
-// ********** Code for _XMLHttpRequestFactoryProvider **************
-function _XMLHttpRequestFactoryProvider() {}
-_XMLHttpRequestFactoryProvider.XMLHttpRequest$factory = function() {
-  return new XMLHttpRequest();
-}
-// ********** Code for _XSLTProcessorFactoryProvider **************
-function _XSLTProcessorFactoryProvider() {}
 // ********** Code for dom__VariableSizeListIterator **************
 function dom__VariableSizeListIterator() {}
 dom__VariableSizeListIterator.prototype.hasNext = function() {
@@ -4694,7 +4908,7 @@ _Lists.indexOf = function(a, element, startIndex, endIndex) {
   }
   for (var i = startIndex;
    i < endIndex; i++) {
-    if ($eq(a.$index(i), element)) {
+    if ($$eq(a.$index(i), element)) {
       return i;
     }
   }
@@ -4781,10 +4995,10 @@ NodeWrappingImplementation.prototype.remove = function() {
   return this;
 }
 NodeWrappingImplementation.prototype.contains = function(otherNode) {
-  while (otherNode != null && $ne(otherNode, this)) {
+  while (otherNode != null && $$ne(otherNode, this)) {
     otherNode = otherNode.get$parent();
   }
-  return $eq(otherNode, this);
+  return $$eq(otherNode, this);
 }
 NodeWrappingImplementation.prototype.contains$1 = NodeWrappingImplementation.prototype.contains;
 NodeWrappingImplementation.prototype.remove$0 = NodeWrappingImplementation.prototype.remove;
@@ -4799,7 +5013,7 @@ ElementWrappingImplementation.prototype.is$html_Element = function(){return true
 ElementWrappingImplementation.ElementWrappingImplementation$html$factory = function(html) {
   var parentTag = "div";
   var tag;
-  var match = const$0002.firstMatch(html);
+  var match = const$0003.firstMatch(html);
   if (null != match) {
     tag = match.group$1((1)).toLowerCase();
     if (const$0005.containsKey(tag)) {
@@ -4816,9 +5030,9 @@ ElementWrappingImplementation.ElementWrappingImplementation$html$factory = funct
     element = LevelDom.wrapElement(temp.get$children().item$1(tag == "head" ? (0) : (1)));
   }
   else {
-    $throw(new IllegalArgumentException($add(("HTML had " + temp.get$childElementCount() + " "), "top level elements but 1 expected")));
+    $throw(new IllegalArgumentException($$add(("HTML had " + temp.get$childElementCount() + " "), "top level elements but 1 expected")));
   }
-  element.remove$0();
+  element.remove();
   return element;
 }
 ElementWrappingImplementation.ElementWrappingImplementation$tag$factory = function(tag) {
@@ -7390,6 +7604,7 @@ TouchListWrappingImplementation._wrap$ctor = function(ptr) {
 TouchListWrappingImplementation._wrap$ctor.prototype = TouchListWrappingImplementation.prototype;
 function TouchListWrappingImplementation() {}
 TouchListWrappingImplementation.prototype.is$List = function(){return true};
+TouchListWrappingImplementation.prototype.is$Collection = function(){return true};
 TouchListWrappingImplementation.prototype.get$length = function() {
   return this._ptr.get$length();
 }
@@ -7569,7 +7784,7 @@ LevelDom.wrapCanvasRenderingContext = function(raw) {
 
     default:
 
-      $throw(new UnsupportedOperationException($add("Unknown type:", raw.toString())));
+      $throw(new UnsupportedOperationException($$add("Unknown type:", raw.toString())));
 
   }
 }
@@ -7597,7 +7812,7 @@ LevelDom.wrapDocument = function(raw) {
 
     default:
 
-      $throw(new UnsupportedOperationException($add("Unknown type:", raw.toString())));
+      $throw(new UnsupportedOperationException($$add("Unknown type:", raw.toString())));
 
   }
 }
@@ -8199,7 +8414,7 @@ LevelDom.wrapElement = function(raw) {
 
     default:
 
-      $throw(new UnsupportedOperationException($add("Unknown type:", raw.toString())));
+      $throw(new UnsupportedOperationException($$add("Unknown type:", raw.toString())));
 
   }
 }
@@ -8340,7 +8555,7 @@ LevelDom.wrapEvent = function(raw) {
 
     default:
 
-      $throw(new UnsupportedOperationException($add("Unknown type:", raw.toString())));
+      $throw(new UnsupportedOperationException($$add("Unknown type:", raw.toString())));
 
   }
 }
@@ -9038,7 +9253,7 @@ LevelDom.wrapEventTarget = function(raw) {
 
     default:
 
-      $throw(new UnsupportedOperationException($add("Unknown type:", raw.toString())));
+      $throw(new UnsupportedOperationException($$add("Unknown type:", raw.toString())));
 
   }
 }
@@ -9697,7 +9912,7 @@ LevelDom.wrapNode = function(raw) {
 
     default:
 
-      $throw(new UnsupportedOperationException($add("Unknown type:", raw.toString())));
+      $throw(new UnsupportedOperationException($$add("Unknown type:", raw.toString())));
 
   }
 }
@@ -9823,7 +10038,7 @@ Lists.indexOf = function(a, element, startIndex, endIndex) {
   }
   for (var i = startIndex;
    i < endIndex; i++) {
-    if ($eq(a.$index(i), element)) {
+    if ($$eq(a.$index(i), element)) {
       return i;
     }
   }
@@ -9841,8 +10056,8 @@ Lists.getRange = function(a, start, length) {
   }
   var result = [];
   for (var i = (0);
-   $lt(i, length); i = $add(i, (1))) {
-    result.add$1(a.$index($add(start, i)));
+   $$lt(i, length); i = $$add(i, (1))) {
+    result.add$1(a.$index($$add(start, i)));
   }
   return result;
 }
@@ -9996,6 +10211,7 @@ function CompositionEventWrappingImplementation() {}
 function _CssClassSet(_element) {
   this._htmlimpl_element = _element;
 }
+_CssClassSet.prototype.is$Collection = function(){return true};
 _CssClassSet.prototype.toString = function() {
   return this._formatSet(this._read());
 }
@@ -10230,6 +10446,7 @@ function FilteredElementList(node) {
   this._childNodes = node.get$nodes();
 }
 FilteredElementList.prototype.is$List = function(){return true};
+FilteredElementList.prototype.is$Collection = function(){return true};
 FilteredElementList.prototype.get$_filtered = function() {
   return ListFactory.ListFactory$from$factory(this._childNodes.filter((function (n) {
     return !!(n && n.is$html_Element());
@@ -10275,7 +10492,7 @@ FilteredElementList.prototype.clear = function() {
 }
 FilteredElementList.prototype.removeLast = function() {
   var last = this.last();
-  if ($ne(last)) {
+  if ($$ne(last)) {
     last.remove$0();
   }
   return last;
@@ -10294,13 +10511,13 @@ FilteredElementList.prototype.get$length = function() {
 }
 FilteredElementList.prototype.set$length = function(newLength) {
   var len = this.get$length();
-  if ($gte(newLength, len)) {
+  if ($$gte(newLength, len)) {
     return;
   }
   else if (newLength < (0)) {
     $throw(const$0021);
   }
-  this.removeRange(newLength - (1), $sub(len, newLength));
+  this.removeRange(newLength - (1), $$sub(len, newLength));
 }
 FilteredElementList.prototype.$index = function(index) {
   return this.get$_filtered().$index(index);
@@ -10518,6 +10735,7 @@ _ChildrenElementList._wrap$ctor = function(element) {
 _ChildrenElementList._wrap$ctor.prototype = _ChildrenElementList.prototype;
 function _ChildrenElementList() {}
 _ChildrenElementList.prototype.is$List = function(){return true};
+_ChildrenElementList.prototype.is$Collection = function(){return true};
 _ChildrenElementList.prototype._toList = function() {
   var output = new Array(this._childElements.get$length());
   for (var i = (0), len = this._childElements.get$length();
@@ -10587,7 +10805,7 @@ _ChildrenElementList.prototype.clear = function() {
 }
 _ChildrenElementList.prototype.removeLast = function() {
   var last = this.last();
-  if ($ne(last)) {
+  if ($$ne(last)) {
     this._element.removeChild(LevelDom.unwrap(last));
   }
   return last;
@@ -10616,6 +10834,7 @@ FrozenElementList._wrap$ctor = function(_ptr) {
 FrozenElementList._wrap$ctor.prototype = FrozenElementList.prototype;
 function FrozenElementList() {}
 FrozenElementList.prototype.is$List = function(){return true};
+FrozenElementList.prototype.is$Collection = function(){return true};
 FrozenElementList.prototype.get$_ptr = function() { return this._ptr; };
 FrozenElementList.prototype.get$first = function() {
   return this.$index((0));
@@ -10645,7 +10864,7 @@ FrozenElementList.prototype.some = function(f) {
   return false;
 }
 FrozenElementList.prototype.isEmpty = function() {
-  return $eq(this._ptr.get$length(), (0));
+  return $$eq(this._ptr.get$length(), (0));
 }
 FrozenElementList.prototype.get$length = function() {
   return this._ptr.get$length();
@@ -10717,6 +10936,7 @@ FrozenElementListIterator.prototype.hasNext = function() {
 // ********** Code for _ListWrapper **************
 function _ListWrapper() {}
 _ListWrapper.prototype.is$List = function(){return true};
+_ListWrapper.prototype.is$Collection = function(){return true};
 _ListWrapper.prototype.iterator = function() {
   return this._list.iterator();
 }
@@ -10791,6 +11011,7 @@ function _ListWrapper_Element(_list) {
   this._list = _list;
 }
 _ListWrapper_Element.prototype.is$List = function(){return true};
+_ListWrapper_Element.prototype.is$Collection = function(){return true};
 _ListWrapper_Element.prototype.add$1 = _ListWrapper_Element.prototype.add;
 _ListWrapper_Element.prototype.clear$0 = _ListWrapper_Element.prototype.clear;
 _ListWrapper_Element.prototype.filter$1 = function($0) {
@@ -10811,6 +11032,7 @@ function _ElementList(list) {
   _ListWrapper_Element.call(this, list);
 }
 _ElementList.prototype.is$List = function(){return true};
+_ElementList.prototype.is$Collection = function(){return true};
 _ElementList.prototype.filter = function(f) {
   return new _ElementList(_ListWrapper_Element.prototype.filter.call(this, f));
 }
@@ -10826,6 +11048,7 @@ ElementAttributeMap._wrap$ctor = function(_element) {
 }
 ElementAttributeMap._wrap$ctor.prototype = ElementAttributeMap.prototype;
 function ElementAttributeMap() {}
+ElementAttributeMap.prototype.is$Map = function(){return true};
 ElementAttributeMap.prototype.is$Map_dart_core_String$Dynamic = function(){return true};
 ElementAttributeMap.prototype.containsKey = function(key) {
   return this._element.hasAttribute(key);
@@ -10838,7 +11061,7 @@ ElementAttributeMap.prototype.$setindex = function(key, value) {
 }
 ElementAttributeMap.prototype.clear = function() {
   var attributes = this._element.get$attributes();
-  for (var i = $sub(attributes.get$length(), (1));
+  for (var i = $$sub(attributes.get$length(), (1));
    i >= (0); i--) {
     this._element.removeAttribute(attributes.item$1(i).get$name());
   }
@@ -10964,7 +11187,7 @@ EventListenerListImplementation.prototype._removeWrapper = function(listener, us
   for (var i = (0);
    i < this._wrappers.get$length(); i++) {
     var wrapper = this._wrappers.$index(i);
-    if ((($0 = wrapper.raw) == null ? null == (listener) : $0 === listener) && $eq(wrapper.useCapture, useCapture)) {
+    if ((($0 = wrapper.raw) == null ? null == (listener) : $0 === listener) && $$eq(wrapper.useCapture, useCapture)) {
       if (i + (1) != this._wrappers.get$length()) {
         this._wrappers.$setindex(i, this._wrappers.removeLast());
       }
@@ -10985,7 +11208,7 @@ EventListenerListImplementation.prototype._findOrAddWrapper = function(listener,
     var $$list = this._wrappers;
     for (var $$i = $$list.iterator(); $$i.hasNext(); ) {
       var wrapper = $$i.next();
-      if ((($0 = wrapper.raw) == null ? null == (listener) : $0 === listener) && $eq(wrapper.useCapture, useCapture)) {
+      if ((($0 = wrapper.raw) == null ? null == (listener) : $0 === listener) && $$eq(wrapper.useCapture, useCapture)) {
         return wrapper.wrapped;
       }
     }
@@ -11076,6 +11299,7 @@ _ChildrenNodeList._wrap$ctor = function(node) {
 _ChildrenNodeList._wrap$ctor.prototype = _ChildrenNodeList.prototype;
 function _ChildrenNodeList() {}
 _ChildrenNodeList.prototype.is$List = function(){return true};
+_ChildrenNodeList.prototype.is$Collection = function(){return true};
 _ChildrenNodeList.prototype._toList = function() {
   var output = new Array(this._childNodes.get$length());
   for (var i = (0), len = this._childNodes.get$length();
@@ -11145,7 +11369,7 @@ _ChildrenNodeList.prototype.clear = function() {
 }
 _ChildrenNodeList.prototype.removeLast = function() {
   var last = this.last();
-  if ($ne(last)) {
+  if ($$ne(last)) {
     this._node.removeChild(LevelDom.unwrap(last));
   }
   return last;
@@ -11173,6 +11397,7 @@ function _ListWrapper_Node(_list) {
   this._list = _list;
 }
 _ListWrapper_Node.prototype.is$List = function(){return true};
+_ListWrapper_Node.prototype.is$Collection = function(){return true};
 _ListWrapper_Node.prototype.add$1 = _ListWrapper_Node.prototype.add;
 _ListWrapper_Node.prototype.clear$0 = _ListWrapper_Node.prototype.clear;
 _ListWrapper_Node.prototype.filter$1 = function($0) {
@@ -11193,6 +11418,7 @@ function _NodeList(list) {
   _ListWrapper_Node.call(this, list);
 }
 _NodeList.prototype.is$List = function(){return true};
+_NodeList.prototype.is$Collection = function(){return true};
 _NodeList.prototype.filter = function(f) {
   return new _NodeList(_ListWrapper_Node.prototype.filter.call(this, f));
 }
@@ -11713,7 +11939,7 @@ XMLHttpRequestWrappingImplementation.XMLHttpRequestWrappingImplementation$getTEM
   request.open$3("GET", url, true);
   request.set$withCredentials(true);
   request.get$on().get$readyStateChange().add$1((function (e) {
-    if ($eq(request.get$readyState(), (4)) && ($eq(request.get$status(), (200)) || $eq(request.get$status(), (0)))) {
+    if ($$eq(request.get$readyState(), (4)) && ($$eq(request.get$status(), (200)) || $$eq(request.get$status(), (0)))) {
       onSuccess(request);
     }
   })
@@ -11819,7 +12045,7 @@ function _createMeasurementFuture(computeValue, completer) {
   return completer.get$future();
 }
 function _completeMeasurementFutures() {
-  if ($eq($globals._nextMeasurementFrameScheduled, false)) {
+  if ($$eq($globals._nextMeasurementFrameScheduled, false)) {
     return;
   }
   $globals._nextMeasurementFrameScheduled = false;
@@ -11896,9 +12122,9 @@ Token.prototype.get$text = function() {
 Token.prototype.toString = function() {
   var kindText = TokenKind.kindToString(this.kind);
   var actualText = this.get$text();
-  if ($ne(kindText, actualText)) {
-    if ($gt(actualText.get$length(), (10))) {
-      actualText = $add(actualText.substring((0), (8)), "...");
+  if ($$ne(kindText, actualText)) {
+    if ($$gt(actualText.get$length(), (10))) {
+      actualText = $$add(actualText.substring((0), (8)), "...");
     }
     return ("" + kindText + "(" + actualText + ")");
   }
@@ -12018,9 +12244,9 @@ TokenizerBase.prototype.finishWhitespace = function() {
   this._lang_index--;
   while (this._lang_index < this._text.length) {
     var ch = this._text.charCodeAt(this._lang_index++);
-    if ($eq(ch, (32)) || $eq(ch, (9)) || $eq(ch, (13))) {
+    if ($$eq(ch, (32)) || $$eq(ch, (9)) || $$eq(ch, (13))) {
     }
-    else if ($eq(ch, (10))) {
+    else if ($$eq(ch, (10))) {
       if (!this._skipWhitespace) {
         return this._finishToken((63));
       }
@@ -12120,7 +12346,7 @@ TokenizerBase.prototype.readHex = function(hexLength) {
   var result = (0);
   while (this._lang_index < maxIndex) {
     var digit = TokenizerBase._hexDigit(this._text.charCodeAt(this._lang_index));
-    if ($eq(digit, (-1))) {
+    if ($$eq(digit, (-1))) {
       if (null == hexLength) {
         return result;
       }
@@ -12129,7 +12355,7 @@ TokenizerBase.prototype.readHex = function(hexLength) {
       }
     }
     TokenizerBase._hexDigit(this._text.charCodeAt(this._lang_index));
-    result = $add(($mul(result, (16))), digit);
+    result = $$add(($$mul(result, (16))), digit);
     this._lang_index++;
   }
   return result;
@@ -12204,7 +12430,7 @@ TokenizerBase.prototype.finishMultilineString = function(quote) {
     }
     else if (ch == (92)) {
       var escapeVal = this.readEscapeSequence();
-      if ($eq(escapeVal, (-1))) {
+      if ($$eq(escapeVal, (-1))) {
         return this._errorToken("invalid hex escape sequence");
       }
       else {
@@ -12293,7 +12519,7 @@ TokenizerBase.prototype.finishStringBody = function(quote) {
     }
     else if (ch == (92)) {
       var escapeVal = this.readEscapeSequence();
-      if ($eq(escapeVal, (-1))) {
+      if ($$eq(escapeVal, (-1))) {
         return this._errorToken("invalid hex escape sequence");
       }
       else {
@@ -12751,15 +12977,15 @@ Tokenizer.prototype.next = function() {
 Tokenizer.prototype.getIdentifierKind = function() {
   var i0 = this._startIndex;
   var ch;
-  switch ($sub(this._lang_index, i0)) {
+  switch ($$sub(this._lang_index, i0)) {
     case (2):
 
       ch = this._text.charCodeAt(i0);
       if (ch == (100)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (111)) return (95);
+        if (this._text.charCodeAt($$add(i0, (1))) == (111)) return (95);
       }
       else if (ch == (105)) {
-        ch = this._text.charCodeAt($add(i0, (1)));
+        ch = this._text.charCodeAt($$add(i0, (1)));
         if (ch == (102)) {
           return (102);
         }
@@ -12776,22 +13002,22 @@ Tokenizer.prototype.getIdentifierKind = function() {
 
       ch = this._text.charCodeAt(i0);
       if (ch == (102)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (111) && this._text.charCodeAt($add(i0, (2))) == (114)) return (101);
+        if (this._text.charCodeAt($$add(i0, (1))) == (111) && this._text.charCodeAt($$add(i0, (2))) == (114)) return (101);
       }
       else if (ch == (103)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (101) && this._text.charCodeAt($add(i0, (2))) == (116)) return (75);
+        if (this._text.charCodeAt($$add(i0, (1))) == (101) && this._text.charCodeAt($$add(i0, (2))) == (116)) return (75);
       }
       else if (ch == (110)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (101) && this._text.charCodeAt($add(i0, (2))) == (119)) return (105);
+        if (this._text.charCodeAt($$add(i0, (1))) == (101) && this._text.charCodeAt($$add(i0, (2))) == (119)) return (105);
       }
       else if (ch == (115)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (101) && this._text.charCodeAt($add(i0, (2))) == (116)) return (83);
+        if (this._text.charCodeAt($$add(i0, (1))) == (101) && this._text.charCodeAt($$add(i0, (2))) == (116)) return (83);
       }
       else if (ch == (116)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (114) && this._text.charCodeAt($add(i0, (2))) == (121)) return (113);
+        if (this._text.charCodeAt($$add(i0, (1))) == (114) && this._text.charCodeAt($$add(i0, (2))) == (121)) return (113);
       }
       else if (ch == (118)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (97) && this._text.charCodeAt($add(i0, (2))) == (114)) return (114);
+        if (this._text.charCodeAt($$add(i0, (1))) == (97) && this._text.charCodeAt($$add(i0, (2))) == (114)) return (114);
       }
       return (70);
 
@@ -12799,34 +13025,34 @@ Tokenizer.prototype.getIdentifierKind = function() {
 
       ch = this._text.charCodeAt(i0);
       if (ch == (99)) {
-        ch = this._text.charCodeAt($add(i0, (1)));
+        ch = this._text.charCodeAt($$add(i0, (1)));
         if (ch == (97)) {
-          ch = this._text.charCodeAt($add(i0, (2)));
+          ch = this._text.charCodeAt($$add(i0, (2)));
           if (ch == (108)) {
-            if (this._text.charCodeAt($add(i0, (3))) == (108)) return (73);
+            if (this._text.charCodeAt($$add(i0, (3))) == (108)) return (73);
           }
           else if (ch == (115)) {
-            if (this._text.charCodeAt($add(i0, (3))) == (101)) return (89);
+            if (this._text.charCodeAt($$add(i0, (3))) == (101)) return (89);
           }
         }
       }
       else if (ch == (101)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (108) && this._text.charCodeAt($add(i0, (2))) == (115) && this._text.charCodeAt($add(i0, (3))) == (101)) return (96);
+        if (this._text.charCodeAt($$add(i0, (1))) == (108) && this._text.charCodeAt($$add(i0, (2))) == (115) && this._text.charCodeAt($$add(i0, (3))) == (101)) return (96);
       }
       else if (ch == (110)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (117) && this._text.charCodeAt($add(i0, (2))) == (108) && this._text.charCodeAt($add(i0, (3))) == (108)) return (106);
+        if (this._text.charCodeAt($$add(i0, (1))) == (117) && this._text.charCodeAt($$add(i0, (2))) == (108) && this._text.charCodeAt($$add(i0, (3))) == (108)) return (106);
       }
       else if (ch == (116)) {
-        ch = this._text.charCodeAt($add(i0, (1)));
+        ch = this._text.charCodeAt($$add(i0, (1)));
         if (ch == (104)) {
-          if (this._text.charCodeAt($add(i0, (2))) == (105) && this._text.charCodeAt($add(i0, (3))) == (115)) return (110);
+          if (this._text.charCodeAt($$add(i0, (2))) == (105) && this._text.charCodeAt($$add(i0, (3))) == (115)) return (110);
         }
         else if (ch == (114)) {
-          if (this._text.charCodeAt($add(i0, (2))) == (117) && this._text.charCodeAt($add(i0, (3))) == (101)) return (112);
+          if (this._text.charCodeAt($$add(i0, (2))) == (117) && this._text.charCodeAt($$add(i0, (3))) == (101)) return (112);
         }
       }
       else if (ch == (118)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (111) && this._text.charCodeAt($add(i0, (2))) == (105) && this._text.charCodeAt($add(i0, (3))) == (100)) return (115);
+        if (this._text.charCodeAt($$add(i0, (1))) == (111) && this._text.charCodeAt($$add(i0, (2))) == (105) && this._text.charCodeAt($$add(i0, (3))) == (100)) return (115);
       }
       return (70);
 
@@ -12834,40 +13060,40 @@ Tokenizer.prototype.getIdentifierKind = function() {
 
       ch = this._text.charCodeAt(i0);
       if (ch == (97)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (119) && this._text.charCodeAt($add(i0, (2))) == (97) && this._text.charCodeAt($add(i0, (3))) == (105) && this._text.charCodeAt($add(i0, (4))) == (116)) return (87);
+        if (this._text.charCodeAt($$add(i0, (1))) == (119) && this._text.charCodeAt($$add(i0, (2))) == (97) && this._text.charCodeAt($$add(i0, (3))) == (105) && this._text.charCodeAt($$add(i0, (4))) == (116)) return (87);
       }
       else if (ch == (98)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (114) && this._text.charCodeAt($add(i0, (2))) == (101) && this._text.charCodeAt($add(i0, (3))) == (97) && this._text.charCodeAt($add(i0, (4))) == (107)) return (88);
+        if (this._text.charCodeAt($$add(i0, (1))) == (114) && this._text.charCodeAt($$add(i0, (2))) == (101) && this._text.charCodeAt($$add(i0, (3))) == (97) && this._text.charCodeAt($$add(i0, (4))) == (107)) return (88);
       }
       else if (ch == (99)) {
-        ch = this._text.charCodeAt($add(i0, (1)));
+        ch = this._text.charCodeAt($$add(i0, (1)));
         if (ch == (97)) {
-          if (this._text.charCodeAt($add(i0, (2))) == (116) && this._text.charCodeAt($add(i0, (3))) == (99) && this._text.charCodeAt($add(i0, (4))) == (104)) return (90);
+          if (this._text.charCodeAt($$add(i0, (2))) == (116) && this._text.charCodeAt($$add(i0, (3))) == (99) && this._text.charCodeAt($$add(i0, (4))) == (104)) return (90);
         }
         else if (ch == (108)) {
-          if (this._text.charCodeAt($add(i0, (2))) == (97) && this._text.charCodeAt($add(i0, (3))) == (115) && this._text.charCodeAt($add(i0, (4))) == (115)) return (91);
+          if (this._text.charCodeAt($$add(i0, (2))) == (97) && this._text.charCodeAt($$add(i0, (3))) == (115) && this._text.charCodeAt($$add(i0, (4))) == (115)) return (91);
         }
         else if (ch == (111)) {
-          if (this._text.charCodeAt($add(i0, (2))) == (110) && this._text.charCodeAt($add(i0, (3))) == (115) && this._text.charCodeAt($add(i0, (4))) == (116)) return (92);
+          if (this._text.charCodeAt($$add(i0, (2))) == (110) && this._text.charCodeAt($$add(i0, (3))) == (115) && this._text.charCodeAt($$add(i0, (4))) == (116)) return (92);
         }
       }
       else if (ch == (102)) {
-        ch = this._text.charCodeAt($add(i0, (1)));
+        ch = this._text.charCodeAt($$add(i0, (1)));
         if (ch == (97)) {
-          if (this._text.charCodeAt($add(i0, (2))) == (108) && this._text.charCodeAt($add(i0, (3))) == (115) && this._text.charCodeAt($add(i0, (4))) == (101)) return (98);
+          if (this._text.charCodeAt($$add(i0, (2))) == (108) && this._text.charCodeAt($$add(i0, (3))) == (115) && this._text.charCodeAt($$add(i0, (4))) == (101)) return (98);
         }
         else if (ch == (105)) {
-          if (this._text.charCodeAt($add(i0, (2))) == (110) && this._text.charCodeAt($add(i0, (3))) == (97) && this._text.charCodeAt($add(i0, (4))) == (108)) return (99);
+          if (this._text.charCodeAt($$add(i0, (2))) == (110) && this._text.charCodeAt($$add(i0, (3))) == (97) && this._text.charCodeAt($$add(i0, (4))) == (108)) return (99);
         }
       }
       else if (ch == (115)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (117) && this._text.charCodeAt($add(i0, (2))) == (112) && this._text.charCodeAt($add(i0, (3))) == (101) && this._text.charCodeAt($add(i0, (4))) == (114)) return (108);
+        if (this._text.charCodeAt($$add(i0, (1))) == (117) && this._text.charCodeAt($$add(i0, (2))) == (112) && this._text.charCodeAt($$add(i0, (3))) == (101) && this._text.charCodeAt($$add(i0, (4))) == (114)) return (108);
       }
       else if (ch == (116)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (104) && this._text.charCodeAt($add(i0, (2))) == (114) && this._text.charCodeAt($add(i0, (3))) == (111) && this._text.charCodeAt($add(i0, (4))) == (119)) return (111);
+        if (this._text.charCodeAt($$add(i0, (1))) == (104) && this._text.charCodeAt($$add(i0, (2))) == (114) && this._text.charCodeAt($$add(i0, (3))) == (111) && this._text.charCodeAt($$add(i0, (4))) == (119)) return (111);
       }
       else if (ch == (119)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (104) && this._text.charCodeAt($add(i0, (2))) == (105) && this._text.charCodeAt($add(i0, (3))) == (108) && this._text.charCodeAt($add(i0, (4))) == (101)) return (116);
+        if (this._text.charCodeAt($$add(i0, (1))) == (104) && this._text.charCodeAt($$add(i0, (2))) == (105) && this._text.charCodeAt($$add(i0, (3))) == (108) && this._text.charCodeAt($$add(i0, (4))) == (101)) return (116);
       }
       return (70);
 
@@ -12875,33 +13101,33 @@ Tokenizer.prototype.getIdentifierKind = function() {
 
       ch = this._text.charCodeAt(i0);
       if (ch == (97)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (115) && this._text.charCodeAt($add(i0, (2))) == (115) && this._text.charCodeAt($add(i0, (3))) == (101) && this._text.charCodeAt($add(i0, (4))) == (114) && this._text.charCodeAt($add(i0, (5))) == (116)) return (72);
+        if (this._text.charCodeAt($$add(i0, (1))) == (115) && this._text.charCodeAt($$add(i0, (2))) == (115) && this._text.charCodeAt($$add(i0, (3))) == (101) && this._text.charCodeAt($$add(i0, (4))) == (114) && this._text.charCodeAt($$add(i0, (5))) == (116)) return (72);
       }
       else if (ch == (105)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (109) && this._text.charCodeAt($add(i0, (2))) == (112) && this._text.charCodeAt($add(i0, (3))) == (111) && this._text.charCodeAt($add(i0, (4))) == (114) && this._text.charCodeAt($add(i0, (5))) == (116)) return (77);
+        if (this._text.charCodeAt($$add(i0, (1))) == (109) && this._text.charCodeAt($$add(i0, (2))) == (112) && this._text.charCodeAt($$add(i0, (3))) == (111) && this._text.charCodeAt($$add(i0, (4))) == (114) && this._text.charCodeAt($$add(i0, (5))) == (116)) return (77);
       }
       else if (ch == (110)) {
-        ch = this._text.charCodeAt($add(i0, (1)));
+        ch = this._text.charCodeAt($$add(i0, (1)));
         if (ch == (97)) {
-          if (this._text.charCodeAt($add(i0, (2))) == (116) && this._text.charCodeAt($add(i0, (3))) == (105) && this._text.charCodeAt($add(i0, (4))) == (118) && this._text.charCodeAt($add(i0, (5))) == (101)) return (80);
+          if (this._text.charCodeAt($$add(i0, (2))) == (116) && this._text.charCodeAt($$add(i0, (3))) == (105) && this._text.charCodeAt($$add(i0, (4))) == (118) && this._text.charCodeAt($$add(i0, (5))) == (101)) return (80);
         }
         else if (ch == (101)) {
-          if (this._text.charCodeAt($add(i0, (2))) == (103) && this._text.charCodeAt($add(i0, (3))) == (97) && this._text.charCodeAt($add(i0, (4))) == (116) && this._text.charCodeAt($add(i0, (5))) == (101)) return (81);
+          if (this._text.charCodeAt($$add(i0, (2))) == (103) && this._text.charCodeAt($$add(i0, (3))) == (97) && this._text.charCodeAt($$add(i0, (4))) == (116) && this._text.charCodeAt($$add(i0, (5))) == (101)) return (81);
         }
       }
       else if (ch == (114)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (101) && this._text.charCodeAt($add(i0, (2))) == (116) && this._text.charCodeAt($add(i0, (3))) == (117) && this._text.charCodeAt($add(i0, (4))) == (114) && this._text.charCodeAt($add(i0, (5))) == (110)) return (107);
+        if (this._text.charCodeAt($$add(i0, (1))) == (101) && this._text.charCodeAt($$add(i0, (2))) == (116) && this._text.charCodeAt($$add(i0, (3))) == (117) && this._text.charCodeAt($$add(i0, (4))) == (114) && this._text.charCodeAt($$add(i0, (5))) == (110)) return (107);
       }
       else if (ch == (115)) {
-        ch = this._text.charCodeAt($add(i0, (1)));
+        ch = this._text.charCodeAt($$add(i0, (1)));
         if (ch == (111)) {
-          if (this._text.charCodeAt($add(i0, (2))) == (117) && this._text.charCodeAt($add(i0, (3))) == (114) && this._text.charCodeAt($add(i0, (4))) == (99) && this._text.charCodeAt($add(i0, (5))) == (101)) return (84);
+          if (this._text.charCodeAt($$add(i0, (2))) == (117) && this._text.charCodeAt($$add(i0, (3))) == (114) && this._text.charCodeAt($$add(i0, (4))) == (99) && this._text.charCodeAt($$add(i0, (5))) == (101)) return (84);
         }
         else if (ch == (116)) {
-          if (this._text.charCodeAt($add(i0, (2))) == (97) && this._text.charCodeAt($add(i0, (3))) == (116) && this._text.charCodeAt($add(i0, (4))) == (105) && this._text.charCodeAt($add(i0, (5))) == (99)) return (85);
+          if (this._text.charCodeAt($$add(i0, (2))) == (97) && this._text.charCodeAt($$add(i0, (3))) == (116) && this._text.charCodeAt($$add(i0, (4))) == (105) && this._text.charCodeAt($$add(i0, (5))) == (99)) return (85);
         }
         else if (ch == (119)) {
-          if (this._text.charCodeAt($add(i0, (2))) == (105) && this._text.charCodeAt($add(i0, (3))) == (116) && this._text.charCodeAt($add(i0, (4))) == (99) && this._text.charCodeAt($add(i0, (5))) == (104)) return (109);
+          if (this._text.charCodeAt($$add(i0, (2))) == (105) && this._text.charCodeAt($$add(i0, (3))) == (116) && this._text.charCodeAt($$add(i0, (4))) == (99) && this._text.charCodeAt($$add(i0, (5))) == (104)) return (109);
         }
       }
       return (70);
@@ -12910,25 +13136,25 @@ Tokenizer.prototype.getIdentifierKind = function() {
 
       ch = this._text.charCodeAt(i0);
       if (ch == (100)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (101) && this._text.charCodeAt($add(i0, (2))) == (102) && this._text.charCodeAt($add(i0, (3))) == (97) && this._text.charCodeAt($add(i0, (4))) == (117) && this._text.charCodeAt($add(i0, (5))) == (108) && this._text.charCodeAt($add(i0, (6))) == (116)) return (94);
+        if (this._text.charCodeAt($$add(i0, (1))) == (101) && this._text.charCodeAt($$add(i0, (2))) == (102) && this._text.charCodeAt($$add(i0, (3))) == (97) && this._text.charCodeAt($$add(i0, (4))) == (117) && this._text.charCodeAt($$add(i0, (5))) == (108) && this._text.charCodeAt($$add(i0, (6))) == (116)) return (94);
       }
       else if (ch == (101)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (120) && this._text.charCodeAt($add(i0, (2))) == (116) && this._text.charCodeAt($add(i0, (3))) == (101) && this._text.charCodeAt($add(i0, (4))) == (110) && this._text.charCodeAt($add(i0, (5))) == (100) && this._text.charCodeAt($add(i0, (6))) == (115)) return (97);
+        if (this._text.charCodeAt($$add(i0, (1))) == (120) && this._text.charCodeAt($$add(i0, (2))) == (116) && this._text.charCodeAt($$add(i0, (3))) == (101) && this._text.charCodeAt($$add(i0, (4))) == (110) && this._text.charCodeAt($$add(i0, (5))) == (100) && this._text.charCodeAt($$add(i0, (6))) == (115)) return (97);
       }
       else if (ch == (102)) {
-        ch = this._text.charCodeAt($add(i0, (1)));
+        ch = this._text.charCodeAt($$add(i0, (1)));
         if (ch == (97)) {
-          if (this._text.charCodeAt($add(i0, (2))) == (99) && this._text.charCodeAt($add(i0, (3))) == (116) && this._text.charCodeAt($add(i0, (4))) == (111) && this._text.charCodeAt($add(i0, (5))) == (114) && this._text.charCodeAt($add(i0, (6))) == (121)) return (74);
+          if (this._text.charCodeAt($$add(i0, (2))) == (99) && this._text.charCodeAt($$add(i0, (3))) == (116) && this._text.charCodeAt($$add(i0, (4))) == (111) && this._text.charCodeAt($$add(i0, (5))) == (114) && this._text.charCodeAt($$add(i0, (6))) == (121)) return (74);
         }
         else if (ch == (105)) {
-          if (this._text.charCodeAt($add(i0, (2))) == (110) && this._text.charCodeAt($add(i0, (3))) == (97) && this._text.charCodeAt($add(i0, (4))) == (108) && this._text.charCodeAt($add(i0, (5))) == (108) && this._text.charCodeAt($add(i0, (6))) == (121)) return (100);
+          if (this._text.charCodeAt($$add(i0, (2))) == (110) && this._text.charCodeAt($$add(i0, (3))) == (97) && this._text.charCodeAt($$add(i0, (4))) == (108) && this._text.charCodeAt($$add(i0, (5))) == (108) && this._text.charCodeAt($$add(i0, (6))) == (121)) return (100);
         }
       }
       else if (ch == (108)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (105) && this._text.charCodeAt($add(i0, (2))) == (98) && this._text.charCodeAt($add(i0, (3))) == (114) && this._text.charCodeAt($add(i0, (4))) == (97) && this._text.charCodeAt($add(i0, (5))) == (114) && this._text.charCodeAt($add(i0, (6))) == (121)) return (79);
+        if (this._text.charCodeAt($$add(i0, (1))) == (105) && this._text.charCodeAt($$add(i0, (2))) == (98) && this._text.charCodeAt($$add(i0, (3))) == (114) && this._text.charCodeAt($$add(i0, (4))) == (97) && this._text.charCodeAt($$add(i0, (5))) == (114) && this._text.charCodeAt($$add(i0, (6))) == (121)) return (79);
       }
       else if (ch == (116)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (121) && this._text.charCodeAt($add(i0, (2))) == (112) && this._text.charCodeAt($add(i0, (3))) == (101) && this._text.charCodeAt($add(i0, (4))) == (100) && this._text.charCodeAt($add(i0, (5))) == (101) && this._text.charCodeAt($add(i0, (6))) == (102)) return (86);
+        if (this._text.charCodeAt($$add(i0, (1))) == (121) && this._text.charCodeAt($$add(i0, (2))) == (112) && this._text.charCodeAt($$add(i0, (3))) == (101) && this._text.charCodeAt($$add(i0, (4))) == (100) && this._text.charCodeAt($$add(i0, (5))) == (101) && this._text.charCodeAt($$add(i0, (6))) == (102)) return (86);
       }
       return (70);
 
@@ -12936,24 +13162,24 @@ Tokenizer.prototype.getIdentifierKind = function() {
 
       ch = this._text.charCodeAt(i0);
       if (ch == (97)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (98) && this._text.charCodeAt($add(i0, (2))) == (115) && this._text.charCodeAt($add(i0, (3))) == (116) && this._text.charCodeAt($add(i0, (4))) == (114) && this._text.charCodeAt($add(i0, (5))) == (97) && this._text.charCodeAt($add(i0, (6))) == (99) && this._text.charCodeAt($add(i0, (7))) == (116)) return (71);
+        if (this._text.charCodeAt($$add(i0, (1))) == (98) && this._text.charCodeAt($$add(i0, (2))) == (115) && this._text.charCodeAt($$add(i0, (3))) == (116) && this._text.charCodeAt($$add(i0, (4))) == (114) && this._text.charCodeAt($$add(i0, (5))) == (97) && this._text.charCodeAt($$add(i0, (6))) == (99) && this._text.charCodeAt($$add(i0, (7))) == (116)) return (71);
       }
       else if (ch == (99)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (111) && this._text.charCodeAt($add(i0, (2))) == (110) && this._text.charCodeAt($add(i0, (3))) == (116) && this._text.charCodeAt($add(i0, (4))) == (105) && this._text.charCodeAt($add(i0, (5))) == (110) && this._text.charCodeAt($add(i0, (6))) == (117) && this._text.charCodeAt($add(i0, (7))) == (101)) return (93);
+        if (this._text.charCodeAt($$add(i0, (1))) == (111) && this._text.charCodeAt($$add(i0, (2))) == (110) && this._text.charCodeAt($$add(i0, (3))) == (116) && this._text.charCodeAt($$add(i0, (4))) == (105) && this._text.charCodeAt($$add(i0, (5))) == (110) && this._text.charCodeAt($$add(i0, (6))) == (117) && this._text.charCodeAt($$add(i0, (7))) == (101)) return (93);
       }
       else if (ch == (111)) {
-        if (this._text.charCodeAt($add(i0, (1))) == (112) && this._text.charCodeAt($add(i0, (2))) == (101) && this._text.charCodeAt($add(i0, (3))) == (114) && this._text.charCodeAt($add(i0, (4))) == (97) && this._text.charCodeAt($add(i0, (5))) == (116) && this._text.charCodeAt($add(i0, (6))) == (111) && this._text.charCodeAt($add(i0, (7))) == (114)) return (82);
+        if (this._text.charCodeAt($$add(i0, (1))) == (112) && this._text.charCodeAt($$add(i0, (2))) == (101) && this._text.charCodeAt($$add(i0, (3))) == (114) && this._text.charCodeAt($$add(i0, (4))) == (97) && this._text.charCodeAt($$add(i0, (5))) == (116) && this._text.charCodeAt($$add(i0, (6))) == (111) && this._text.charCodeAt($$add(i0, (7))) == (114)) return (82);
       }
       return (70);
 
     case (9):
 
-      if (this._text.charCodeAt(i0) == (105) && this._text.charCodeAt($add(i0, (1))) == (110) && this._text.charCodeAt($add(i0, (2))) == (116) && this._text.charCodeAt($add(i0, (3))) == (101) && this._text.charCodeAt($add(i0, (4))) == (114) && this._text.charCodeAt($add(i0, (5))) == (102) && this._text.charCodeAt($add(i0, (6))) == (97) && this._text.charCodeAt($add(i0, (7))) == (99) && this._text.charCodeAt($add(i0, (8))) == (101)) return (78);
+      if (this._text.charCodeAt(i0) == (105) && this._text.charCodeAt($$add(i0, (1))) == (110) && this._text.charCodeAt($$add(i0, (2))) == (116) && this._text.charCodeAt($$add(i0, (3))) == (101) && this._text.charCodeAt($$add(i0, (4))) == (114) && this._text.charCodeAt($$add(i0, (5))) == (102) && this._text.charCodeAt($$add(i0, (6))) == (97) && this._text.charCodeAt($$add(i0, (7))) == (99) && this._text.charCodeAt($$add(i0, (8))) == (101)) return (78);
       return (70);
 
     case (10):
 
-      if (this._text.charCodeAt(i0) == (105) && this._text.charCodeAt($add(i0, (1))) == (109) && this._text.charCodeAt($add(i0, (2))) == (112) && this._text.charCodeAt($add(i0, (3))) == (108) && this._text.charCodeAt($add(i0, (4))) == (101) && this._text.charCodeAt($add(i0, (5))) == (109) && this._text.charCodeAt($add(i0, (6))) == (101) && this._text.charCodeAt($add(i0, (7))) == (110) && this._text.charCodeAt($add(i0, (8))) == (116) && this._text.charCodeAt($add(i0, (9))) == (115)) return (76);
+      if (this._text.charCodeAt(i0) == (105) && this._text.charCodeAt($$add(i0, (1))) == (109) && this._text.charCodeAt($$add(i0, (2))) == (112) && this._text.charCodeAt($$add(i0, (3))) == (108) && this._text.charCodeAt($$add(i0, (4))) == (101) && this._text.charCodeAt($$add(i0, (5))) == (109) && this._text.charCodeAt($$add(i0, (6))) == (101) && this._text.charCodeAt($$add(i0, (7))) == (110) && this._text.charCodeAt($$add(i0, (8))) == (116) && this._text.charCodeAt($$add(i0, (9))) == (115)) return (76);
       return (70);
 
     default:
@@ -13432,7 +13658,7 @@ TokenKind.kindToString = function(kind) {
 
     default:
 
-      return $add($add("TokenKind(", kind.toString()), ")");
+      return $$add($$add("TokenKind(", kind.toString()), ")");
 
   }
 }
@@ -13452,6 +13678,7 @@ _SharedBackingMap._SharedBackingMap$from$factory = function(other) {
 }
 // ********** Code for CopyOnWriteMap **************
 function CopyOnWriteMap() {}
+CopyOnWriteMap.prototype.is$Map = function(){return true};
 CopyOnWriteMap.prototype.is$Map_dart_core_String$Dynamic = function(){return true};
 CopyOnWriteMap.prototype._ensureWritable = function() {
   var $0;
@@ -13511,7 +13738,7 @@ function classifySource(src) {
   var tokenizer = new Tokenizer(src, false, (0));
   var token;
   var inString = false;
-  while ($ne((token = tokenizer.next()).get$kind(), (1))) {
+  while ($$ne((token = tokenizer.next()).get$kind(), (1))) {
     switch (token.get$kind()) {
       case (58):
       case (59):
@@ -13525,14 +13752,14 @@ function classifySource(src) {
     }
     var kind = classify(token);
     var text = escapeHtml(token.get$text());
-    if ($ne(kind)) {
+    if ($$ne(kind)) {
       var stringClass = inString ? "si" : "";
       html.add$1(("<span class=\"" + kind + " " + stringClass + "\">" + text + "</span>"));
     }
     else {
       html.add$1(("<span>" + text + "</span>"));
     }
-    if ($eq(token.get$kind(), (58))) {
+    if ($$eq(token.get$kind(), (58))) {
       inString = false;
     }
   }
@@ -13772,6 +13999,7 @@ AbstractObservable.prototype.recordEvent = function(event) {
 $inherits(ObservableList, AbstractObservable);
 function ObservableList() {}
 ObservableList.prototype.is$List = function(){return true};
+ObservableList.prototype.is$Collection = function(){return true};
 ObservableList.prototype.$index = function(index) {
   return this._internal.$index(index);
 }
@@ -13791,7 +14019,7 @@ ObservableList.prototype.clear = function() {
   this.recordGlobalChange();
 }
 ObservableList.prototype.sort = function(compare) {
-  this._internal.sort$1(compare);
+  this._internal.sort(compare);
   this.recordGlobalChange();
 }
 ObservableList.prototype.add = function(element) {
@@ -13854,6 +14082,7 @@ function ObservableList_Article(parent) {
   AbstractObservable.call(this, parent);
 }
 ObservableList_Article.prototype.is$List = function(){return true};
+ObservableList_Article.prototype.is$Collection = function(){return true};
 ObservableList_Article.prototype.add$1 = ObservableList_Article.prototype.add;
 ObservableList_Article.prototype.clear$0 = ObservableList_Article.prototype.clear;
 ObservableList_Article.prototype.filter$1 = function($0) {
@@ -13875,6 +14104,7 @@ function ObservableList_Feed(parent) {
   AbstractObservable.call(this, parent);
 }
 ObservableList_Feed.prototype.is$List = function(){return true};
+ObservableList_Feed.prototype.is$Collection = function(){return true};
 ObservableList_Feed.prototype.add$1 = ObservableList_Feed.prototype.add;
 ObservableList_Feed.prototype.clear$0 = ObservableList_Feed.prototype.clear;
 ObservableList_Feed.prototype.filter$1 = function($0) {
@@ -14056,7 +14286,7 @@ CollectionUtils.sortBy = function(list, selector) {
   }
   else {
     list.sort$1((function (x, y) {
-      return $sub(x, y);
+      return $$sub(x, y);
     })
     );
   }
@@ -14072,7 +14302,7 @@ CollectionUtils.sum = function(source, selector) {
   }
   else {
     do {
-      total = $add(total, iter.next());
+      total = $$add(total, iter.next());
     }
     while (iter.hasNext())
   }
@@ -14109,8 +14339,8 @@ DateUtils.toRecentTimeString = function(then) {
 DateUtils.getWeekday = function(dateTime) {
   var unixTimeStart = DateImplementation.DateImplementation$factory((1970), (1), (1), (0), (0), (0), (0));
   var msSince1970 = dateTime.difference(unixTimeStart).inMilliseconds;
-  var daysSince1970 = $truncdiv(msSince1970, (86400000));
-  return ($mod((daysSince1970 + (3)), (7)));
+  var daysSince1970 = $$truncdiv(msSince1970, (86400000));
+  return ($$mod((daysSince1970 + (3)), (7)));
 }
 DateUtils.toHourMinutesString = function(duration) {
   var hours = duration.get$inHours();
@@ -14253,7 +14483,7 @@ AnimationScheduler.prototype._base_step = function() {
   }
   this._frameCount++;
   if (this._isMobileSafari) {
-    var offset = $mod(this._frameCount, (2));
+    var offset = $$mod(this._frameCount, (2));
     this._safariHackStyle.set$left(("" + offset + "px"));
   }
 }
@@ -14758,7 +14988,7 @@ Scroller.prototype.throwTo = function(x, y, decelerationFactor) {
     if (decelerationFactor == null) {
       decelerationFactor = $this._momentum.get$decelerationFactor();
     }
-    if ($ne(snappedTarget, $this.get$currentTarget())) {
+    if ($$ne(snappedTarget, $this.get$currentTarget())) {
       $this._momentum.abort();
       $this._startDeceleration($this._momentum.calculateVelocity($this._contentOffset, snappedTarget, decelerationFactor), decelerationFactor);
       $this.get$onDecelStart().dispatch(EventWrappingImplementation.EventWrappingImplementation$factory("scroller:decel_start", true, true));
@@ -14771,10 +15001,10 @@ Scroller.prototype.throwDelta = function(deltaX, deltaY, decelerationFactor) {
   var end = this.get$currentTarget();
   var x = end.x.toInt();
   var y = end.y.toInt();
-  if (deltaX != (0) && $ne(deltaX.isNegative(), (end.x - start.x).isNegative())) {
+  if (deltaX != (0) && $$ne(deltaX.isNegative(), (end.x - start.x).isNegative())) {
     x = start.x;
   }
-  if (deltaY != (0) && $ne(deltaY.isNegative(), (end.y - start.y).isNegative())) {
+  if (deltaY != (0) && $$ne(deltaY.isNegative(), (end.y - start.y).isNegative())) {
     y = start.y;
   }
   x += deltaX.toInt();
@@ -14860,7 +15090,7 @@ Scroller.prototype.onDragMove = function() {
   this._setContentOffset(newX, newY);
 }
 Scroller.prototype.onDragStart = function(e) {
-  if ($gt(e.get$touches().get$length(), (1))) {
+  if ($$gt(e.get$touches().get$length(), (1))) {
     return false;
   }
   var shouldHorizontal = this._shouldScrollHorizontally();
@@ -15053,12 +15283,12 @@ TouchHandler.prototype.getEndVelocity = function() {
   var velocityX = (0);
   var velocityY = (0);
   if (this._recentTouchesX.get$length() > (0)) {
-    var timeDeltaX = Math.max((1), $sub(this._endTime, this._recentTouchesX.$index((1))));
-    velocityX = ($sub(this._endTouchX, this._recentTouchesX.$index((0)))) / timeDeltaX;
+    var timeDeltaX = Math.max((1), $$sub(this._endTime, this._recentTouchesX.$index((1))));
+    velocityX = ($$sub(this._endTouchX, this._recentTouchesX.$index((0)))) / timeDeltaX;
   }
   if (this._recentTouchesY.get$length() > (0)) {
-    var timeDeltaY = Math.max((1), $sub(this._endTime, this._recentTouchesY.$index((1))));
-    velocityY = ($sub(this._endTouchY, this._recentTouchesY.$index((0)))) / timeDeltaY;
+    var timeDeltaY = Math.max((1), $$sub(this._endTime, this._recentTouchesY.$index((1))));
+    velocityY = ($$sub(this._endTouchY, this._recentTouchesY.$index((0)))) / timeDeltaY;
   }
   velocityX = this._correctVelocity(velocityX);
   velocityY = this._correctVelocity(velocityY);
@@ -15155,7 +15385,7 @@ TouchHandler.prototype._onStart = function(e) {
 TouchHandler.prototype._removeOldTouches = function(recentTouches, recentTime) {
   var count = (0);
   var len = recentTouches.get$length();
-  while ($lt(count, len) && $sub(recentTime, recentTouches.$index(count + (1))) > (250) || ($sub(len, count)) > (10)) {
+  while ($$lt(count, len) && $$sub(recentTime, recentTouches.$index(count + (1))) > (250) || ($$sub(len, count)) > (10)) {
     count += (2);
   }
   return count == (0) ? recentTouches : TouchHandler._removeFirstN(recentTouches, count);
@@ -15183,7 +15413,7 @@ ClickBuster._onClick = function(e) {
   }
   var coord = new Coordinate.fromClient$ctor(e);
   var entry = $globals.ClickBuster__coordinates.firstEntry();
-  while ($ne(entry)) {
+  while ($$ne(entry)) {
     if (ClickBuster._hitTest(entry.get$element(), entry.nextEntry().get$element(), coord.get$x(), coord.get$y())) {
       entry.nextEntry().remove();
       entry.remove$0();
@@ -15212,8 +15442,8 @@ ClickBuster._hitTest = function(x, y, eventX, eventY) {
 }
 ClickBuster._removeCoordinate = function(x, y) {
   var entry = $globals.ClickBuster__coordinates.firstEntry();
-  while ($ne(entry)) {
-    if ($eq(entry.get$element(), x) && $eq(entry.nextEntry().get$element(), y)) {
+  while ($$ne(entry)) {
+    if ($$eq(entry.get$element(), x) && $$eq(entry.nextEntry().get$element(), y)) {
       entry.nextEntry().remove();
       entry.remove$0();
       return;
@@ -15249,7 +15479,7 @@ ClickBuster.preventGhostClick = function(x, y) {
   ClickBuster._toggleTapHighlights(false);
   $globals.ClickBuster__lastPreventedTime = TimeUtil.now();
   var entry = $globals.ClickBuster__coordinates.firstEntry();
-  while ($ne(entry)) {
+  while ($$ne(entry)) {
     if (ClickBuster._hitTest(entry.get$element(), entry.nextEntry().get$element(), x, y)) {
       entry.nextEntry().remove();
       entry.remove$0();
@@ -15385,7 +15615,7 @@ Scrollbar.prototype.initialize = function() {
       if (!!(activeElement && activeElement.is$BodyElement()) || (!$this._frame.contains(activeElement) && !!(activeElement && activeElement.is$DivElement()))) {
         scrollerEl.focus();
       }
-      if ($eq($this._hovering, false)) {
+      if ($$eq($this._hovering, false)) {
         $this._hovering = true;
         $this._cancelTimeout();
         $this._showScrollbars(true);
@@ -15404,8 +15634,8 @@ Scrollbar.prototype.initialize = function() {
 }
 Scrollbar.prototype._onStart = function(e) {
   var elementOver = e.get$target();
-  if ($eq(elementOver, this._verticalElement) || $eq(elementOver, this._horizontalElement)) {
-    this._currentScrollVertical = $eq(elementOver, this._verticalElement);
+  if ($$eq(elementOver, this._verticalElement) || $$eq(elementOver, this._horizontalElement)) {
+    this._currentScrollVertical = $$eq(elementOver, this._verticalElement);
     if (this._currentScrollVertical) {
       this._currentScrollStartMouse = e.get$pageY();
       this._currentScrollStartOffset = this._scroller.getVerticalOffset();
@@ -15483,7 +15713,7 @@ Scrollbar.prototype.get$_onScrollerEnd = function() {
   return this._onScrollerEnd.bind(this);
 }
 Scrollbar.prototype.onScrollerMoved = function(scrollX, scrollY, decelerating) {
-  if ($eq(this._scrollInProgress, false)) {
+  if ($$eq(this._scrollInProgress, false)) {
     this._onScrollerStart(null);
     this._onScrollerEnd(null);
   }
@@ -15491,7 +15721,7 @@ Scrollbar.prototype.onScrollerMoved = function(scrollX, scrollY, decelerating) {
 }
 Scrollbar.prototype.refresh = function() {
   var $this = this; // closure support
-  if ($eq(this._scrollInProgress, false) && $eq(this._hovering, false)) {
+  if ($$eq(this._scrollInProgress, false) && $$eq(this._hovering, false)) {
     return;
   }
   this._scroller._resize((function () {
@@ -15525,7 +15755,7 @@ Scrollbar.prototype._cancelTimeout = function() {
   }
 }
 Scrollbar.prototype._showScrollbars = function(show) {
-  if ($eq(this._hovering, true) && this._displayOnHover) {
+  if ($$eq(this._hovering, true) && this._displayOnHover) {
     show = true;
   }
   this._toggleOpacity(this._verticalElement, show);
@@ -15565,11 +15795,11 @@ Scrollbar.prototype._updateScrollbar = function(element, offset, scrollPercent, 
   size = size.round();
   var style = element.get$style();
   style.setProperty(cssPos, ("" + pos + "px"), "");
-  if ($ne(this._cachedSize.$index(cssSize), size)) {
+  if ($$ne(this._cachedSize.$index(cssSize), size)) {
     this._cachedSize.$setindex(cssSize, size);
     style.setProperty(cssSize, ("" + size + "px"), "");
   }
-  if ($eq(element.get$parent())) {
+  if ($$eq(element.get$parent())) {
     this._frame.get$nodes().add(element);
   }
 }
@@ -15762,7 +15992,7 @@ ViewLayout.prototype.get$layoutParams = function() { return this.layoutParams; }
 ViewLayout.prototype.set$layoutParams = function(value) { return this.layoutParams = value; };
 ViewLayout.prototype.get$view = function() { return this.view; };
 ViewLayout.hasCustomLayout = function(view) {
-  return $eq(view.customStyle.$index("display"), "-dart-grid");
+  return $$eq(view.customStyle.$index("display"), "-dart-grid");
 }
 ViewLayout.prototype.get$_style = function() {
   return this.layoutParams.style.get$value();
@@ -15975,7 +16205,7 @@ GridLayout.prototype._computeUsedBreadthOfTracks = function(tracks) {
   var tempBreadth = this._calcNormalizedFractionBreadth(tracks);
   for (var $$i = tracks.iterator(); $$i.hasNext(); ) {
     var t = $$i.next();
-    t.set$usedBreadth(Math.max(t.get$usedBreadth(), $mul(tempBreadth, t.get$maxSizing().get$fractionValue())));
+    t.set$usedBreadth(Math.max(t.get$usedBreadth(), $$mul(tempBreadth, t.get$maxSizing().get$fractionValue())));
   }
   this._computeTrackPositions(tracks);
 }
@@ -16048,8 +16278,8 @@ GridLayout.prototype._distributeSpaceToTracks = function(tracks, freeSpace, brea
     for (var i = (0);
      i < tracks.get$length(); i++) {
       var share = freeSpace / (tracks.get$length() - i);
-      ($0 = tracks.$index(i)).set$tempBreadth($add($0.get$tempBreadth(), share));
-      freeSpace = $sub(freeSpace, share);
+      ($0 = tracks.$index(i)).set$tempBreadth($$add($0.get$tempBreadth(), share));
+      freeSpace = $$sub(freeSpace, share);
     }
   }
   for (var $$i = tracks.iterator(); $$i.hasNext(); ) {
@@ -16091,7 +16321,7 @@ GridLayout._hasContentSizedTracks = function(tracks, sizeMode, breadth) {
   for (var $$i = tracks.iterator(); $$i.hasNext(); ) {
     var t = $$i.next();
     var fn = breadth.getSizingFunction(t);
-    if ($eq(sizeMode, const$0028) && fn.get$isMaxContentSized() || $eq(sizeMode, const$0027) && fn.get$isContentSized()) {
+    if ($$eq(sizeMode, const$0028) && fn.get$isMaxContentSized() || $$eq(sizeMode, const$0027) && fn.get$isContentSized()) {
       return tracks.get$length() == (1) || !tracks.some((function (t_) {
         return t_.get$isFractional();
       })
@@ -16107,7 +16337,7 @@ GridLayout.prototype._ensureTrack = function(tracks, sizing, start, span) {
   tracks.set$length(Math.max(tracks.get$length(), length));
   for (var i = first;
    i < length; i++) {
-    if ($eq(tracks.$index(i))) {
+    if ($$eq(tracks.$index(i))) {
       tracks.$setindex(i, new GridTrack(sizing));
     }
   }
@@ -16199,7 +16429,7 @@ GridLayout.prototype._getTracks = function(item) {
 }
 GridLayout.prototype._getSpanCount = function(item) {
   var childLayout = item.layoutParams;
-  return ($eq(this._dimension, const$0022) ? childLayout.columnSpan : childLayout.rowSpan);
+  return ($$eq(this._dimension, const$0022) ? childLayout.columnSpan : childLayout.rowSpan);
 }
 // ********** Code for LayoutParams **************
 function LayoutParams(node) {
@@ -16219,9 +16449,9 @@ function GridLayoutParams(view, layout) {
   this.rowSpan = StringUtils.parseInt(view.customStyle.$index("grid-row-span"));
   this.columnSpan = StringUtils.parseInt(view.customStyle.$index("grid-column-span"));
   var line = _GridItemParser.parse(view.customStyle.$index("grid-row"), layout.rows);
-  if ($ne(line)) {
+  if ($$ne(line)) {
     this.row = line.get$start();
-    if ($ne(line.get$length())) {
+    if ($$ne(line.get$length())) {
       if (this.rowSpan != null) {
         $throw(new UnsupportedOperationException("grid-row-span cannot be with grid-row that defines an end"));
       }
@@ -16229,9 +16459,9 @@ function GridLayoutParams(view, layout) {
     }
   }
   line = _GridItemParser.parse(view.customStyle.$index("grid-column"), layout.columns);
-  if ($ne(line)) {
+  if ($$ne(line)) {
     this.column = line.get$start();
-    if ($ne(line.get$length())) {
+    if ($$ne(line.get$length())) {
       if (this.columnSpan != null) {
         $throw(new UnsupportedOperationException("grid-column-span cannot be with grid-column that defines an end"));
       }
@@ -16461,7 +16691,7 @@ _GridTemplateParser.prototype._parseTemplate = function() {
   while ((row = this._maybeEatString()) != null) {
     rows.add$1(row);
   }
-  if ($eq(rows.get$length(), (0))) {
+  if ($$eq(rows.get$length(), (0))) {
     this._error("expected at least one cell, or \"none\"");
   }
   return new GridTemplate(rows);
@@ -16512,7 +16742,7 @@ _GridItemParser.prototype._maybeParseLine = function(list) {
   else {
     var edge = list.lineNames.$index(name);
     if (edge == null) {
-      this._error($add(("row/column name \"" + name + "\" not found in the parent's "), " grid-row/grid-columns properties"));
+      this._error($$add(("row/column name \"" + name + "\" not found in the parent's "), " grid-row/grid-columns properties"));
     }
     return edge;
   }
@@ -16641,7 +16871,7 @@ function SyntaxErrorException(_message, _source, _offset) {
 SyntaxErrorException.prototype.toString = function() {
   var location;
   if (this._offset < this._source.length) {
-    location = $add("location: ", this._source.substring(this._offset));
+    location = $$add("location: ", this._source.substring(this._offset));
   }
   else {
     location = "end of input";
@@ -16739,7 +16969,7 @@ GridTemplate.prototype._buildRects = function(templateRows) {
      c < row.length; c++) {
       var cell = row.charCodeAt(c);
       var rect = this._rects.$index(cell);
-      if ($ne(rect)) {
+      if ($$ne(rect)) {
         rect.add$2(r + (1), c + (1));
       }
       else {
@@ -16758,7 +16988,7 @@ GridTemplate.prototype.lookupCell = function(cell) {
     $throw(new UnsupportedOperationException(("grid-cell \"" + cell + "\" must be a one character string")));
   }
   var rect = this._rects.$index(cell.charCodeAt((0)));
-  if ($eq(rect)) {
+  if ($$eq(rect)) {
     $throw(new UnsupportedOperationException(("grid-cell \"" + cell + "\" not found in parent's grid-template")));
   }
   return rect;
@@ -16785,7 +17015,7 @@ _GridTemplateRect.prototype.checkValid = function() {
   var expected = this.rowSpan * this.columnSpan;
   if (expected != this._count) {
     var cell = Strings.String$fromCharCodes$factory([this._char]);
-    $throw(new UnsupportedOperationException($add(("grid-template \"" + cell + "\""), (" is not square, expected " + expected + " cells but got " + this._count))));
+    $throw(new UnsupportedOperationException($$add(("grid-template \"" + cell + "\""), (" is not square, expected " + expected + " cells but got " + this._count))));
   }
 }
 _GridTemplateRect.prototype.add$2 = _GridTemplateRect.prototype.add;
@@ -17055,7 +17285,7 @@ View.prototype._enterDocument = function() {
   this.enterDocument();
 }
 View.prototype.get$layout = function() {
-  if ($eq(this._view_layout)) {
+  if ($$eq(this._view_layout)) {
     this._view_layout = ViewLayout.ViewLayout$fromView$factory(this);
   }
   return this._view_layout;
@@ -17125,7 +17355,7 @@ View.prototype._applyLayoutToChildren = function() {
   }
 }
 View.prototype._applyLayout = function() {
-  if ($ne(this._view_layout)) {
+  if ($$ne(this._view_layout)) {
     this._view_layout.applyLayout();
   }
   this._applyLayoutToChildren();
@@ -17182,7 +17412,7 @@ CompositeView.prototype.addChild = function(view) {
 }
 CompositeView.prototype.removeChild = function(view) {
   this.childViews = this.childViews.filter$1(function _(e) {
-    return $ne(view, e);
+    return $$ne(view, e);
   }
   );
   if (null != this.container) {
@@ -17221,13 +17451,13 @@ ConveyorView.prototype.adjustOffset = function(animate) {
     this.animationTimeoutId = html_get$window().setTimeout((function () {
       $this._onAnimationEnd();
     })
-    , ($mul(durationSeconds, (1000))).toInt());
+    , ($$mul(durationSeconds, (1000))).toInt());
   }
 }
 ConveyorView.prototype.getIndexOfSelectedView = function() {
   for (var i = (0);
    i < this.childViews.get$length(); i++) {
-    if ($eq(this.childViews.$index(i), this.selectedView)) {
+    if ($$eq(this.childViews.$index(i), this.selectedView)) {
       return i;
     }
   }
@@ -17235,7 +17465,7 @@ ConveyorView.prototype.getIndexOfSelectedView = function() {
 }
 ConveyorView.prototype.addChild = function(view) {
   view.addClass("conveyor-item");
-  view.set$transform($add("translate3d(" + (this.childViews.get$length() * (100)), "%, 0, 0)"));
+  view.set$transform($$add("translate3d(" + (this.childViews.get$length() * (100)), "%, 0, 0)"));
   return CompositeView.prototype.addChild.call(this, view);
 }
 ConveyorView.prototype._onAnimationEnd = function() {
@@ -17405,7 +17635,7 @@ SliderMenu.prototype.enterDocument = function() {
     );
     this.get$node().get$on().get$touchEnd().add$1((function (event) {
       if ($this.touchItem != null) {
-        if ($eq($this.itemOfTouchEvent(event), $this.touchItem)) {
+        if ($$eq($this.itemOfTouchEvent(event), $this.touchItem)) {
           $this.selectItem($this.touchItem, true);
         }
         else {
@@ -17433,7 +17663,7 @@ SliderMenu.prototype.itemOfTouchEvent = function(event) {
   return this.itemOfNode(node);
 }
 SliderMenu.prototype.itemOfNode = function(node) {
-  while (node != null && $ne(node, html_get$document())) {
+  while (node != null && $$ne(node, html_get$document())) {
     if (!!(node && node.is$html_Element())) {
       var element = node;
       if (element.get$classes().contains("sm-item")) {
@@ -17463,13 +17693,13 @@ SliderMenu.prototype.selectItem = function(item, animate) {
 }
 SliderMenu.prototype.selectNext = function(animate) {
   var result = this.get$node().query(".sm-item.sel").get$nextElementSibling();
-  if ($ne(result)) {
+  if ($$ne(result)) {
     this.selectItem(result, animate);
   }
 }
 SliderMenu.prototype.selectPrevious = function(animate) {
   var result = this.get$node().query(".sm-item.sel").get$previousElementSibling();
-  if ($ne(result)) {
+  if ($$ne(result)) {
     this.selectItem(result, animate);
   }
 }
@@ -17694,7 +17924,7 @@ UIState.prototype.pushToHistory = function() {
     $throw("history tracking not started");
   }
   var state = json_JSON.stringify(this.toHistory());
-  html_get$window().get$history().pushState(null, html_get$document().get$title(), $add("#", state));
+  html_get$window().get$history().pushState(null, html_get$document().get$title(), $$add("#", state));
 }
 // ********** Code for SwarmState **************
 $inherits(SwarmState, UIState);
@@ -17725,19 +17955,19 @@ SwarmState.prototype.toHistory = function() {
   return data;
 }
 SwarmState.prototype.loadFromHistory = function(values) {
-  if ($ne(values.$index("section"))) {
+  if ($$ne(values.$index("section"))) {
     this._sectionIterator.jumpToValue(this._dataModel.findSectionById(values.$index("section")));
   }
   else {
     this._sectionIterator = new BiIterator_Section(this._dataModel.get$sections());
   }
-  if ($ne(values.$index("feed")) && this.get$currentSection() != null) {
+  if ($$ne(values.$index("feed")) && this.get$currentSection() != null) {
     this._feedIterator.jumpToValue(this.get$currentSection().findFeed(values.$index("feed")));
   }
   else {
     this._feedIterator = new BiIterator_Feed(this._sectionIterator.get$current().feeds);
   }
-  if ($ne(values.$index("article")) && this.get$currentFeed() != null) {
+  if ($$ne(values.$index("article")) && this.get$currentFeed() != null) {
     this.currentArticle.set$value(this.get$currentFeed().findArticle(values.$index("article")));
     this._articleIterator.jumpToValue(this.currentArticle.get$value());
   }
@@ -17779,7 +18009,7 @@ SwarmState.prototype.goToNextSection = function(sliderMenu) {
   var oldSection = this.get$currentSection();
   var oldIndex = this._articleIterator.currentIndex.get$value();
   sliderMenu.selectNext(true);
-  if ($ne(oldSection, this._sectionIterator.get$current())) {
+  if ($$ne(oldSection, this._sectionIterator.get$current())) {
     this._feedIterator = new BiIterator_Feed(this._sectionIterator.get$current().feeds, this._feedIterator.currentIndex.listeners);
     this._articleIterator = new BiIterator_Article(this._feedIterator.get$current().articles, this._articleIterator.currentIndex.listeners);
     this._articleIterator.currentIndex.set$value(oldIndex);
@@ -17790,7 +18020,7 @@ SwarmState.prototype.goToPreviousSection = function(sliderMenu) {
   var oldSection = this.get$currentSection();
   var oldIndex = this._articleIterator.currentIndex.get$value();
   sliderMenu.selectPrevious(true);
-  if ($ne(oldSection, this._sectionIterator.get$current())) {
+  if ($$ne(oldSection, this._sectionIterator.get$current())) {
     this._feedIterator = new BiIterator_Feed(this._sectionIterator.get$current().feeds, this._feedIterator.currentIndex.listeners);
     this._feedIterator.currentIndex.set$value(this._feedIterator.list.get$length() - (1));
     this._articleIterator = new BiIterator_Article(this._feedIterator.get$current().articles, this._articleIterator.currentIndex.listeners);
@@ -17861,7 +18091,7 @@ function FrontView(swarm) {
 }
 FrontView.prototype.get$currentSection = function() {
   var view = this.sections.selectedView;
-  if ($eq(view)) {
+  if ($$eq(view)) {
     view = this.sections.childViews.$index((0));
     this.sections.selectView(view, true);
   }
@@ -17907,7 +18137,7 @@ FrontView.prototype._animateToMainView = function() {
 FrontView.prototype._animateToStory = function(item) {
   var $this = this; // closure support
   var source = item.dataSource;
-  if (this.detachedView != null && $ne(this.detachedView.source, source)) {
+  if (this.detachedView != null && $$ne(this.detachedView.source, source)) {
     return;
   }
   if (this.storyView != null) {
@@ -17965,7 +18195,7 @@ FrontView.prototype._onSectionTransitionEnded = function(selectedView) {
   var $$list = this.sections.childViews;
   for (var $$i = $$list.iterator(); $$i.hasNext(); ) {
     var view = $$i.next();
-    if ($eq(view, selectedView)) {
+    if ($$eq(view, selectedView)) {
       view.showSources();
     }
     else {
@@ -17981,7 +18211,7 @@ FrontView.prototype._onSectionSelected = function(sectionTitle) {
   var $$list = this.sections.childViews;
   for (var $$i = $$list.iterator(); $$i.hasNext(); ) {
     var view = $$i.next();
-    if ($eq(view.get$section(), section)) {
+    if ($$eq(view.get$section(), section)) {
       this.sections.selectView(view, true);
       break;
     }
@@ -18252,8 +18482,8 @@ ArticleViewLayout.prototype.computeLayout = function(item, titleBuffer, snippetB
   }
   var titleLines = this.measureTitleText.addLineBrokenText(titleBuffer, item.title, titleWidth, (2));
   var bodyLines = this.measureBodyText.addLineBrokenText(snippetBuffer, item.textBody, this.width - (36), (4));
-  var height = $mul(bodyLines, (18)) + (102);
-  if ($eq(bodyLines, (0))) {
+  var height = $$mul(bodyLines, (18)) + (102);
+  if ($$eq(bodyLines, (0))) {
     height = (92);
   }
   return new ArticleViewMetrics(height, titleLines, bodyLines);
@@ -18292,7 +18522,7 @@ ArticleView.prototype.afterRender = function(node) {
     var oldArticle = $this.swarm.state.currentArticle.get$value();
     $this.swarm.state.currentArticle.set$value($this.item);
     $this.swarm.state.storyTextMode.set$value(true);
-    if ($eq(oldArticle)) {
+    if ($$eq(oldArticle)) {
       $this.swarm.state.pushToHistory();
     }
   })
@@ -18337,7 +18567,7 @@ ArticleView.prototype._updateViewForSelectedArticle = function() {
   }
 }
 ArticleView.prototype._refreshSelected = function(curItem) {
-  if ($eq(curItem.get$value(), this.item)) {
+  if ($$eq(curItem.get$value(), this.item)) {
     this.addClass("sel");
   }
   else {
@@ -18355,7 +18585,7 @@ StoryContentView.prototype.get$childViews = function() {
   return [this._pagedStory];
 }
 StoryContentView.prototype.render = function() {
-  var storyContent = ElementWrappingImplementation.ElementWrappingImplementation$html$factory(("<div style=\"height:1000px;\" class=\"story-content\">" + this.item.get$htmlBody() + "</div>"));
+  var storyContent = ElementWrappingImplementation.ElementWrappingImplementation$html$factory(("<div style=\"height:5000px;\" class=\"story-content\">" + this.item.get$htmlBody() + "</div>"));
   var $$list = storyContent.queryAll("iframe, script, style, object, embed, frameset, frame");
   for (var $$i = $$list.iterator(); $$i.hasNext(); ) {
     var element = $$i.next();
@@ -18481,6 +18711,7 @@ Swarm.prototype.render = function() {
 function Sections(_sections) {
   this._sections = _sections;
 }
+Sections.prototype.is$Collection = function(){return true};
 Sections.prototype.$index = function(i) {
   return this._sections.$index(i);
 }
@@ -18509,7 +18740,7 @@ Sections.get$runningFromFile = function() {
   return html_get$window().get$location().get$protocol().startsWith("file:");
 }
 Sections.get$home = function() {
-  return $add($add(html_get$window().get$location().get$protocol(), "//"), html_get$window().get$location().get$host());
+  return $$add($$add(html_get$window().get$location().get$protocol(), "//"), html_get$window().get$location().get$host());
 }
 Sections.initializeFromData = function(data, callback) {
   var sections = new Array();
@@ -18532,7 +18763,7 @@ Sections.initializeFromUrl = function(callback) {
 }
 Sections.prototype.findSectionById = function(id) {
   return CollectionUtils.find(this._sections, (function (section) {
-    return $eq(section.get$id(), id);
+    return $$eq(section.get$id(), id);
   })
   );
 }
@@ -18583,14 +18814,14 @@ Section.decode = function(i, c) {
   var nSources = (10);
   var feeds = new ObservableList_Feed();
   for (var j = (0);
-   $lt(j, nSources); j++) {
+   $$lt(j, nSources); j++) {
     feeds.add$1(Feed.decode(c));
   }
   return new Section(sectionId, sectionTitle, feeds);
 }
 Section.prototype.findFeed = function(id_) {
   return CollectionUtils.find(this.feeds, (function (feed) {
-    return $eq(feed.get$id(), id_);
+    return $$eq(feed.get$id(), id_);
   })
   );
 }
@@ -18613,7 +18844,7 @@ Feed.decode = function(c) {
   var feed = new Feed(sourceId, sourceTitle, sourceIcon, "");
   var nItems = (10);
   for (var i = (0);
-   $lt(i, nItems); i++) {
+   $$lt(i, nItems); i++) {
     if (!c.isEmpty()) {
       var a = json_JSON.parse(c.removeLast());
       feed.get$articles().add(Article.decodeHeader(feed, a));
@@ -18623,7 +18854,7 @@ Feed.decode = function(c) {
 }
 Feed.prototype.findArticle = function(id_) {
   return CollectionUtils.find(this.articles, (function (article) {
-    return $eq(article.get$id(), id_);
+    return $$eq(article.get$id(), id_);
   })
   );
 }
@@ -18671,12 +18902,12 @@ Article.prototype._ensureLoaded = function() {
   var code = json_JSON.parse(req.get$responseText()).$index("code");
   var sf = new SourceFile("hi.dart", code);
   var classifiedCode = classifySource(sf);
-  this._htmlBody = $add($add("<div><pre><source>", classifiedCode), "</pre></source></div>");
+  this._htmlBody = $$add($$add("<div><pre><source>", classifiedCode), "</pre></source></div>");
 }
 Article.decodeHeader = function(source, code) {
   var id = code.$index("_id");
   var title = code.$index("_id");
-  var srcUrl = $add("/DartBoardClient.html?docId=", code.$index("_id"));
+  var srcUrl = $$add("/DartBoardClient.html?docId=", code.$index("_id"));
   var hasThumbnail = false;
   var author = "adam";
   var dateInSeconds = "dateInSeconds";
@@ -18717,8 +18948,8 @@ GenericListView.prototype._onClick = function(e) {
 }
 GenericListView.prototype._findAssociatedIndex = function(leafNode) {
   var node = leafNode;
-  while (node != null && $ne(node, this._containerElem)) {
-    if ($eq(node.get$parent(), this._containerElem)) {
+  while (node != null && $$ne(node, this._containerElem)) {
+    if ($$eq(node.get$parent(), this._containerElem)) {
       return this._nodeToIndex(node);
     }
     node = node.get$parent();
@@ -18789,7 +19020,7 @@ GenericListView.prototype.afterRender = function(node) {
   if ((this._data instanceof ObservableList)) {
     var observable = this._data;
     this.attachWatch(observable, (function (e) {
-      if ($eq(e.target, observable)) {
+      if ($$eq(e.target, observable)) {
         $this.onDataChange();
       }
     })
@@ -18896,7 +19127,7 @@ GenericListView.prototype._renderItems = function() {
   this.renderVisibleItems(false);
 }
 GenericListView.prototype._onPageSelected = function() {
-  if ($ne(this._pages.target, this._layout.getPage(this._activeInterval.start, this._viewLength))) {
+  if ($$ne(this._pages.target, this._layout.getPage(this._activeInterval.start, this._viewLength))) {
     this._throwTo(this._layout.getOffset(this._layout.getPageStartIndex(this._pages.target.get$value(), this._viewLength)));
   }
 }
@@ -18923,7 +19154,7 @@ GenericListView.prototype.renderVisibleItems = function(lengthChanged) {
   if (!this._removeClippedViews) {
     targetInterval = targetInterval.union(this._activeInterval);
   }
-  if ($eq(lengthChanged, false) && $eq(targetInterval, this._activeInterval)) {
+  if ($$eq(lengthChanged, false) && $$eq(targetInterval, this._activeInterval)) {
     return;
   }
   for (var i = this._activeInterval.start, end = Math.min(targetInterval.start, this._activeInterval.end);
@@ -18967,14 +19198,14 @@ GenericListView.prototype._addView = function(index) {
   if (index == (0)) {
     view.addClass("first-child");
   }
-  this._selectHelper(view, $eq(this._data.$index(index), this._lastSelectedItem));
+  this._selectHelper(view, $$eq(this._data.$index(index), this._lastSelectedItem));
   this._addViewHelper(view, index);
   this.childViewAdded(view);
   return view;
 }
 GenericListView.prototype._addViewHelper = function(view, index) {
   this._positionSubview(view.get$node(), index);
-  if ($ne(view.get$node().get$parent(), this._containerElem)) {
+  if ($$ne(view.get$node().get$parent(), this._containerElem)) {
     this._containerElem.get$nodes().add(view.get$node());
   }
 }
@@ -19016,7 +19247,7 @@ GenericListView.prototype.findIndex = function(targetItem) {
   var $$list = this._data;
   for (var $$i = $$list.iterator(); $$i.hasNext(); ) {
     var item = $$i.next();
-    if ($eq(item, targetItem)) {
+    if ($$eq(item, targetItem)) {
       return i;
     }
     i++;
@@ -19035,7 +19266,7 @@ GenericListView.prototype._positionSubview = function(node, index) {
 GenericListView.prototype._select = function(index, selected) {
   if (index != null) {
     var subview = this.getSubview(index);
-    if ($ne(subview)) {
+    if ($$ne(subview)) {
       this._selectHelper(subview, selected);
     }
   }
@@ -19151,7 +19382,7 @@ FixedSizeListViewLayout.prototype.getLength = function(viewLength) {
   else if (this._paginate) {
     if (this._data.get$length() > (0)) {
       var pageLength = this.getPageLength(viewLength);
-      return $mul(this.getPage(this._data.get$length() - (1), viewLength), pageLength) + Math.max(viewLength, pageLength);
+      return $$mul(this.getPage(this._data.get$length() - (1), viewLength), pageLength) + Math.max(viewLength, pageLength);
     }
     else {
       return (0);
@@ -19174,7 +19405,7 @@ FixedSizeListViewLayout.prototype.getPageLength = function(viewLength) {
     return (Math.max((1), itemsPerPage) * this.get$_itemLength()).toInt();
   } catch (_) {
     _ = _toDartException(_);
-    dart_core_print($add("exception ", _));
+    dart_core_print($$add("exception ", _));
     return (0);
   }
 }
@@ -19439,9 +19670,9 @@ function $static_init(){
 }
 var const$0000 = Object.create(_DeletedKeySentinel.prototype, {});
 var const$0001 = Object.create(NoMoreElementsException.prototype, {});
-var const$0002 = new JSSyntaxRegExp("<(\\w+)");
-var const$0003 = Object.create(IllegalAccessException.prototype, {});
-var const$0004 = Object.create(EmptyQueueException.prototype, {});
+var const$0002 = Object.create(EmptyQueueException.prototype, {});
+var const$0003 = new JSSyntaxRegExp("<(\\w+)");
+var const$0004 = Object.create(IllegalAccessException.prototype, {});
 var const$0005 = _constMap(["body", "html", "head", "html", "caption", "table", "td", "tr", "colgroup", "table", "col", "colgroup", "tr", "tbody", "tbody", "table", "tfoot", "table", "thead", "table", "track", "audio"]);
 var const$0006 = Object.create(NotImplementedException.prototype, {});
 var const$0008 = new JSSyntaxRegExp("iPhone|iPod|iPad");

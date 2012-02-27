@@ -165,6 +165,7 @@ class DartBoardServer extends IsolatedServer {
     });
     
     addHandler("/getCodeViewer", (HTTPRequest request, HTTPResponse response) {
+      int limit = 500; // FIX: bad workaround for reaching the connection limit
       request.dataEnd = (String data) {
       
         final receiveCouchPort = new ReceivePort();
@@ -179,17 +180,22 @@ class DartBoardServer extends IsolatedServer {
             
             codeViewerDocuments.add(mm);
        
-            if (JSON.parse(message)["rows"].length == codeViewerDocuments.length) {
+            if (JSON.parse(message)["rows"].length == codeViewerDocuments.length || codeViewerDocuments.length == limit) {
               receiveDocCouchPort.close();
               _sendJSONResponse(response,{'documents':codeViewerDocuments});
             }
           });
 
           new CouchIsolate().spawn().then((SendPort sp) {
-            JSON.parse(message)["rows"].forEach((var doc) {
-              Map m = {'command':'getCode', 'dbName':'codedb' ,'docId':doc["id"]};
-              sp.send(m, receiveDocCouchPort.toSendPort());     
-            });
+            int i = limit;
+            if (i!=0) {
+              JSON.parse(message)["rows"].forEach((var doc) {
+                Map m = {'command':'getCode', 'dbName':'codedb' ,'docId':doc["id"]};
+                sp.send(m, receiveDocCouchPort.toSendPort());   
+                
+              });
+            }
+            i--;
           });  
         });
         

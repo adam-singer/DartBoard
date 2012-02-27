@@ -2,7 +2,7 @@
 
 // CouchIsolate is neat, blog this/add to presentation. 
 class CouchIsolate extends Isolate {
-  CouchIsolate() : super.light() {
+  CouchIsolate() : super.heavy() {
     
   }
   
@@ -13,15 +13,19 @@ class CouchIsolate extends Isolate {
       
       
       if (message['command']=='createDatabase') {
+        debugPrint("command.createDatabase = ${message['dbName']}");
         couch.createDb(message['dbName']);
       } else if (message['command']=='saveCode') {
         //TODO: json what we want not the whole message
+        debugPrint("command.saveCode = ${message['dbName']}");
         couch.saveDoc(message['dbName'], JSON.stringify(message));
       } else if (message['command']=='getCode') {
+        debugPrint("command.getCode = ${message['dbName']}, ${message['docId']}");
         couch.openDoc(message['dbName'], message['docId']);
       } else if (message['command']=='getCodeList') {
         
       } else if (message['command']=='getCodeViewer') {
+        debugPrint("command.getCodeViewer = ${message['dbName']}");
         couch.listDoc(message['dbName']);
       } else if (message['command']=='closePort') {
         replyTo.send('closePort');
@@ -120,6 +124,8 @@ class CouchDBWrapperImpl {
   // Basic http methods
   getHttp(var uri) {
     HTTPClient h = new HTTPClient();
+    try {
+    
     h.open('GET', host, port, uri);
     h.openHandler = (HTTPClientRequest request) {
       request.setHeader('Accept', 'application/json');
@@ -134,6 +140,10 @@ class CouchDBWrapperImpl {
       
       request.writeDone();
     };
+    } catch (var ex){
+      debugPrint("failed to getHttp");
+      //replyTo.send("");
+    }
   }
   
   postHttp(var uri, var body) {
