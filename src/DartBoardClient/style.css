@@ -91,13 +91,19 @@ body {
 	
 	position: absolute; 
 	overflow: hidden;
-
+	-moz-box-shadow: inset 0 0 2px 2px #888;
+-webkit-box-shadow: inset 0 0 2px 2px #888;
+box-shadow: inset 0 0 2px 2px #888;
+/*
+	-moz-box-shadow: 5px 5px 5px #888;
+-webkit-box-shadow: 5px 5px 5px #888;
+box-shadow: 5px 5px 5px #888; */
 }
 
 .textarea-container {
 	left: 0px; 
 	position: absolute;
-	
+
 );
 }
 
@@ -129,6 +135,8 @@ body {
 	text-shadow: none;
 	display: inline-block;
 	text-align: -webkit-auto;
+
+
 }
 
 .scroll-y-container {
@@ -136,6 +144,7 @@ body {
 	top:0px; 
 	left: 0px; 
 	z-index:-1; 
+
 }
 
 .scroll-x-container {
@@ -163,6 +172,8 @@ body {
 	text-shadow: none;
 	display: inline-block;
 	text-align: -webkit-auto;
+
+
 }
 
 .view {
@@ -185,5 +196,8 @@ body {
     color: AliceBlue;
     overflow : auto;
     height: 250;
+	-moz-box-shadow: inset 0 0 2px 2px #888;
+-webkit-box-shadow: inset 0 0 2px 2px#888;
+box-shadow: inset 0 0 2px 2px #888;
 }
 

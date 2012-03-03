@@ -39,10 +39,11 @@ class DartBoardServer extends IsolatedServer {
      "/photo.jpg":BASE+"/photo.jpg",
      "/style.css":BASE+"/style.css", 
      "/highlight.css":BASE+"/highlight.css",
-     
+     "/dart.js":BASE+"/dart.js", 
      
      
      "/swarm":BASE+"/swarm",
+     "/swarm/dart.js":BASE+"/swarm/dart.js",
      "/swarm/App.dart":BASE+"/swarm/App.dart",
      "/swarm/appengine":BASE+"/swarm/appengine",
      "/swarm/appengine/app.yaml":BASE+"/swarm/appengine/app.yaml",
